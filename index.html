@@ -1,0 +1,744 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<title>Romain Lalire — Système de Design</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green:   #00f8c1;
+    --black:   #000000;
+    --white:   #ffffff;
+    --bg:      #282425;
+    --surface: #333030;
+    --surface2:#3c3838;
+    --border:  #504b4b;
+    --text:    #f0eded;
+    --muted:   #908888;
+    --font:    'Inter', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 72px 64px 96px;
+  }
+
+  /* ── HEADER ── */
+  .ds-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 96px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .lockup {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .lockup-text {
+    font-size: 36px;
+    font-weight: 400;
+    line-height: 1.0;
+    letter-spacing: -0.015em;
+    color: var(--text);
+  }
+
+  .header-meta {
+    text-align: right;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    line-height: 1.9;
+  }
+
+  .header-meta .tag {
+    color: var(--green);
+    font-weight: 700;
+    display: block;
+  }
+
+  /* ── SECTIONS ── */
+  .section { margin-bottom: 88px; }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── COLORS ── */
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .swatch {
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .swatch-fill { height: 130px; }
+
+  .swatch-info {
+    padding: 18px;
+    background: var(--surface);
+  }
+
+  .swatch-name {
+    font-size: 13px;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .swatch-hex {
+    font-size: 12px;
+    color: var(--muted);
+    display: block;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+  }
+
+  .swatch-codes {
+    font-size: 11px;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  .swatch-use {
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.5;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+
+  /* ── TYPOGRAPHY ── */
+  .type-hero {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 52px;
+    margin-bottom: 24px;
+  }
+
+  .type-display {
+    font-size: 96px;
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+  }
+
+  .type-row {
+    display: flex;
+    gap: 48px;
+    align-items: flex-end;
+    margin-top: 28px;
+  }
+
+  .type-desc {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.65;
+    max-width: 540px;
+  }
+
+  .type-specimens {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .type-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 32px;
+  }
+
+  .card-label {
+    font-size: 10px;
+    color: var(--green);
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    font-weight: 700;
+    display: block;
+  }
+
+  .weight-row {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .weight-row:last-child { border-bottom: none; }
+
+  .weight-label {
+    width: 110px;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .weight-sample {
+    font-size: 22px;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+
+  /* ── GRAPHIC ELEMENTS ── */
+  .elements-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .element-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 40px 32px 32px;
+    text-align: center;
+  }
+
+  .element-demo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 88px;
+    margin-bottom: 24px;
+  }
+
+  .filet-demo {
+    width: 120px;
+    height: 1px;
+    background: var(--text);
+  }
+
+  .cadre-demo {
+    width: 72px;
+    height: 72px;
+    border: 2px solid var(--text);
+  }
+
+  .element-name {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+
+  .element-desc {
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  /* ── PRINCIPLES ── */
+  .principles-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .principle-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 28px;
+  }
+
+  .principle-number {
+    font-size: 10px;
+    color: var(--green);
+    letter-spacing: 2px;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 14px;
+  }
+
+  .principle-text {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.55;
+  }
+
+  /* ── COMPONENTS ── */
+  .component-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .component-demo {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 36px 28px;
+  }
+
+  .component-title {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: block;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    background: var(--green);
+    color: var(--black);
+    font-family: var(--font);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 12px 22px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .btn-secondary {
+    display: inline-block;
+    background: transparent;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 11px 22px;
+    border: 1px solid var(--text);
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .btn-filet {
+    display: inline-block;
+    background: transparent;
+    color: var(--green);
+    font-family: var(--font);
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 0 0 3px;
+    border: none;
+    border-bottom: 1px solid var(--green);
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .cadre-card {
+    border: 1px solid var(--text);
+    padding: 18px;
+  }
+
+  .badge {
+    display: inline-block;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+  }
+
+  .badge-green   { background: var(--green); color: var(--black); }
+  .badge-outline { border: 1px solid var(--text); color: var(--text); }
+  .badge-muted   { border: 1px solid var(--muted); color: var(--muted); }
+
+  /* ── LOGO USAGE ── */
+  .logo-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  .logo-tile {
+    border: 1px solid var(--border);
+    padding: 36px 20px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    min-height: 180px;
+  }
+
+  .logo-tile.on-white  { background: #ffffff; }
+  .logo-tile.on-black  { background: #000000; }
+  .logo-tile.on-green  { background: #00f8c1; }
+  .logo-tile.on-dark   { background: #282425; }
+
+  .tile-label {
+    font-size: 9.5px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  /* ── FOOTER ── */
+  .ds-footer {
+    margin-top: 96px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="ds-header">
+    <div class="lockup">
+      <svg viewBox="0 0 342.642 203.215" height="64" fill="var(--text)" xmlns="http://www.w3.org/2000/svg"><g transform="translate(342.642,0)"><path fill-rule="nonzero" d="M0,203.215L0,193.137L-36.441,192.754L-36.441,0L-342.642,0L-342.642,203.215L-230.874,203.215L-230.874,143.317C-228.02,143.34 -225.015,143.36 -222.782,143.36C-187.526,143.36 -158.348,169.348 -153.345,203.215L0,203.215ZM-156.275,71.496C-156.275,109.246 -186.878,139.848 -224.629,139.848C-226.364,139.848 -228.631,139.832 -230.874,139.817L-230.874,3.149C-228.631,3.145 -226.364,3.141 -224.629,3.141C-186.878,3.141 -156.275,33.742 -156.275,71.496"/></g></svg>
+      <div class="lockup-text">romain<br>lalire</div>
+    </div>
+    <div class="header-meta">
+      <span class="tag">Système de Design</span>
+      v1 · 2024<br>
+      Artiste Visuel
+    </div>
+  </div>
+
+  <!-- ═══ COULEURS ═══ -->
+  <div class="section">
+    <div class="section-label">Couleurs</div>
+    <div class="color-grid">
+
+      <div class="swatch">
+        <div class="swatch-fill" style="background:#00f8c1;"></div>
+        <div class="swatch-info">
+          <span class="swatch-name" style="color:#00f8c1;">Vert</span>
+          <span class="swatch-hex">#00f8c1</span>
+          <span class="swatch-codes">RVB 0 · 248 · 193 &nbsp;·&nbsp; CMJN 50·0·45·0</span>
+          <span class="swatch-use">Projets de collaboration. Associé systématiquement à une iconographie noir et blanc. Pantone 3385 C (couché) / 332 U ou 333 U (mat)</span>
+        </div>
+      </div>
+
+      <div class="swatch">
+        <div class="swatch-fill" style="background:#000000; border-bottom:1px solid var(--border);"></div>
+        <div class="swatch-info">
+          <span class="swatch-name" style="color:var(--text);">Noir</span>
+          <span class="swatch-hex">#000000</span>
+          <span class="swatch-codes">RVB 0 · 0 · 0 &nbsp;·&nbsp; CMJN 30·30·30·100</span>
+          <span class="swatch-use">Systématiquement pour l'idéogramme et le logotype. Projets personnels de création artistique. Pantone Process Black C / Process Black U</span>
+        </div>
+      </div>
+
+      <div class="swatch">
+        <div class="swatch-fill" style="background:#ffffff; border-bottom:1px solid var(--border);"></div>
+        <div class="swatch-info">
+          <span class="swatch-name" style="color:var(--text);">Blanc</span>
+          <span class="swatch-hex">#ffffff</span>
+          <span class="swatch-codes">RVB 255 · 255 · 255 &nbsp;·&nbsp; CMJN 0·0·0·0</span>
+          <span class="swatch-use">Contrepoint du noir. Déclinaison du logotype sur fond coloré dense. Peut s'associer à des iconographies en couleur.</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ TYPOGRAPHIE ═══ -->
+  <div class="section">
+    <div class="section-label">Typographie — Inter</div>
+
+    <div class="type-hero">
+      <div class="type-display" style="color:var(--text);">inter.</div>
+      <div class="type-row">
+        <div style="font-size:68px; font-weight:900; font-style:italic; line-height:1; color:var(--green); letter-spacing:-0.03em;">inter.</div>
+        <div style="font-size:48px; font-weight:300; line-height:1; color:var(--muted); letter-spacing:-0.02em;">inter.</div>
+      </div>
+      <div style="margin-top:28px; display:flex; gap:32px; align-items:center;">
+        <div style="font-size:56px; font-weight:400; color:var(--text);">At</div>
+        <div style="font-size:56px; font-weight:400; color:var(--text);">Ra</div>
+        <div style="font-size:56px; font-weight:400; color:var(--green);">i</div>
+        <div style="font-size:11px; color:var(--muted); max-width:340px; line-height:1.65; border-left:1px solid var(--border); padding-left:24px;">
+          Une police d'une grande simplicité, lisible et moderne à la fois. Des lignes droites et courbes. Le «i» avec son point rond distinctif apporte de la personnalité au tracé.
+        </div>
+      </div>
+    </div>
+
+    <div class="type-specimens">
+      <div class="type-card">
+        <span class="card-label">Graisses disponibles</span>
+        <div class="weight-row">
+          <span class="weight-label">Black · 900</span>
+          <span class="weight-sample" style="font-weight:900;">romain lalire</span>
+        </div>
+        <div class="weight-row">
+          <span class="weight-label">Black Italic</span>
+          <span class="weight-sample" style="font-weight:900; font-style:italic;">romain lalire</span>
+        </div>
+        <div class="weight-row">
+          <span class="weight-label">Bold · 700</span>
+          <span class="weight-sample" style="font-weight:700;">romain lalire</span>
+        </div>
+        <div class="weight-row">
+          <span class="weight-label">Bold Italic</span>
+          <span class="weight-sample" style="font-weight:700; font-style:italic;">romain lalire</span>
+        </div>
+        <div class="weight-row">
+          <span class="weight-label">Regular · 400</span>
+          <span class="weight-sample" style="font-weight:400;">romain lalire</span>
+        </div>
+        <div class="weight-row">
+          <span class="weight-label">Regular Italic</span>
+          <span class="weight-sample" style="font-weight:400; font-style:italic;">romain lalire</span>
+        </div>
+        <div class="weight-row">
+          <span class="weight-label">Light · 300</span>
+          <span class="weight-sample" style="font-weight:300;">romain lalire</span>
+        </div>
+        <div class="weight-row">
+          <span class="weight-label">Light Italic</span>
+          <span class="weight-sample" style="font-weight:300; font-style:italic;">romain lalire</span>
+        </div>
+      </div>
+
+      <div class="type-card">
+        <span class="card-label">Corps de texte</span>
+
+        <div style="margin-bottom:6px; font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Regular · 8 pts · interlignage 11 pts</div>
+        <div style="font-size:11.5px; line-height:1.55; color:var(--text); margin-bottom:24px;">
+          Tout, dans le travail de l'artiste, est pensé pour renforcer l'enchantement et le mystère. Seul, au milieu d'une contrée qui semble faite exprès pour un cœur tel que le mien, j'y goûte à longs traits l'ivresse de la vie.
+        </div>
+
+        <div style="margin-bottom:6px; font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Bold · 8 pts · interlignage 11 pts</div>
+        <div style="font-size:11.5px; line-height:1.55; color:var(--text); font-weight:700; margin-bottom:24px;">
+          Tout, dans le travail de l'artiste, est pensé pour renforcer l'enchantement et le mystère.
+        </div>
+
+        <div style="border-top:1px solid var(--border); padding-top:20px;">
+          <div style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;">Lettrage ludique — Inter</div>
+          <div style="font-size:32px; letter-spacing:8px; color:var(--text);">ℓ ↱ ○ ↩</div>
+          <div style="font-size:11px; color:var(--muted); margin-top:8px; line-height:1.5;">Caractères spéciaux inclus dans Inter — apportent originalité et expressivité.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ÉLÉMENTS GRAPHIQUES ═══ -->
+  <div class="section">
+    <div class="section-label">Éléments Graphiques de Mise en Page</div>
+    <div class="elements-grid">
+
+      <div class="element-card">
+        <div class="element-demo">
+          <div style="display:flex; flex-direction:column; align-items:flex-start; gap:16px; width:100%;">
+            <div style="font-size:13px; color:var(--text); padding-bottom:6px; border-bottom:1px solid var(--text); width:100%;">le geste<br>magique</div>
+            <div style="font-size:11px; color:var(--muted);">Filet sous le titre</div>
+          </div>
+        </div>
+        <div class="element-name">Le Filet</div>
+        <div class="element-desc">Reprise de la barre du «L» de l'idéogramme. Souligne l'information ou rythme la mise en page. Se positionne en dessous du texte. Toujours fin — ne jamais devenir plus épais que la graisse de la police utilisée.</div>
+      </div>
+
+      <div class="element-card">
+        <div class="element-demo">
+          <div class="cadre-demo"></div>
+        </div>
+        <div class="element-name">Le Cadre</div>
+        <div class="element-desc">Principe simple et modulable dans la mise en page des supports. Peut varier en taille mais reste une ligne directrice forte. L'idéogramme se positionne dans un coin du cadre pour «terminer» visuellement la composition.</div>
+      </div>
+
+      <div class="element-card">
+        <div class="element-demo">
+          <div style="font-size:38px; letter-spacing:6px; color:var(--text); line-height:1.1;">ℓ ↱<br>○ ↩</div>
+        </div>
+        <div class="element-name">Lettrage Ludique</div>
+        <div class="element-desc">Une variété de caractères spéciaux inclus dans la police Inter. Apporte du changement et de l'originalité au traitement du texte. Utilisables ponctuellement pour personnaliser une composition typographique.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ RÈGLES D'UTILISATION ═══ -->
+  <div class="section">
+    <div class="section-label">Règles d'Utilisation</div>
+    <div class="principles-grid">
+
+      <div class="principle-card">
+        <span class="principle-number">01 — Idéogramme</span>
+        <div class="principle-text">L'<strong>idéogramme seul</strong> (RL) est utilisé en priorité pour les projets artistiques personnels. Il s'utilise en noir ou en blanc.</div>
+      </div>
+
+      <div class="principle-card">
+        <span class="principle-number">02 — Logotype complet</span>
+        <div class="principle-text">L'<strong>idéogramme + signature</strong> «romain lalire» constitue le logotype. Il est privilégié pour les collaborations.</div>
+      </div>
+
+      <div class="principle-card">
+        <span class="principle-number">03 — La couleur verte</span>
+        <div class="principle-text">Le <strong>vert #00f8c1</strong> est associé aux projets de collaboration et aux iconographies en noir et blanc. Jamais utilisé en dehors de ce contexte.</div>
+      </div>
+
+      <div class="principle-card">
+        <span class="principle-number">04 — Fond coloré</span>
+        <div class="principle-text">Sur <strong>fond coloré</strong>, utiliser le logotype noir ou blanc selon la densité de la couleur de fond, pour garantir sa lisibilité.</div>
+      </div>
+
+      <div class="principle-card">
+        <span class="principle-number">05 — Zone de protection</span>
+        <div class="principle-text">Utiliser <strong>1× la hauteur</strong> de la lettre «l» du logotype comme zone minimale de protection autour de celui-ci. Aucun élément ne peut entrer dans cette zone.</div>
+      </div>
+
+      <div class="principle-card">
+        <span class="principle-number">06 — Taille minimale</span>
+        <div class="principle-text">En impression, le logotype <strong>ne s'utilise pas en dessous de 15 mm</strong> de largeur pour garantir sa lisibilité et l'intégrité de l'idéogramme.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ COMPOSANTS ═══ -->
+  <div class="section">
+    <div class="section-label">Composants</div>
+    <div class="component-grid">
+
+      <div class="component-demo">
+        <span class="component-title">Boutons</span>
+        <div style="display:flex; flex-direction:column; gap:14px; align-items:flex-start;">
+          <button class="btn-primary">Primaire →</button>
+          <button class="btn-secondary">Secondaire</button>
+          <a class="btn-filet" href="#">Lien avec filet</a>
+        </div>
+        <div style="margin-top:24px; font-size:10px; color:var(--muted); line-height:1.6;">
+          <strong style="color:var(--text);">Primaire</strong> — fond vert, texte noir, gras<br>
+          <strong style="color:var(--text);">Secondaire</strong> — contour blanc, texte blanc<br>
+          <strong style="color:var(--text);">Lien filet</strong> — reprend le filet, texte vert
+        </div>
+      </div>
+
+      <div class="component-demo">
+        <span class="component-title">Carte · Cadre</span>
+        <div class="cadre-card">
+          <div style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px;">Installations</div>
+          <div style="font-size:18px; font-weight:400; line-height:1.15;">le geste<br>magique</div>
+          <div style="margin-top:14px; width:56px; height:1px; background:var(--text);"></div>
+          <div style="margin-top:12px; display:flex; justify-content:flex-end;">
+            <svg viewBox="0 0 342.642 203.215" height="20" fill="var(--text)" xmlns="http://www.w3.org/2000/svg"><g transform="translate(342.642,0)"><path fill-rule="nonzero" d="M0,203.215L0,193.137L-36.441,192.754L-36.441,0L-342.642,0L-342.642,203.215L-230.874,203.215L-230.874,143.317C-228.02,143.34 -225.015,143.36 -222.782,143.36C-187.526,143.36 -158.348,169.348 -153.345,203.215L0,203.215ZM-156.275,71.496C-156.275,109.246 -186.878,139.848 -224.629,139.848C-226.364,139.848 -228.631,139.832 -230.874,139.817L-230.874,3.149C-228.631,3.145 -226.364,3.141 -224.629,3.141C-186.878,3.141 -156.275,33.742 -156.275,71.496"/></g></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="component-demo">
+        <span class="component-title">Badges · Tags</span>
+        <div style="display:flex; flex-direction:column; gap:10px; align-items:flex-start;">
+          <span class="badge badge-green">Collaboration</span>
+          <span class="badge badge-outline">Artiste visuel</span>
+          <span class="badge badge-muted">Installation</span>
+          <span class="badge badge-muted">Fragments</span>
+        </div>
+        <div style="margin-top:24px; font-size:10px; color:var(--muted); line-height:1.6;">
+          <strong style="color:var(--text);">Vert</strong> — contexte collaboration<br>
+          <strong style="color:var(--text);">Contour blanc</strong> — contexte principal<br>
+          <strong style="color:var(--text);">Contour gris</strong> — catégorie secondaire
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ IDÉOGRAMME & LOGOTYPE ═══ -->
+  <div class="section">
+    <div class="section-label">Idéogramme &amp; Logotype — Déclinaisons</div>
+    <div class="logo-grid" style="margin-bottom:16px;">
+
+      <div class="logo-tile on-white">
+        <svg viewBox="0 0 342.642 203.215" height="52" fill="#000000" xmlns="http://www.w3.org/2000/svg"><g transform="translate(342.642,0)"><path fill-rule="nonzero" d="M0,203.215L0,193.137L-36.441,192.754L-36.441,0L-342.642,0L-342.642,203.215L-230.874,203.215L-230.874,143.317C-228.02,143.34 -225.015,143.36 -222.782,143.36C-187.526,143.36 -158.348,169.348 -153.345,203.215L0,203.215ZM-156.275,71.496C-156.275,109.246 -186.878,139.848 -224.629,139.848C-226.364,139.848 -228.631,139.832 -230.874,139.817L-230.874,3.149C-228.631,3.145 -226.364,3.141 -224.629,3.141C-186.878,3.141 -156.275,33.742 -156.275,71.496"/></g></svg>
+        <span class="tile-label" style="color:#888;">Idéogramme<br>Noir / Fond blanc<br>Projets personnels</span>
+      </div>
+
+      <div class="logo-tile on-black">
+        <svg viewBox="0 0 342.642 203.215" height="52" fill="#ffffff" xmlns="http://www.w3.org/2000/svg"><g transform="translate(342.642,0)"><path fill-rule="nonzero" d="M0,203.215L0,193.137L-36.441,192.754L-36.441,0L-342.642,0L-342.642,203.215L-230.874,203.215L-230.874,143.317C-228.02,143.34 -225.015,143.36 -222.782,143.36C-187.526,143.36 -158.348,169.348 -153.345,203.215L0,203.215ZM-156.275,71.496C-156.275,109.246 -186.878,139.848 -224.629,139.848C-226.364,139.848 -228.631,139.832 -230.874,139.817L-230.874,3.149C-228.631,3.145 -226.364,3.141 -224.629,3.141C-186.878,3.141 -156.275,33.742 -156.275,71.496"/></g></svg>
+        <span class="tile-label" style="color:#555;">Idéogramme<br>Blanc / Fond noir<br>Projets personnels</span>
+      </div>
+
+      <div class="logo-tile on-white" style="padding:28px 16px;">
+        <svg viewBox="0 0 342.642 101.607" height="48" fill="#000000" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0,51.647)"><path fill-rule="nonzero" d="M163.59,3.082L158.216,3.082L158.216,47.563L163.59,47.563L163.59,3.082ZM181.445,48.34C187.086,48.34 190.221,45.384 191.355,43.026L191.714,43.026L191.714,47.564L196.998,47.564L196.998,25.562C196.998,15.144 188.967,13.77 184.489,13.77C179.324,13.77 173.593,15.621 171.026,21.681L176.19,23.383C177.235,21.054 179.832,18.487 184.639,18.487C189.266,18.487 191.624,20.875 191.624,25.024L191.624,25.204C191.624,27.681 188.997,27.502 183.056,28.249C176.877,29.025 170.071,30.428 170.071,38.071C170.071,44.638 175.116,48.34 181.445,48.34M182.37,43.593C178.369,43.593 175.474,41.802 175.474,38.339C175.474,34.548 178.907,33.294 182.817,32.786C184.877,32.518 190.729,31.921 191.624,30.876L191.624,35.503C191.624,39.593 188.31,43.593 182.37,43.593M210.692,3.082L205.318,3.082L205.318,47.563L210.692,47.563L210.692,3.082ZM219.123,47.564L224.497,47.564L224.497,14.189L219.123,14.189L219.123,47.564ZM221.839,8.725C223.899,8.725 225.601,7.143 225.601,5.173C225.601,3.202 223.899,1.62 221.839,1.62C219.81,1.62 218.108,3.202 218.108,5.173C218.108,7.143 219.81,8.725 221.839,8.725M232.909,47.564L238.283,47.564L238.283,26.667C238.283,22.159 241.806,18.905 246.612,18.905C248.044,18.905 249.507,19.144 249.836,19.203L249.836,13.8C249.209,13.77 247.895,13.711 247.119,13.711C243.148,13.711 239.685,15.949 238.462,19.323L238.103,19.323L238.103,14.188L232.909,14.188L232.909,47.564ZM268.202,48.28C275.039,48.28 280.024,44.847 281.576,39.802L276.382,38.369C275.128,41.772 272.173,43.503 268.232,43.503C262.321,43.503 258.261,39.682 257.992,32.697L282.114,32.697L282.114,30.458C282.114,18.129 274.65,13.77 267.575,13.77C258.47,13.77 252.559,20.905 252.559,31.144C252.559,41.414 258.529,48.28 268.202,48.28M258.022,28.159C258.35,23.055 261.843,18.546 267.575,18.546C273.068,18.546 276.143,22.487 276.651,28.159L258.022,28.159Z"/></g><g transform="translate(158.2164,1.6377)"><path fill-rule="nonzero" d="M0,45.168L5.374,45.168L5.374,24.271C5.374,19.763 8.896,16.509 13.703,16.509C15.136,16.509 16.598,16.748 16.927,16.808L16.927,11.404C16.3,11.374 14.986,11.315 14.21,11.315C10.24,11.315 6.777,13.554 5.553,16.927L5.195,16.927L5.195,11.793L0,11.793L0,45.168ZM34.845,45.885C43.95,45.885 50.1,38.989 50.1,28.689C50.1,18.241 43.95,11.374 34.845,11.374C25.77,11.374 19.65,18.241 19.65,28.689C19.65,38.989 25.77,45.885 34.845,45.885M34.845,41.078C28.188,41.078 25.113,35.257 25.113,28.689C25.113,22.032 28.188,16.181 34.845,16.181C41.592,16.181 44.667,22.062 44.667,28.689C44.667,35.257 41.592,41.078 34.845,41.078M56.864,45.168L62.237,45.168L62.237,24.151C62.237,18.837 65.79,16.091 69.7,16.091C73.462,16.091 76.239,18.569 76.239,22.271L76.239,45.168L81.612,45.168L81.612,23.375C81.612,19.166 84.358,16.091 88.867,16.091C92.449,16.091 95.583,18.002 95.583,22.808L95.583,45.168L100.987,45.168L100.987,22.659C100.987,14.927 96.27,11.195 90.479,11.195C85.642,11.195 81.552,13.792 79.97,18.002C78.776,13.882 75.85,11.195 71.462,11.195C67.522,11.195 63.76,13.404 62.118,17.912L62.088,11.793L56.864,11.793L56.864,45.168ZM118.609,45.944C124.251,45.944 127.385,42.989 128.52,40.63L128.878,40.63L128.878,45.168L134.162,45.168L134.162,23.167C134.162,12.748 126.132,11.374 121.654,11.374C116.489,11.374 110.758,13.225 108.19,19.285L113.354,20.987C114.4,18.658 116.997,16.091 121.803,16.091C126.43,16.091 128.789,18.479 128.789,22.629L128.789,22.808C128.789,25.286 126.161,25.107 120.221,25.853C114.042,26.63 107.235,28.032 107.235,35.675C107.235,42.242 112.28,45.944 118.609,45.944M119.534,41.198C115.534,41.198 112.638,39.406 112.638,35.944C112.638,32.152 116.071,30.899 119.982,30.391C122.042,30.122 127.893,29.525 128.789,28.48L128.789,33.108C128.789,37.197 125.475,41.198 119.534,41.198M142.343,45.168L147.717,45.168L147.717,11.793L142.343,11.793L142.343,45.168ZM145.059,6.329C147.119,6.329 148.821,4.747 148.821,2.777C148.821,0.806 147.119,-0.776 145.059,-0.776C143.029,-0.776 141.327,0.806 141.327,2.777C141.327,4.747 143.029,6.329 145.059,6.329M161.502,25.166C161.502,19.464 165.115,16.211 169.92,16.211C174.578,16.211 177.444,19.285 177.444,24.42L177.444,45.168L182.817,45.168L182.817,23.972C182.817,15.524 178.279,11.374 171.533,11.374C167.055,11.374 163.472,13.255 161.323,17.972L161.293,11.793L156.129,11.793L156.129,45.168L161.502,45.168L161.502,25.166Z"/></g><g transform="translate(146.3661,13.4975)"><path fill-rule="nonzero" d="M0,85.851L0,81.594L-15.396,81.434L-15.396,0L-144.757,0L-144.757,85.851L-97.538,85.851L-97.538,60.546C-96.333,60.556 -95.063,60.564 -94.119,60.564C-79.225,60.564 -66.898,71.545 -64.784,85.851L0,85.851ZM-66.022,30.203C-66.022,46.152 -78.952,59.081 -94.9,59.081C-95.633,59.081 -96.591,59.075 -97.538,59.067L-97.538,1.33C-96.591,1.327 -95.633,1.326 -94.9,1.326C-78.952,1.326 -66.022,14.255 -66.022,30.203"/></g></svg>
+        <span class="tile-label" style="color:#888;">Logotype complet<br>Collaborations</span>
+      </div>
+
+      <div class="logo-tile on-black" style="padding:28px 16px;">
+        <svg viewBox="0 0 342.642 101.607" height="48" fill="#ffffff" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0,51.647)"><path fill-rule="nonzero" d="M163.59,3.082L158.216,3.082L158.216,47.563L163.59,47.563L163.59,3.082ZM181.445,48.34C187.086,48.34 190.221,45.384 191.355,43.026L191.714,43.026L191.714,47.564L196.998,47.564L196.998,25.562C196.998,15.144 188.967,13.77 184.489,13.77C179.324,13.77 173.593,15.621 171.026,21.681L176.19,23.383C177.235,21.054 179.832,18.487 184.639,18.487C189.266,18.487 191.624,20.875 191.624,25.024L191.624,25.204C191.624,27.681 188.997,27.502 183.056,28.249C176.877,29.025 170.071,30.428 170.071,38.071C170.071,44.638 175.116,48.34 181.445,48.34M182.37,43.593C178.369,43.593 175.474,41.802 175.474,38.339C175.474,34.548 178.907,33.294 182.817,32.786C184.877,32.518 190.729,31.921 191.624,30.876L191.624,35.503C191.624,39.593 188.31,43.593 182.37,43.593M210.692,3.082L205.318,3.082L205.318,47.563L210.692,47.563L210.692,3.082ZM219.123,47.564L224.497,47.564L224.497,14.189L219.123,14.189L219.123,47.564ZM221.839,8.725C223.899,8.725 225.601,7.143 225.601,5.173C225.601,3.202 223.899,1.62 221.839,1.62C219.81,1.62 218.108,3.202 218.108,5.173C218.108,7.143 219.81,8.725 221.839,8.725M232.909,47.564L238.283,47.564L238.283,26.667C238.283,22.159 241.806,18.905 246.612,18.905C248.044,18.905 249.507,19.144 249.836,19.203L249.836,13.8C249.209,13.77 247.895,13.711 247.119,13.711C243.148,13.711 239.685,15.949 238.462,19.323L238.103,19.323L238.103,14.188L232.909,14.188L232.909,47.564ZM268.202,48.28C275.039,48.28 280.024,44.847 281.576,39.802L276.382,38.369C275.128,41.772 272.173,43.503 268.232,43.503C262.321,43.503 258.261,39.682 257.992,32.697L282.114,32.697L282.114,30.458C282.114,18.129 274.65,13.77 267.575,13.77C258.47,13.77 252.559,20.905 252.559,31.144C252.559,41.414 258.529,48.28 268.202,48.28M258.022,28.159C258.35,23.055 261.843,18.546 267.575,18.546C273.068,18.546 276.143,22.487 276.651,28.159L258.022,28.159Z"/></g><g transform="translate(158.2164,1.6377)"><path fill-rule="nonzero" d="M0,45.168L5.374,45.168L5.374,24.271C5.374,19.763 8.896,16.509 13.703,16.509C15.136,16.509 16.598,16.748 16.927,16.808L16.927,11.404C16.3,11.374 14.986,11.315 14.21,11.315C10.24,11.315 6.777,13.554 5.553,16.927L5.195,16.927L5.195,11.793L0,11.793L0,45.168ZM34.845,45.885C43.95,45.885 50.1,38.989 50.1,28.689C50.1,18.241 43.95,11.374 34.845,11.374C25.77,11.374 19.65,18.241 19.65,28.689C19.65,38.989 25.77,45.885 34.845,45.885M34.845,41.078C28.188,41.078 25.113,35.257 25.113,28.689C25.113,22.032 28.188,16.181 34.845,16.181C41.592,16.181 44.667,22.062 44.667,28.689C44.667,35.257 41.592,41.078 34.845,41.078M56.864,45.168L62.237,45.168L62.237,24.151C62.237,18.837 65.79,16.091 69.7,16.091C73.462,16.091 76.239,18.569 76.239,22.271L76.239,45.168L81.612,45.168L81.612,23.375C81.612,19.166 84.358,16.091 88.867,16.091C92.449,16.091 95.583,18.002 95.583,22.808L95.583,45.168L100.987,45.168L100.987,22.659C100.987,14.927 96.27,11.195 90.479,11.195C85.642,11.195 81.552,13.792 79.97,18.002C78.776,13.882 75.85,11.195 71.462,11.195C67.522,11.195 63.76,13.404 62.118,17.912L62.088,11.793L56.864,11.793L56.864,45.168ZM118.609,45.944C124.251,45.944 127.385,42.989 128.52,40.63L128.878,40.63L128.878,45.168L134.162,45.168L134.162,23.167C134.162,12.748 126.132,11.374 121.654,11.374C116.489,11.374 110.758,13.225 108.19,19.285L113.354,20.987C114.4,18.658 116.997,16.091 121.803,16.091C126.43,16.091 128.789,18.479 128.789,22.629L128.789,22.808C128.789,25.286 126.161,25.107 120.221,25.853C114.042,26.63 107.235,28.032 107.235,35.675C107.235,42.242 112.28,45.944 118.609,45.944M119.534,41.198C115.534,41.198 112.638,39.406 112.638,35.944C112.638,32.152 116.071,30.899 119.982,30.391C122.042,30.122 127.893,29.525 128.789,28.48L128.789,33.108C128.789,37.197 125.475,41.198 119.534,41.198M142.343,45.168L147.717,45.168L147.717,11.793L142.343,11.793L142.343,45.168ZM145.059,6.329C147.119,6.329 148.821,4.747 148.821,2.777C148.821,0.806 147.119,-0.776 145.059,-0.776C143.029,-0.776 141.327,0.806 141.327,2.777C141.327,4.747 143.029,6.329 145.059,6.329M161.502,25.166C161.502,19.464 165.115,16.211 169.92,16.211C174.578,16.211 177.444,19.285 177.444,24.42L177.444,45.168L182.817,45.168L182.817,23.972C182.817,15.524 178.279,11.374 171.533,11.374C167.055,11.374 163.472,13.255 161.323,17.972L161.293,11.793L156.129,11.793L156.129,45.168L161.502,45.168L161.502,25.166Z"/></g><g transform="translate(146.3661,13.4975)"><path fill-rule="nonzero" d="M0,85.851L0,81.594L-15.396,81.434L-15.396,0L-144.757,0L-144.757,85.851L-97.538,85.851L-97.538,60.546C-96.333,60.556 -95.063,60.564 -94.119,60.564C-79.225,60.564 -66.898,71.545 -64.784,85.851L0,85.851ZM-66.022,30.203C-66.022,46.152 -78.952,59.081 -94.9,59.081C-95.633,59.081 -96.591,59.075 -97.538,59.067L-97.538,1.33C-96.591,1.327 -95.633,1.326 -94.9,1.326C-78.952,1.326 -66.022,14.255 -66.022,30.203"/></g></svg>
+        <span class="tile-label" style="color:#555;">Logotype complet<br>Fond noir</span>
+      </div>
+
+    </div>
+
+    <div class="logo-grid">
+
+      <div class="logo-tile on-green" style="padding:28px 16px;">
+        <svg viewBox="0 0 342.642 101.607" height="48" fill="#000000" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0,51.647)"><path fill-rule="nonzero" d="M163.59,3.082L158.216,3.082L158.216,47.563L163.59,47.563L163.59,3.082ZM181.445,48.34C187.086,48.34 190.221,45.384 191.355,43.026L191.714,43.026L191.714,47.564L196.998,47.564L196.998,25.562C196.998,15.144 188.967,13.77 184.489,13.77C179.324,13.77 173.593,15.621 171.026,21.681L176.19,23.383C177.235,21.054 179.832,18.487 184.639,18.487C189.266,18.487 191.624,20.875 191.624,25.024L191.624,25.204C191.624,27.681 188.997,27.502 183.056,28.249C176.877,29.025 170.071,30.428 170.071,38.071C170.071,44.638 175.116,48.34 181.445,48.34M182.37,43.593C178.369,43.593 175.474,41.802 175.474,38.339C175.474,34.548 178.907,33.294 182.817,32.786C184.877,32.518 190.729,31.921 191.624,30.876L191.624,35.503C191.624,39.593 188.31,43.593 182.37,43.593M210.692,3.082L205.318,3.082L205.318,47.563L210.692,47.563L210.692,3.082ZM219.123,47.564L224.497,47.564L224.497,14.189L219.123,14.189L219.123,47.564ZM221.839,8.725C223.899,8.725 225.601,7.143 225.601,5.173C225.601,3.202 223.899,1.62 221.839,1.62C219.81,1.62 218.108,3.202 218.108,5.173C218.108,7.143 219.81,8.725 221.839,8.725M232.909,47.564L238.283,47.564L238.283,26.667C238.283,22.159 241.806,18.905 246.612,18.905C248.044,18.905 249.507,19.144 249.836,19.203L249.836,13.8C249.209,13.77 247.895,13.711 247.119,13.711C243.148,13.711 239.685,15.949 238.462,19.323L238.103,19.323L238.103,14.188L232.909,14.188L232.909,47.564ZM268.202,48.28C275.039,48.28 280.024,44.847 281.576,39.802L276.382,38.369C275.128,41.772 272.173,43.503 268.232,43.503C262.321,43.503 258.261,39.682 257.992,32.697L282.114,32.697L282.114,30.458C282.114,18.129 274.65,13.77 267.575,13.77C258.47,13.77 252.559,20.905 252.559,31.144C252.559,41.414 258.529,48.28 268.202,48.28M258.022,28.159C258.35,23.055 261.843,18.546 267.575,18.546C273.068,18.546 276.143,22.487 276.651,28.159L258.022,28.159Z"/></g><g transform="translate(158.2164,1.6377)"><path fill-rule="nonzero" d="M0,45.168L5.374,45.168L5.374,24.271C5.374,19.763 8.896,16.509 13.703,16.509C15.136,16.509 16.598,16.748 16.927,16.808L16.927,11.404C16.3,11.374 14.986,11.315 14.21,11.315C10.24,11.315 6.777,13.554 5.553,16.927L5.195,16.927L5.195,11.793L0,11.793L0,45.168ZM34.845,45.885C43.95,45.885 50.1,38.989 50.1,28.689C50.1,18.241 43.95,11.374 34.845,11.374C25.77,11.374 19.65,18.241 19.65,28.689C19.65,38.989 25.77,45.885 34.845,45.885M34.845,41.078C28.188,41.078 25.113,35.257 25.113,28.689C25.113,22.032 28.188,16.181 34.845,16.181C41.592,16.181 44.667,22.062 44.667,28.689C44.667,35.257 41.592,41.078 34.845,41.078M56.864,45.168L62.237,45.168L62.237,24.151C62.237,18.837 65.79,16.091 69.7,16.091C73.462,16.091 76.239,18.569 76.239,22.271L76.239,45.168L81.612,45.168L81.612,23.375C81.612,19.166 84.358,16.091 88.867,16.091C92.449,16.091 95.583,18.002 95.583,22.808L95.583,45.168L100.987,45.168L100.987,22.659C100.987,14.927 96.27,11.195 90.479,11.195C85.642,11.195 81.552,13.792 79.97,18.002C78.776,13.882 75.85,11.195 71.462,11.195C67.522,11.195 63.76,13.404 62.118,17.912L62.088,11.793L56.864,11.793L56.864,45.168ZM118.609,45.944C124.251,45.944 127.385,42.989 128.52,40.63L128.878,40.63L128.878,45.168L134.162,45.168L134.162,23.167C134.162,12.748 126.132,11.374 121.654,11.374C116.489,11.374 110.758,13.225 108.19,19.285L113.354,20.987C114.4,18.658 116.997,16.091 121.803,16.091C126.43,16.091 128.789,18.479 128.789,22.629L128.789,22.808C128.789,25.286 126.161,25.107 120.221,25.853C114.042,26.63 107.235,28.032 107.235,35.675C107.235,42.242 112.28,45.944 118.609,45.944M119.534,41.198C115.534,41.198 112.638,39.406 112.638,35.944C112.638,32.152 116.071,30.899 119.982,30.391C122.042,30.122 127.893,29.525 128.789,28.48L128.789,33.108C128.789,37.197 125.475,41.198 119.534,41.198M142.343,45.168L147.717,45.168L147.717,11.793L142.343,11.793L142.343,45.168ZM145.059,6.329C147.119,6.329 148.821,4.747 148.821,2.777C148.821,0.806 147.119,-0.776 145.059,-0.776C143.029,-0.776 141.327,0.806 141.327,2.777C141.327,4.747 143.029,6.329 145.059,6.329M161.502,25.166C161.502,19.464 165.115,16.211 169.92,16.211C174.578,16.211 177.444,19.285 177.444,24.42L177.444,45.168L182.817,45.168L182.817,23.972C182.817,15.524 178.279,11.374 171.533,11.374C167.055,11.374 163.472,13.255 161.323,17.972L161.293,11.793L156.129,11.793L156.129,45.168L161.502,45.168L161.502,25.166Z"/></g><g transform="translate(146.3661,13.4975)"><path fill-rule="nonzero" d="M0,85.851L0,81.594L-15.396,81.434L-15.396,0L-144.757,0L-144.757,85.851L-97.538,85.851L-97.538,60.546C-96.333,60.556 -95.063,60.564 -94.119,60.564C-79.225,60.564 -66.898,71.545 -64.784,85.851L0,85.851ZM-66.022,30.203C-66.022,46.152 -78.952,59.081 -94.9,59.081C-95.633,59.081 -96.591,59.075 -97.538,59.067L-97.538,1.33C-96.591,1.327 -95.633,1.326 -94.9,1.326C-78.952,1.326 -66.022,14.255 -66.022,30.203"/></g></svg>
+        <span class="tile-label" style="color:#009e7a;">Fond vert · Noir<br>Collaborations</span>
+      </div>
+
+      <div class="logo-tile on-green" style="padding:28px 16px;">
+        <svg viewBox="0 0 342.642 101.607" height="48" fill="#ffffff" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0,51.647)"><path fill-rule="nonzero" d="M163.59,3.082L158.216,3.082L158.216,47.563L163.59,47.563L163.59,3.082ZM181.445,48.34C187.086,48.34 190.221,45.384 191.355,43.026L191.714,43.026L191.714,47.564L196.998,47.564L196.998,25.562C196.998,15.144 188.967,13.77 184.489,13.77C179.324,13.77 173.593,15.621 171.026,21.681L176.19,23.383C177.235,21.054 179.832,18.487 184.639,18.487C189.266,18.487 191.624,20.875 191.624,25.024L191.624,25.204C191.624,27.681 188.997,27.502 183.056,28.249C176.877,29.025 170.071,30.428 170.071,38.071C170.071,44.638 175.116,48.34 181.445,48.34M182.37,43.593C178.369,43.593 175.474,41.802 175.474,38.339C175.474,34.548 178.907,33.294 182.817,32.786C184.877,32.518 190.729,31.921 191.624,30.876L191.624,35.503C191.624,39.593 188.31,43.593 182.37,43.593M210.692,3.082L205.318,3.082L205.318,47.563L210.692,47.563L210.692,3.082ZM219.123,47.564L224.497,47.564L224.497,14.189L219.123,14.189L219.123,47.564ZM221.839,8.725C223.899,8.725 225.601,7.143 225.601,5.173C225.601,3.202 223.899,1.62 221.839,1.62C219.81,1.62 218.108,3.202 218.108,5.173C218.108,7.143 219.81,8.725 221.839,8.725M232.909,47.564L238.283,47.564L238.283,26.667C238.283,22.159 241.806,18.905 246.612,18.905C248.044,18.905 249.507,19.144 249.836,19.203L249.836,13.8C249.209,13.77 247.895,13.711 247.119,13.711C243.148,13.711 239.685,15.949 238.462,19.323L238.103,19.323L238.103,14.188L232.909,14.188L232.909,47.564ZM268.202,48.28C275.039,48.28 280.024,44.847 281.576,39.802L276.382,38.369C275.128,41.772 272.173,43.503 268.232,43.503C262.321,43.503 258.261,39.682 257.992,32.697L282.114,32.697L282.114,30.458C282.114,18.129 274.65,13.77 267.575,13.77C258.47,13.77 252.559,20.905 252.559,31.144C252.559,41.414 258.529,48.28 268.202,48.28M258.022,28.159C258.35,23.055 261.843,18.546 267.575,18.546C273.068,18.546 276.143,22.487 276.651,28.159L258.022,28.159Z"/></g><g transform="translate(158.2164,1.6377)"><path fill-rule="nonzero" d="M0,45.168L5.374,45.168L5.374,24.271C5.374,19.763 8.896,16.509 13.703,16.509C15.136,16.509 16.598,16.748 16.927,16.808L16.927,11.404C16.3,11.374 14.986,11.315 14.21,11.315C10.24,11.315 6.777,13.554 5.553,16.927L5.195,16.927L5.195,11.793L0,11.793L0,45.168ZM34.845,45.885C43.95,45.885 50.1,38.989 50.1,28.689C50.1,18.241 43.95,11.374 34.845,11.374C25.77,11.374 19.65,18.241 19.65,28.689C19.65,38.989 25.77,45.885 34.845,45.885M34.845,41.078C28.188,41.078 25.113,35.257 25.113,28.689C25.113,22.032 28.188,16.181 34.845,16.181C41.592,16.181 44.667,22.062 44.667,28.689C44.667,35.257 41.592,41.078 34.845,41.078M56.864,45.168L62.237,45.168L62.237,24.151C62.237,18.837 65.79,16.091 69.7,16.091C73.462,16.091 76.239,18.569 76.239,22.271L76.239,45.168L81.612,45.168L81.612,23.375C81.612,19.166 84.358,16.091 88.867,16.091C92.449,16.091 95.583,18.002 95.583,22.808L95.583,45.168L100.987,45.168L100.987,22.659C100.987,14.927 96.27,11.195 90.479,11.195C85.642,11.195 81.552,13.792 79.97,18.002C78.776,13.882 75.85,11.195 71.462,11.195C67.522,11.195 63.76,13.404 62.118,17.912L62.088,11.793L56.864,11.793L56.864,45.168ZM118.609,45.944C124.251,45.944 127.385,42.989 128.52,40.63L128.878,40.63L128.878,45.168L134.162,45.168L134.162,23.167C134.162,12.748 126.132,11.374 121.654,11.374C116.489,11.374 110.758,13.225 108.19,19.285L113.354,20.987C114.4,18.658 116.997,16.091 121.803,16.091C126.43,16.091 128.789,18.479 128.789,22.629L128.789,22.808C128.789,25.286 126.161,25.107 120.221,25.853C114.042,26.63 107.235,28.032 107.235,35.675C107.235,42.242 112.28,45.944 118.609,45.944M119.534,41.198C115.534,41.198 112.638,39.406 112.638,35.944C112.638,32.152 116.071,30.899 119.982,30.391C122.042,30.122 127.893,29.525 128.789,28.48L128.789,33.108C128.789,37.197 125.475,41.198 119.534,41.198M142.343,45.168L147.717,45.168L147.717,11.793L142.343,11.793L142.343,45.168ZM145.059,6.329C147.119,6.329 148.821,4.747 148.821,2.777C148.821,0.806 147.119,-0.776 145.059,-0.776C143.029,-0.776 141.327,0.806 141.327,2.777C141.327,4.747 143.029,6.329 145.059,6.329M161.502,25.166C161.502,19.464 165.115,16.211 169.92,16.211C174.578,16.211 177.444,19.285 177.444,24.42L177.444,45.168L182.817,45.168L182.817,23.972C182.817,15.524 178.279,11.374 171.533,11.374C167.055,11.374 163.472,13.255 161.323,17.972L161.293,11.793L156.129,11.793L156.129,45.168L161.502,45.168L161.502,25.166Z"/></g><g transform="translate(146.3661,13.4975)"><path fill-rule="nonzero" d="M0,85.851L0,81.594L-15.396,81.434L-15.396,0L-144.757,0L-144.757,85.851L-97.538,85.851L-97.538,60.546C-96.333,60.556 -95.063,60.564 -94.119,60.564C-79.225,60.564 -66.898,71.545 -64.784,85.851L0,85.851ZM-66.022,30.203C-66.022,46.152 -78.952,59.081 -94.9,59.081C-95.633,59.081 -96.591,59.075 -97.538,59.067L-97.538,1.33C-96.591,1.327 -95.633,1.326 -94.9,1.326C-78.952,1.326 -66.022,14.255 -66.022,30.203"/></g></svg>
+        <span class="tile-label" style="color:#009e7a;">Fond vert · Blanc<br>Alternative</span>
+      </div>
+
+      <div class="logo-tile on-dark">
+        <svg viewBox="0 0 342.642 203.215" height="52" fill="#00f8c1" xmlns="http://www.w3.org/2000/svg"><g transform="translate(342.642,0)"><path fill-rule="nonzero" d="M0,203.215L0,193.137L-36.441,192.754L-36.441,0L-342.642,0L-342.642,203.215L-230.874,203.215L-230.874,143.317C-228.02,143.34 -225.015,143.36 -222.782,143.36C-187.526,143.36 -158.348,169.348 -153.345,203.215L0,203.215ZM-156.275,71.496C-156.275,109.246 -186.878,139.848 -224.629,139.848C-226.364,139.848 -228.631,139.832 -230.874,139.817L-230.874,3.149C-228.631,3.145 -226.364,3.141 -224.629,3.141C-186.878,3.141 -156.275,33.742 -156.275,71.496"/></g></svg>
+        <span class="tile-label" style="color:#555;">Idéogramme vert<br>Fond sombre<br>Collaborations</span>
+      </div>
+
+      <div class="logo-tile on-dark" style="position:relative;">
+        <div style="position:relative; display:inline-block; padding:18px; border:1px dashed #504b4b;">
+          <svg viewBox="0 0 342.642 203.215" height="30" fill="var(--text)" xmlns="http://www.w3.org/2000/svg"><g transform="translate(342.642,0)"><path fill-rule="nonzero" d="M0,203.215L0,193.137L-36.441,192.754L-36.441,0L-342.642,0L-342.642,203.215L-230.874,203.215L-230.874,143.317C-228.02,143.34 -225.015,143.36 -222.782,143.36C-187.526,143.36 -158.348,169.348 -153.345,203.215L0,203.215ZM-156.275,71.496C-156.275,109.246 -186.878,139.848 -224.629,139.848C-226.364,139.848 -228.631,139.832 -230.874,139.817L-230.874,3.149C-228.631,3.145 -226.364,3.141 -224.629,3.141C-186.878,3.141 -156.275,33.742 -156.275,71.496"/></g></svg>
+          <div style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); font-size:8px; color:var(--green); letter-spacing:1px; white-space:nowrap; background:var(--bg); padding:0 4px;">× protection</div>
+        </div>
+        <span class="tile-label" style="color:#555;">Zone de protection<br>1× hauteur «l»<br>Min. 15mm impression</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ FOOTER ═══ -->
+  <div class="ds-footer">
+    <span>Romain Lalire · Système de Design · v1 · 2024</span>
+    <span>design/design-system.html · Agence Extra, Lyon</span>
+  </div>
+
+</div>
+</body>
+</html>
