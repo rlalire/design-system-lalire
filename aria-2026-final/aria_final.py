@@ -205,9 +205,16 @@ def candidate_dirs():
             dirs.append(os.path.dirname(os.path.abspath(__file__)))
     except NameError:
         pass
+    # Script ouvert dans l'éditeur de texte de Blender : on prend son dossier sur le disque
+    for txt in bpy.data.texts:
+        if txt.filepath and os.path.isfile(bpy.path.abspath(txt.filepath)):
+            dirs.append(os.path.dirname(bpy.path.abspath(txt.filepath)))
     if bpy.data.filepath:
         dirs.append(os.path.dirname(bpy.data.filepath))
-    return dirs
+    home = os.path.expanduser("~")
+    dirs += [os.path.join(home, "Downloads"), os.path.join(home, "Téléchargements"),
+             os.path.join(home, "Desktop"), os.path.join(home, "Bureau")]
+    return [d for i, d in enumerate(dirs) if d not in dirs[:i] and os.path.isdir(d)]
 
 
 def find_file(path_setting, fallback_names):
@@ -476,7 +483,9 @@ def build_map(coll):
     tc.location = (-1200, 0)
     uvs = tc.outputs["UV"]
 
+    global MAP_FOUND
     path = find_file(MAP_IMAGE, ["carte_europe.png", "carte_europe.jpg"])
+    MAP_FOUND = path
     tex = nt.nodes.new("ShaderNodeTexImage")
     tex.location = (-900, 300)
     tex.extension = "EXTEND"
@@ -849,6 +858,33 @@ def animate(cubes):
 # MAIN
 # ═════════════════════════════════════════════════════════════════════════════
 
+MAP_FOUND = None
+
+
+def notify(message, icon="INFO"):
+    print("[ARIA] " + message)
+    wm = bpy.context.window_manager
+    if bpy.context.window and wm:
+        wm.popup_menu(lambda self, _ctx: self.layout.label(text=message), title="ARIA", icon=icon)
+
+
+def show_in_viewport(cam):
+    """Passe les vues 3D en « Aperçu matériau » et en vue caméra :
+    en mode Solide la carte n'apparaît pas (c'est un shader)."""
+    screen = bpy.context.screen
+    if not screen:
+        return
+    for area in screen.areas:
+        if area.type != "VIEW_3D":
+            continue
+        for space in area.spaces:
+            if space.type == "VIEW_3D":
+                if space.shading.type in ("SOLID", "WIREFRAME"):
+                    space.shading.type = "MATERIAL"
+                space.region_3d.view_perspective = "CAMERA"
+        area.tag_redraw()
+
+
 def main():
     prefs = bpy.context.preferences.edit
     old_interp = prefs.keyframe_new_interpolation_type
@@ -865,7 +901,12 @@ def main():
         build_map(c_map)
         cubes = build_cubes(scn, c_cubes, c_targets, saved)
         animate(cubes)
-        scn.frame_set(1)
+        # On se place après le dessin de la carte (à l'image 1 elle est encore noire)
+        scn.frame_set(frame_of(MAP_FILL[1]) + 1)
+        show_in_viewport(cam)
+        if not MAP_FOUND:
+            notify("Carte introuvable : mets carte_europe.png à côté du .blend "
+                   "(et enregistre le .blend), ou renseigne MAP_IMAGE en haut du script.", "ERROR")
         print(f"[ARIA] Scène « {SCENE_NAME} » prête : {len(cubes)} cubes, {N_FRAMES} images. "
               f"{len(saved)} repère(s) ajusté(s) conservé(s).")
     finally:
