@@ -1,0 +1,418 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Treuil à bobine plate</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap">
+<style>
+  /* Mise en page : la scène 3D occupe la largeur, les commandes et les mesures tiennent dessous sur une grille. */
+  :root {
+    --green: #00f8c1;
+    --bg: #282425;
+    --surface: #333030;
+    --surface2: #3c3838;
+    --border: #504b4b;
+    --text: #f0eded;
+    --muted: #a39b9b;
+    --scene: #1d1a1b;
+    --metal: #8d8a8c;
+    --dark-part: #151314;
+    --thread: #f0eded;
+    --on-green: #000000;
+    --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --green: #00a886; --bg: #f3f1f1; --surface: #ffffff; --surface2: #e9e5e5; --border: #cfc8c8;
+      --text: #282425; --muted: #6b6364; --scene: #e4e0e0; --metal: #9a9698; --dark-part: #3a3536;
+      --thread: #141213; --on-green: #ffffff; color-scheme: light;
+    }
+  }
+  :root[data-theme="light"] {
+    --green: #00a886; --bg: #f3f1f1; --surface: #ffffff; --surface2: #e9e5e5; --border: #cfc8c8;
+    --text: #282425; --muted: #6b6364; --scene: #e4e0e0; --metal: #9a9698; --dark-part: #3a3536;
+    --thread: #141213; --on-green: #ffffff; color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding-block: 28px 40px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  header { display: flex; flex-direction: column; gap: 6px; }
+  .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--green); }
+  h1 { margin: 0; font-size: clamp(26px, 4.4vw, 40px); font-weight: 900; letter-spacing: -0.02em; line-height: 1.05; text-wrap: balance; }
+  .lede { margin: 0; max-width: 62ch; color: var(--muted); font-weight: 300; font-size: 15px; }
+
+  .stage {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 16 / 9;
+    min-height: 300px;
+    background: var(--scene);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+  .views { position: absolute; top: 12px; left: 12px; display: flex; gap: 0; }
+  .hint { position: absolute; right: 12px; bottom: 10px; font-size: 11px; color: var(--muted); pointer-events: none; }
+
+  button {
+    font: inherit; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text); background: var(--surface); border: 1px solid var(--border);
+    padding: 9px 14px; cursor: pointer;
+  }
+  button:hover { background: var(--surface2); }
+  button[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: var(--on-green); }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+  .views button + button { border-left: 0; }
+
+  .controls { display: grid; grid-template-columns: auto 1fr 1fr auto; gap: 16px 24px; align-items: end; }
+  .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .field label, .check { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .field label output { color: var(--text); font-variant-numeric: tabular-nums; letter-spacing: 0; margin-left: 6px; }
+  input[type="range"] { width: 100%; accent-color: var(--green); margin: 0; height: 24px; }
+  .check { display: flex; align-items: center; gap: 8px; padding-bottom: 6px; cursor: pointer; white-space: nowrap; }
+  .check input { accent-color: var(--green); width: 16px; height: 16px; margin: 0; }
+  #play { min-width: 132px; }
+
+  .readouts { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border: 1px solid var(--border); background: var(--surface); }
+  .readouts div { padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .readouts div + div { border-left: 1px solid var(--border); }
+  .readouts dt { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .readouts dd { margin: 0; font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .readouts dd small { font-size: 12px; font-weight: 400; color: var(--muted); margin-left: 4px; }
+  dl { margin: 0; }
+
+  .notes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; border-top: 1px solid var(--border); padding-top: 20px; }
+  .notes h2 { margin: 0 0 4px; font-size: 13px; font-weight: 700; }
+  .notes p { margin: 0; color: var(--muted); font-weight: 300; }
+
+  @media (max-width: 760px) {
+    .controls { grid-template-columns: 1fr 1fr; }
+    .controls .field { grid-column: 1 / -1; }
+    .readouts { grid-template-columns: 1fr 1fr; }
+    .readouts div + div { border-left: 0; }
+    .readouts div:nth-child(even) { border-left: 1px solid var(--border); }
+    .readouts div:nth-child(n+3) { border-top: 1px solid var(--border); }
+    .readouts div:last-child { grid-column: 1 / -1; border-left: 0; }
+    .notes { grid-template-columns: 1fr; gap: 16px; }
+    .stage { aspect-ratio: 4 / 5; }
+    .hint { display: none; }
+  }
+</style>
+
+<div class="page">
+  <header>
+    <span class="eyebrow">Lévitation · bloc treuil</span>
+    <h1>Treuil à bobine plate</h1>
+    <p class="lede">Une bobine de 25 cm enroule 79 cm de fil par tour, en une seule couche de 16 spires. Le fil sort toujours au même point, par une poulie fixe.</p>
+  </header>
+
+  <div class="stage" id="stage">
+    <canvas id="scene" aria-label="Vue 3D du bloc treuil : moteur, réducteur, bobine plate, poulie de sortie et objet suspendu"></canvas>
+    <div class="views" role="group" aria-label="Point de vue">
+      <button type="button" id="view-bloc" aria-pressed="true">Le bloc</button>
+      <button type="button" id="view-salle" aria-pressed="false">La salle</button>
+    </div>
+    <span class="hint">Glisser pour tourner · molette pour zoomer</span>
+  </div>
+
+  <div class="controls">
+    <button type="button" id="play" aria-pressed="true">Pause</button>
+    <div class="field">
+      <label for="pos">Fil déroulé <output id="pos-out" for="pos">0,00 m</output></label>
+      <input type="range" id="pos" min="0" max="10" step="0.01" value="0">
+    </div>
+    <div class="field">
+      <label for="vmax">Vitesse maximale <output id="vmax-out" for="vmax">3,0 m/s</output></label>
+      <input type="range" id="vmax" min="0.1" max="3" step="0.1" value="3">
+    </div>
+    <label class="check" for="slow"><input type="checkbox" id="slow"> Ralenti ×10</label>
+  </div>
+
+  <dl class="readouts">
+    <div><dt>Vitesse du fil</dt><dd><span id="r-v">0,00</span><small>m/s</small></dd></div>
+    <div><dt>Bobine</dt><dd><span id="r-rpm">0</span><small>tr/min</small></dd></div>
+    <div><dt>Moteur</dt><dd><span id="r-mot">0</span><small>tr/min</small></dd></div>
+    <div><dt>Spires enroulées</dt><dd><span id="r-turns">16</span><small>/ 16</small></dd></div>
+    <div><dt>Hauteur de l'objet</dt><dd><span id="r-h">10,00</span><small>m</small></dd></div>
+  </dl>
+
+  <section class="notes">
+    <div>
+      <h2>Ce que montre la simulation</h2>
+      <p>Les cotes sont celles de la maquette : bobine de 250 mm, gorge de 20 mm, poulie à 455 mm. Les mouvements suivent les limites du firmware : 3 m/s et 6 m/s² au maximum.</p>
+    </div>
+    <div>
+      <h2>Ce qu'elle ne montre pas</h2>
+      <p>Ni le balancement de l'objet, ni l'allongement du fil, ni le bruit du réducteur. C'est une animation du mécanisme, pas un calcul physique.</p>
+    </div>
+    <div>
+      <h2>À regarder</h2>
+      <p>Sur la bobine, le fil ne se déplace que de 20 mm entre le haut et le bas de la course. À la poulie, il ne bouge plus : l'objet descend à la verticale.</p>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function () {
+  // ---------- Cotes de la maquette (mm), identiques à cad/treuil.py ----------
+  var DRUM_D = 250, LINE_D = 1, PITCH = 1.2, TRAVEL = 10000, GEAR = 10;
+  var PER_TURN = Math.PI * (DRUM_D + LINE_D);                  // 788,5 mm de fil par tour
+  var TOTAL_TURNS = 16, DEAD_TURNS = TOTAL_TURNS - TRAVEL / PER_TURN;
+  var GROOVE_W = 20, FLANGE_D = 266, FLANGE_T = 3, REEL_W = 26, PLATE_T = 8;
+  var X_REEL = PLATE_T + 6, X_LINE = X_REEL + REEL_W / 2, R_LINE = DRUM_D / 2 + LINE_D / 2;
+  var PULLEY_DIST = 455, PULLEY_R = 20, PULLEY_Y = -R_LINE - PULLEY_R;
+  var BEAM_Y0 = -FLANGE_D / 2 - 62, BEAM_Y1 = -FLANGE_D / 2 - 22;
+  var VMAX = 3000, AMAX = 6000;                                 // mm/s et mm/s²
+  var CEILING = 10900, LOAD_R = 150, HANG_MIN = 250;
+
+  var $ = function (id) { return document.getElementById(id); };
+  var fr = function (v, d) { return v.toFixed(d).replace('.', ','); };
+  var canvas = $('scene'), stage = $('stage');
+
+  if (!window.THREE) {
+    stage.insertAdjacentHTML('beforeend', '<p style="position:absolute;inset:0;margin:auto;height:2em;text-align:center">La vue 3D n\'a pas pu se charger.</p>');
+    return;
+  }
+
+  var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(38, 16 / 9, 5, 80000);
+  var controls = THREE.OrbitControls ? new THREE.OrbitControls(camera, canvas) : null;
+  if (controls) { controls.enableDamping = true; controls.dampingFactor = 0.08; controls.maxDistance = 40000; controls.minDistance = 150; }
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x3a3436, 0.85));
+  var sun = new THREE.DirectionalLight(0xffffff, 0.9); sun.position.set(700, 900, 500); scene.add(sun);
+  var fill = new THREE.DirectionalLight(0xffffff, 0.35); fill.position.set(-500, -200, -400); scene.add(fill);
+
+  var mat = {
+    metal: new THREE.MeshStandardMaterial({ metalness: 0.75, roughness: 0.38 }),
+    plate: new THREE.MeshStandardMaterial({ metalness: 0.6, roughness: 0.5 }),
+    dark: new THREE.MeshStandardMaterial({ metalness: 0.3, roughness: 0.6 }),
+    spool: new THREE.MeshStandardMaterial({ metalness: 0.0, roughness: 0.55, side: THREE.DoubleSide }),
+    wound: new THREE.MeshStandardMaterial({ metalness: 0.1, roughness: 0.8 }),
+    load: new THREE.MeshStandardMaterial({ metalness: 0.1, roughness: 0.35, flatShading: true }),
+    ghost: new THREE.MeshStandardMaterial({ metalness: 0, roughness: 0.9 }),
+    line: new THREE.LineBasicMaterial()
+  };
+
+  // Repère : X = axe du moteur, Y = vertical, Z = vers la poulie de sortie.
+  function cylX(d, len, x, y, z, m, seg) {
+    var g = new THREE.CylinderGeometry(d / 2, d / 2, len, seg || 48);
+    g.rotateZ(Math.PI / 2);
+    var o = new THREE.Mesh(g, m); o.position.set(x + len / 2, y || 0, z || 0); return o;
+  }
+  function box(x0, x1, y0, y1, z0, z1, m) {
+    var o = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, y1 - y0, z1 - z0), m);
+    o.position.set((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2); return o;
+  }
+
+  var block = new THREE.Group(); scene.add(block);
+  block.add(box(-275, -95, -30, 30, -30, 30, mat.dark));              // servo avec frein
+  block.add(box(-275, -213, -33, 33, -33, 33, mat.dark));
+  block.add(box(-95, 0, -30, 30, -30, 30, mat.metal));                // réducteur planétaire
+  block.add(cylX(14, 44, 0, 0, 0, mat.metal));
+  block.add(box(0, PLATE_T, BEAM_Y0, 75, -70, 70, mat.plate));        // platine
+  block.add(box(PLATE_T, PLATE_T + 20, BEAM_Y0, BEAM_Y1, -90, PULLEY_DIST - 30, mat.plate));   // profilé 2040
+  block.add(box(-270, -100, -30, 30, 34, 68, mat.plate));             // électronique
+  // Support et poulie de sortie
+  block.add(box(X_LINE - 10, X_LINE - 6, BEAM_Y1, PULLEY_Y + 14, PULLEY_DIST - 42, PULLEY_DIST + 20, mat.dark));
+  block.add(box(X_LINE + 6, X_LINE + 10, BEAM_Y1, PULLEY_Y + 14, PULLEY_DIST - 42, PULLEY_DIST + 20, mat.dark));
+  var pulley = new THREE.Group(); pulley.position.set(0, PULLEY_Y, PULLEY_DIST); block.add(pulley);
+  pulley.add(cylX(2 * PULLEY_R - 2, 6, X_LINE - 3, 0, 0, mat.spool));
+  pulley.add(cylX(2 * PULLEY_R + 6, 1.5, X_LINE - 4.5, 0, 0, mat.spool));
+  pulley.add(cylX(2 * PULLEY_R + 6, 1.5, X_LINE + 3, 0, 0, mat.spool));
+  pulley.add(box(X_LINE + 4.5, X_LINE + 5.2, 4, 18, -2, 2, mat.dark));
+
+  // Partie tournante : bobine imprimée (jante, voile ajouré, moyeu) et fil enroulé
+  var rotor = new THREE.Group(); block.add(rotor);
+  var rimGeo = new THREE.CylinderGeometry(DRUM_D / 2, DRUM_D / 2, REEL_W, 96, 1, true); rimGeo.rotateZ(Math.PI / 2);
+  var rim = new THREE.Mesh(rimGeo, mat.spool); rim.position.x = X_REEL + REEL_W / 2; rotor.add(rim);
+  [X_REEL, X_REEL + REEL_W - FLANGE_T].forEach(function (x) {
+    var g = new THREE.RingGeometry(DRUM_D / 2 - 6, FLANGE_D / 2, 96); g.rotateY(Math.PI / 2);
+    var a = new THREE.Mesh(g, mat.spool); a.position.x = x; rotor.add(a);
+    var b = new THREE.Mesh(g, mat.spool); b.position.x = x + FLANGE_T; rotor.add(b);
+    var e = new THREE.CylinderGeometry(FLANGE_D / 2, FLANGE_D / 2, FLANGE_T, 96, 1, true); e.rotateZ(Math.PI / 2);
+    var c = new THREE.Mesh(e, mat.spool); c.position.x = x + FLANGE_T / 2; rotor.add(c);
+  });
+  var web = new THREE.Shape(); web.absarc(0, 0, DRUM_D / 2 - 6, 0, Math.PI * 2, false);
+  for (var k = 0; k < 6; k++) {
+    var a = k * Math.PI / 3, rr = (DRUM_D / 2 - 6 + 28) / 2, h = new THREE.Path();
+    h.absarc(rr * Math.cos(a), rr * Math.sin(a), 29, 0, Math.PI * 2, true); web.holes.push(h);
+  }
+  var webGeo = new THREE.ExtrudeGeometry(web, { depth: 5, bevelEnabled: false, curveSegments: 48 }); webGeo.rotateY(Math.PI / 2);
+  var webMesh = new THREE.Mesh(webGeo, mat.spool); webMesh.position.x = X_REEL; rotor.add(webMesh);
+  rotor.add(cylX(56, REEL_W, X_REEL, 0, 0, mat.spool));
+  rotor.add(cylX(46, 4, X_REEL + REEL_W, 0, 0, mat.metal));
+  for (var j = 0; j < 4; j++) {
+    var b2 = j * Math.PI / 2 + Math.PI / 4;
+    rotor.add(cylX(8, 3, X_REEL + REEL_W + 4, 20 * Math.cos(b2), 20 * Math.sin(b2), mat.dark, 6));
+  }
+  var woundGeo = new THREE.CylinderGeometry(R_LINE + 0.5, R_LINE + 0.5, 1, 96, 1, true); woundGeo.rotateZ(Math.PI / 2);
+  var wound = new THREE.Mesh(woundGeo, mat.wound); rotor.add(wound);
+
+  // Fil : bas de la bobine -> poulie (quart de tour) -> objet
+  var ARC = 10, NPTS = ARC + 3;
+  var lineGeo = new THREE.BufferGeometry();
+  lineGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(NPTS * 3), 3));
+  var thread = new THREE.Line(lineGeo, mat.line); thread.frustumCulled = false; scene.add(thread);
+  var load = new THREE.Mesh(new THREE.IcosahedronGeometry(LOAD_R, 0), mat.load); scene.add(load);
+
+  // La salle : poutre d'accroche, sol, silhouette de 1,75 m pour l'échelle
+  var room = new THREE.Group(); scene.add(room);
+  room.add(box(-2500, 2500, 150, 230, -60, 60, mat.ghost));
+  var floor = new THREE.Mesh(new THREE.PlaneGeometry(14000, 14000), mat.ghost);
+  floor.rotation.x = -Math.PI / 2; floor.position.y = -CEILING; room.add(floor);
+  var grid = new THREE.GridHelper(14000, 14); grid.position.y = -CEILING + 2; room.add(grid);
+  var bodyM = new THREE.Mesh(new THREE.CylinderGeometry(170, 130, 1500, 20), mat.ghost);
+  bodyM.position.set(1500, -CEILING + 750, 900); room.add(bodyM);
+  var head = new THREE.Mesh(new THREE.SphereGeometry(125, 20, 14), mat.ghost);
+  head.position.set(1500, -CEILING + 1625, 900); room.add(head);
+
+  function applyTheme() {
+    var css = getComputedStyle(document.documentElement);
+    var c = function (n) { return new THREE.Color(css.getPropertyValue(n).trim()); };
+    scene.background = c('--scene');
+    mat.spool.color = c('--green');
+    mat.metal.color = c('--metal');
+    mat.plate.color = c('--metal').lerp(c('--text'), 0.35);
+    mat.dark.color = c('--dark-part');
+    mat.wound.color = c('--thread').lerp(c('--scene'), 0.25);
+    mat.load.color = c('--text');
+    mat.ghost.color = c('--scene').lerp(c('--text'), 0.14);
+    mat.line.color = c('--thread');
+    grid.material.color = c('--border');
+  }
+  applyTheme();
+  new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  if (window.matchMedia) {
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq.addEventListener) mq.addEventListener('change', applyTheme);
+  }
+
+  var views = {
+    bloc: { pos: [760, 120, 870], target: [0, -90, 200] },
+    salle: { pos: [7500, -3200, 15500], target: [300, -5600, 400] }
+  };
+  function setView(name) {
+    var v = views[name];
+    camera.position.set(v.pos[0], v.pos[1], v.pos[2]);
+    if (controls) { controls.target.set(v.target[0], v.target[1], v.target[2]); controls.update(); }
+    else camera.lookAt(v.target[0], v.target[1], v.target[2]);
+    $('view-bloc').setAttribute('aria-pressed', name === 'bloc');
+    $('view-salle').setAttribute('aria-pressed', name === 'salle');
+  }
+  $('view-bloc').addEventListener('click', function () { setView('bloc'); });
+  $('view-salle').addEventListener('click', function () { setView('salle'); });
+  setView('bloc');
+
+  function resize() {
+    var w = stage.clientWidth, h = stage.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h; camera.updateProjectionMatrix();
+  }
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(stage);
+  window.addEventListener('resize', resize);
+  resize();
+
+  // ---------- Mouvement : même loi de suivi que le firmware ----------
+  var p = 0, v = 0, target = 0, vmax = VMAX;
+  var auto = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var cues = [[9000, 3000], [6000, 800], [6400, 300], [1500, 3000], [2600, 500], [150, 1500]];
+  var cue = -1, rest = 0;
+
+  var posIn = $('pos'), vmaxIn = $('vmax'), playBtn = $('play'), slowIn = $('slow');
+  function syncPlay() { playBtn.setAttribute('aria-pressed', auto); playBtn.textContent = auto ? 'Pause' : 'Lecture auto'; }
+  playBtn.addEventListener('click', function () { auto = !auto; rest = 0; if (!auto) target = p; syncPlay(); });
+  posIn.addEventListener('input', function () { auto = false; syncPlay(); target = parseFloat(posIn.value) * 1000; });
+  vmaxIn.addEventListener('input', function () {
+    vmax = parseFloat(vmaxIn.value) * 1000; $('vmax-out').textContent = fr(vmax / 1000, 1) + ' m/s';
+  });
+  syncPlay();
+
+  function step(dt) {
+    if (auto && Math.abs(target - p) < 1 && Math.abs(v) < 1) {
+      rest += dt;
+      if (rest > 0.9 || cue < 0) {
+        cue = (cue + 1) % cues.length; rest = 0;
+        target = cues[cue][0]; vmax = cues[cue][1];
+        vmaxIn.value = vmax / 1000; $('vmax-out').textContent = fr(vmax / 1000, 1) + ' m/s';
+      }
+    }
+    var e = target - p;
+    var catchUp = Math.min(25 * Math.abs(e), Math.sqrt(2 * 0.8 * AMAX * Math.abs(e)));
+    var vDes = Math.max(-vmax, Math.min(vmax, e > 0 ? catchUp : -catchUp));
+    var dv = AMAX * dt;
+    v = v < vDes ? Math.min(v + dv, vDes) : Math.max(v - dv, vDes);
+    p = Math.max(0, Math.min(TRAVEL, p + v * dt));
+  }
+
+  function pose() {
+    var turnsOn = (TRAVEL - p) / PER_TURN + DEAD_TURNS;
+    var woundLen = turnsOn * PITCH;
+    var x0 = X_REEL + FLANGE_T + (GROOVE_W - TOTAL_TURNS * PITCH) / 2;
+    var xw = x0 + woundLen;                                      // là où le fil quitte la bobine
+    var ang = (p / PER_TURN) * 2 * Math.PI;
+    rotor.rotation.x = ang;                                      // le bas de la bobine part vers la poulie
+    pulley.rotation.x = -(p / PULLEY_R);
+    wound.scale.x = Math.max(woundLen, 0.01);
+    wound.position.x = x0 + woundLen / 2;
+
+    var yLoad = PULLEY_Y - HANG_MIN - p;
+    var a = lineGeo.attributes.position.array, i = 0;
+    a[i++] = xw; a[i++] = -R_LINE; a[i++] = 0;                    // tangence sous la bobine
+    for (var s = 0; s <= ARC; s++) {                             // quart de tour sur la poulie
+      var t = Math.PI / 2 - s * (Math.PI / 2) / ARC;
+      a[i++] = X_LINE; a[i++] = PULLEY_Y + PULLEY_R * Math.sin(t); a[i++] = PULLEY_DIST + PULLEY_R * Math.cos(t);
+    }
+    a[i++] = X_LINE; a[i++] = yLoad; a[i++] = PULLEY_DIST + PULLEY_R;
+    lineGeo.attributes.position.needsUpdate = true;
+    load.position.set(X_LINE, yLoad - LOAD_R, PULLEY_DIST + PULLEY_R);
+    load.rotation.y = p / 2600;
+
+    if (auto || Math.abs(v) > 1) posIn.value = (p / 1000).toFixed(2);
+    $('pos-out').textContent = fr(p / 1000, 2) + ' m';
+    var rpm = Math.abs(v) / PER_TURN * 60;
+    $('r-v').textContent = fr(Math.abs(v) / 1000, 2);
+    $('r-rpm').textContent = Math.round(rpm);
+    $('r-mot').textContent = Math.round(rpm * GEAR);
+    $('r-turns').textContent = fr(turnsOn, 1);
+    $('r-h').textContent = fr((CEILING + PULLEY_Y - HANG_MIN - p - 2 * LOAD_R) / 1000, 2);
+  }
+
+  var last = performance.now();
+  function frame(now) {
+    var dt = Math.min((now - last) / 1000, 0.05); last = now;
+    if (slowIn.checked) dt /= 10;
+    var n = Math.max(1, Math.ceil(dt / 0.004));
+    for (var q = 0; q < n; q++) step(dt / n);
+    pose();
+    if (controls) controls.update();
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+  pose();
+  requestAnimationFrame(frame);
+})();
+</script>
