@@ -23,7 +23,7 @@ synchronise avec d'autres blocs pour faire voler un objet sur 2, 3 ou 4 fils. Pi
 | Accélération | 6 m/s² (0 à 3 m/s en une demi-seconde) |
 | Course | 10 m de fil sur une seule couche (paramétrable) |
 | Résolution | 0,03 mm par pas |
-| Encombrement | environ 270 × 205 × 140 mm, hors alimentation |
+| Encombrement | environ 290 × 205 × 140 mm, hors alimentation |
 | Liaison | Ethernet, OSC, jusqu'à 100 m de câble par bloc |
 
 ## 2. Principe
@@ -86,9 +86,9 @@ techniques avant de commander.
 
 | Fonction | Composant | Prix indicatif |
 |---|---|---|
-| Moteur | Servo intégré JMC iHSV60-30-40-48 (400 W, 48 V, 3000 tr/min, 1,27 N·m) | 150 € |
+| Moteur | Servo intégré JMC iHSV60-30-40-48-SC, version avec frein 24 V intégré (400 W, 48 V, 3000 tr/min, 1,27 N·m, longueur 180 mm, 2 kg) | 180 € |
 | Transmission | Poulies HTD 3M 20 et 40 dents, courroie largeur 15 mm, entraxe 90 mm | 25 € |
-| Frein | Frein à manque de courant 24 V, 4 N·m minimum, alésage 12 mm | 45 € |
+| Frein sur l'axe du tambour | Frein à manque de courant 24 V, 4 N·m minimum, alésage 12 mm. Facultatif hors public : le frein du servo suffit, mais il ne retient rien si la courroie casse | 45 € |
 | Trancannage | Moteur pas-à-pas NEMA 11 à vis intégrée (pas 2 mm), 2 colonnes Ø 6, douilles | 45 € |
 | Driver du trancannage | TMC2209 (mode silencieux) | 8 € |
 | Carte | Olimex ESP32-POE (Ethernet, alimentée par le câble réseau) | 25 € |
@@ -100,7 +100,7 @@ techniques avant de commander.
 | Mécanique | 2 flasques alu 8 mm, tambour alu, chariot, axe Ø 12, 2 roulements 6001, 4 entretoises (usinage en Chine) | 100–150 € |
 | Guide-fil | Œillet céramique, poulie de sortie sur roulement | 15 € |
 | Divers | Connecteurs, câbles, visserie, capot | 40 € |
-| | **Total par bloc** | **environ 650–700 €** |
+| | **Total par bloc** | **environ 650–750 €** |
 
 Pour les objets de moins d'un kilo seulement, le servo 180 W (iHSV57-30-18-36) suffirait et
 économiserait une centaine d'euros avec son alimentation. Je conseille de construire
