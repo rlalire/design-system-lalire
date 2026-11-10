@@ -2,6 +2,15 @@
 
 Durée 25 s · 30 im/s · 1920×1080 · Blender 5.x · police Inter
 
+Deux modes, au choix en haut du script :
+
+- `REVEAL_MODE = "categories"` (par défaut) : 4 vagues de 6 cubes, une par catégorie (EP › GE › SA › SE). Les 6 titres restent affichés ensemble ≈ 2,9 s en grille 3 × 2. La vague suivante monte pendant que la précédente file sur la carte.
+- `REVEAL_MODE = "relais"` : la version un par un décrite ci-dessous.
+
+`VARIATION` (0 à 1,5) casse le côté mécanique : chaque cube a sa trajectoire courbe, sa façon de se retourner (4 sens, parfois un tour complet), son rebond, sa durée, sa légère inclinaison, son départ et sa rotation à l'atterrissage. Les départs d'une vague se font dans un ordre différent des arrivées. `0` = tous identiques. Au-delà de ~1,2, deux cubes peuvent parfois se frôler pendant un changement de vague. Change `SEED` pour tirer une autre combinaison de mouvements.
+
+Mode relais :
+
 | Temps | Ce qui se passe |
 |---|---|
 | 0 → 3 s | Les contours lumineux de la carte se tracent depuis le centre de l'Europe, puis la carte se remplit. Les 24 cubes sombres apparaissent et flottent. |
@@ -12,7 +21,7 @@ Durée 25 s · 30 im/s · 1920×1080 · Blender 5.x · police Inter
 
 - `aria_final.py` : le script qui construit toute la scène.
 - `carte_europe.png` : ta carte (1536×1024).
-- `apercu_aria_final.mp4` : aperçu basse définition (640×360, 15 im/s, rendu EEVEE logiciel), pour valider le rythme.
+- `apercu_aria_final.mp4` : aperçu du mode catégories, basse définition (640×360, 15 im/s, rendu EEVEE logiciel), pour valider le rythme.
 
 ## Sur ton Mac
 
@@ -30,6 +39,9 @@ Durée 25 s · 30 im/s · 1920×1080 · Blender 5.x · police Inter
 
 | Réglage | Effet |
 |---|---|
+| `REVEAL_MODE`, `VARIATION`, `SEED` | Mode de révélation, dose de variété, tirage aléatoire. |
+| `WAVE_APPROACH`, `WAVE_FLY`, `WAVE_STAGGER_IN/OUT`, `WAVE_GAP` | Mode catégories : durées et étalement. Le temps de lecture s'en déduit (affiché dans la console). |
+| `WAVE_CUBE_SIZE`, `WAVE_GRID`, `WAVE_HOLD_HEIGHT`, `WAVE_ORDER` | Mode catégories : taille et espacement de la grille, ordre des vagues. |
 | `T_APPROACH`, `T_HOLD`, `T_FLY` | Durées du retournement, de l'arrêt en grand et du vol. La cadence s'adapte toute seule pour finir à `LAST_LANDING`. |
 | `FIRST_REVEAL`, `LAST_LANDING` | Début et fin de la valse des cubes. |
 | `ORDER` | `"tableau"` (vagues de couleur EP › GE › SA › SE), `"alterne"` (couleurs mélangées) ou `"ouest_est"`. |

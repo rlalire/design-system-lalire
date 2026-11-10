@@ -4,9 +4,14 @@ ARIA 2026 — Séquence finale (25 s @ 30 im/s)
 ============================================
 
 La carte de l'Europe se dessine, 24 cubes sombres flottent devant.
-Un par un (en relais), chaque cube vient au premier plan en se retournant :
-il se colore et révèle le titre du projet, reste 1,5 s, puis file se poser
-sur son pays en se réduisant jusqu'à devenir un point lumineux.
+Les cubes viennent au premier plan en se retournant : ils se colorent et
+révèlent le titre du projet, restent affichés, puis filent se poser sur
+leur pays en se réduisant jusqu'à devenir des points lumineux.
+
+Deux modes (réglage REVEAL_MODE) :
+  « categories » : 4 vagues de 6 cubes (une par catégorie), ~3 s de lecture
+  « relais »     : un par un, 1,5 s chacun, en relais sur 3 emplacements
+VARIATION règle à quel point chaque cube a son propre mouvement.
 
 UTILISATION (Blender 5.x)
   1. Mets ce script et carte_europe.png à côté de ton .blend (ou règle MAP_IMAGE).
@@ -46,6 +51,11 @@ REVEAL_ORIGIN_PX = (800, 540)       # point d'où part le dessin de la carte
 FONT_TITLE = ""                     # ex. "/Users/moi/Library/Fonts/Inter-SemiBold.ttf"
 FONT_SMALL = ""                     # ex. ".../Inter-Medium.ttf"
 
+# Mode de révélation ---------------------------------------------------------
+REVEAL_MODE = "categories"          # "categories" : vagues de 6 par catégorie
+                                    # "relais"     : un par un (version précédente)
+VARIATION = 1.0                     # 0 = tous les cubes bougent pareil · 1 = variés · 1.5 = très variés
+
 # Timeline (secondes) --------------------------------------------------------
 MAP_LINES = (0.0, 2.2)              # les contours lumineux se tracent
 MAP_FILL = (0.7, 3.0)               # puis la carte se remplit
@@ -55,6 +65,20 @@ LAST_LANDING = 23.2                 # le dernier point se pose ici ; puis plan f
 T_APPROACH = 0.55                   # vol + retournement vers le premier plan
 T_HOLD = 1.5                        # temps affiché en grand
 T_FLY = 0.75                        # vol vers le pays + réduction en point
+# (T_APPROACH / T_HOLD / T_FLY ci-dessus : mode « relais »)
+
+# Mode « categories » : 4 vagues de 6 cubes en grille 3 x 2
+WAVE_ORDER = ("EP", "GE", "SA", "SE")
+WAVE_APPROACH = 0.8                 # durée moyenne du vol + retournement d'un cube
+WAVE_FLY = 0.9                      # durée moyenne du vol vers la carte
+WAVE_STAGGER_IN = 0.55              # étalement des arrivées dans une vague
+WAVE_STAGGER_OUT = 0.65             # étalement des départs vers la carte
+WAVE_GAP = 0.3                      # la vague suivante décolle ce temps après les premiers départs
+# Le temps de lecture (les 6 cubes affichés ensemble) est calculé pour remplir
+# FIRST_REVEAL → LAST_LANDING ; il est affiché dans la console (≈ 3,2 s).
+WAVE_HOLD_HEIGHT = 12.0
+WAVE_CUBE_SIZE = 1.25
+WAVE_GRID = (2.2, 1.65)             # écart entre colonnes / entre rangées
 
 # Géométrie / caméra ---------------------------------------------------------
 CAM_HEIGHT = 20.0                   # caméra en plongée verticale
@@ -733,14 +757,108 @@ def reveal_order():
     return idx
 
 
+def bezier(p0, c, p1, e):
+    return p0 * (1 - e) ** 2 + c * (2 * (1 - e) * e) + p1 * e ** 2
+
+
+def plan_relais(order_cubes, rng):
+    """Un par un, en relais sur 3 emplacements, cadence légèrement irrégulière."""
+    V = VARIATION
+    n = len(order_cubes)
+    # En relais les emplacements sont réutilisés très vite : on ne fait varier la cadence
+    # et les durées que légèrement, la variété vient surtout des trajectoires.
+    gaps = [1.0 + rng.uniform(-0.08, 0.08) * V for _ in range(n - 1)]
+    for cb in order_cubes:
+        cb["t_app"] = T_APPROACH * (1 + rng.uniform(-0.15, 0.0) * V)
+        cb["t_hold"] = T_HOLD
+        cb["t_fly"] = T_FLY * (1 + rng.uniform(-0.1, 0.15) * V)
+        cb["size"] = CUBE_SIZE
+    last = order_cubes[-1]
+    span = LAST_LANDING - FIRST_REVEAL - (last["t_app"] + last["t_hold"] + last["t_fly"])
+    unit = span / max(1e-6, sum(gaps))
+    t = FIRST_REVEAL
+    free_at = [-1.0] * len(SLOTS_X)          # quand chaque emplacement est libéré
+    prev = None
+    for rank, cb in enumerate(order_cubes):
+        cb["start"] = t
+        if rank < n - 1:
+            t += gaps[rank] * unit
+        # emplacement libéré depuis le plus longtemps (jamais le même que le cube précédent)
+        k = min((i for i in range(len(SLOTS_X)) if i != prev), key=lambda i: free_at[i])
+        prev = k
+        free_at[k] = cb["start"] + cb["t_app"] + cb["t_hold"] + cb["t_fly"] * 0.6
+        cb["slot"] = Vector((SLOTS_X[k] + rng.uniform(-0.25, 0.25) * V,
+                             rng.uniform(-0.3, 0.3) * V,
+                             HOLD_HEIGHT + rng.uniform(-0.5, 0.4) * V))
+        cb["tilt"] = math.radians(rng.uniform(-5, 5) * V)
+    print(f"[ARIA] Mode relais : un cube toutes les {unit:.2f} s en moyenne")
+
+
+def plan_categories(cubes, rng):
+    """4 vagues de 6 : les cubes d'une catégorie arrivent ensemble, restent, puis partent."""
+    V = VARIATION
+    waves = [[cb for cb in cubes if cb["cat"] == cat] for cat in WAVE_ORDER]
+    waves = [w for w in waves if w]
+    nw = len(waves)
+    amax = WAVE_APPROACH * (1 + 0.2 * V)
+    fmax = WAVE_FLY * (1 + 0.2 * V)
+    a_w = WAVE_STAGGER_IN + amax                       # toute la vague est arrivée
+    f_w = WAVE_STAGGER_OUT + fmax                      # toute la vague est posée
+    hold = (LAST_LANDING - FIRST_REVEAL - f_w - (nw - 1) * WAVE_GAP) / nw - a_w
+    if hold < 0.8:
+        print("[ARIA] ⚠ Pas assez de temps pour les vagues : réduis WAVE_* ou élargis la timeline.")
+        hold = 0.8
+    period = a_w + hold + WAVE_GAP
+    print(f"[ARIA] Mode catégories : {nw} vagues, les 6 titres restent lisibles ensemble ≈ {hold:.2f} s")
+
+    # Grille 3 x 2 ; l'ordre d'arrivée d'une vague = ordre de départ de la précédente,
+    # ainsi un emplacement est toujours libéré avant d'être réoccupé.
+    gx, gy = WAVE_GRID
+    base_slots = [Vector(((c - 1) * gx, (0.5 - r) * gy, 0)) for r in range(2) for c in range(3)]
+    slot_order = list(range(6))
+    rng.shuffle(slot_order)
+    for w, wave in enumerate(waves):
+        ws = FIRST_REVEAL + w * period
+        # Chaque cube rejoint l'emplacement « de son côté » (évite que les trajectoires se croisent)
+        m = len(wave)
+        targets = [base_slots[slot_order[j % 6]] * 2.6 for j in range(m)]
+        best = min(itertools.permutations(wave),
+                   key=lambda perm: sum((perm[j]["swarm"].xy - targets[j].xy).length for j in range(m)))
+        wave = list(best)
+        # Variation de mise en page par vague : décalage de rangée, légère rotation
+        row_shift = rng.uniform(-0.35, 0.35) * V
+        rot = math.radians(rng.uniform(-3, 3) * V)
+        out_order = list(range(len(wave)))
+        rng.shuffle(out_order)
+        for j, cb in enumerate(wave):
+            k = slot_order[j % 6]
+            p = base_slots[k].copy()
+            if p.y < 0:
+                p.x += row_shift
+            p = Vector((p.x * math.cos(rot) - p.y * math.sin(rot),
+                        p.x * math.sin(rot) + p.y * math.cos(rot), 0))
+            p += Vector((rng.uniform(-0.12, 0.12) * V, rng.uniform(-0.1, 0.1) * V,
+                         WAVE_HOLD_HEIGHT + rng.uniform(-0.35, 0.35) * V))
+            cb["slot"] = p
+            cb["size"] = WAVE_CUBE_SIZE
+            cb["tilt"] = math.radians(rng.uniform(-5, 5) * V)
+            rank_in = j / max(1, len(wave) - 1)
+            cb["start"] = ws + WAVE_STAGGER_IN * rank_in + rng.uniform(-0.05, 0.05) * V
+            cb["start"] = max(ws, cb["start"])
+            cb["t_app"] = WAVE_APPROACH * (1 + rng.uniform(-0.2, 0.2) * V)
+            fly_start = ws + a_w + hold + WAVE_STAGGER_OUT * out_order[j] / max(1, len(wave) - 1)
+            cb["t_hold"] = fly_start - cb["start"] - cb["t_app"]
+            cb["t_fly"] = WAVE_FLY * (1 + rng.uniform(-0.2, 0.2) * V)
+        # emplacements dans l'ordre où ils se libèrent
+        slot_order = [slot_order[j % 6] for j in sorted(range(len(wave)), key=lambda j: out_order[j])]
+        slot_order += [k for k in range(6) if k not in slot_order]
+
+
 def animate(cubes):
     rng = random.Random(SEED)
+    V = VARIATION
     n = len(cubes)
-    order = reveal_order()
-    per_cube = T_APPROACH + T_HOLD + T_FLY
-    cadence = (LAST_LANDING - per_cube - FIRST_REVEAL) / max(1, n - 1)
-    print(f"[ARIA] Cadence : un cube toutes les {cadence:.2f} s "
-          f"(≈{T_HOLD / cadence + 0.5:.1f} cubes en grand simultanément)")
+    order_cubes = [cubes[k] for k in reveal_order()]
 
     # Nuage de départ : grille 6 x 4 légèrement désordonnée
     cols, rows = 6, 4
@@ -748,20 +866,35 @@ def animate(cubes):
     rng.shuffle(cells)
     appear_rank = list(range(n))
     rng.shuffle(appear_rank)
-
-    order_cubes = [cubes[k] for k in order]
-    for rank, cube in enumerate(order_cubes):
+    for rank, cb in enumerate(order_cubes):
         c, r = cells[rank % len(cells)]
-        sx = (c + 0.5) / cols - 0.5
-        sy = (r + 0.5) / rows - 0.5
-        cube["swarm"] = Vector((sx * SWARM_AREA[0] + rng.uniform(-0.45, 0.45),
-                                sy * SWARM_AREA[1] + rng.uniform(-0.4, 0.4),
-                                rng.uniform(*SWARM_Z)))
-        cube["phase"] = rng.uniform(0, 2 * math.pi)
-        cube["spin"] = rng.choice((-1, 1)) * math.pi / 2
-        cube["start"] = FIRST_REVEAL + rank * cadence
-        cube["slot"] = Vector((SLOTS_X[rank % len(SLOTS_X)], 0.0, HOLD_HEIGHT))
-        cube["appear"] = SWARM_IN[0] + (SWARM_IN[1] - SWARM_IN[0]) * appear_rank[rank] / max(1, n - 1)
+        cb["swarm"] = Vector((((c + 0.5) / cols - 0.5) * SWARM_AREA[0] + rng.uniform(-0.45, 0.45),
+                              ((r + 0.5) / rows - 0.5) * SWARM_AREA[1] + rng.uniform(-0.4, 0.4),
+                              rng.uniform(*SWARM_Z)))
+        cb["phase"] = rng.uniform(0, 2 * math.pi)
+        cb["appear"] = SWARM_IN[0] + (SWARM_IN[1] - SWARM_IN[0]) * appear_rank[rank] / max(1, n - 1)
+
+        # Variations individuelles (VARIATION = 0 → toutes identiques)
+        # Retournement : 4 façons d'arriver face cachée vers le haut (toutes équivalentes à l'arrivée)
+        flips = [(math.pi, 0, 0), (-math.pi, 0, 0), (0, math.pi, math.pi), (0, -math.pi, math.pi)]
+        flip = Vector(flips[rng.randrange(4)] if V > 0 else flips[0])
+        if rng.random() < 0.25 * V:
+            flip.z += rng.choice((-1, 1)) * 2 * math.pi          # tour complet en prime
+        cb["flip"] = flip
+        side = Vector((rng.uniform(-1, 1), rng.uniform(-1, 1), 0))
+        side = side.normalized() if side.length > 1e-3 else Vector((1, 0, 0))
+        cb["app_bend"] = side * rng.uniform(0.3, 1.0) * V + Vector((0, 0, rng.uniform(-0.5, 0.8) * V))
+        cb["app_back"] = 1.1 + rng.uniform(-0.6, 0.8) * V           # rebond du retournement
+        side2 = Vector((rng.uniform(-1, 1), rng.uniform(-1, 1), 0))
+        side2 = side2.normalized() if side2.length > 1e-3 else Vector((0, 1, 0))
+        cb["fly_bend"] = side2 * rng.uniform(0.5, 2.2) * V + Vector((0, 0, rng.uniform(-1.2, 0.2) * V))   # plonge d'abord
+        spins = (math.pi / 2, math.pi, 3 * math.pi / 2)
+        cb["spin"] = rng.choice((-1, 1)) * (rng.choice(spins) if V > 0 else spins[0])
+
+    if REVEAL_MODE == "relais":
+        plan_relais(order_cubes, rng)
+    else:
+        plan_categories(cubes, rng)
 
     def float_pos(cb, t):
         p, s = cb["phase"], cb["swarm"]
@@ -780,33 +913,43 @@ def animate(cubes):
 
     def hold_rot(cb, t):
         p = cb["phase"]
-        return Vector((math.pi + 0.07 * math.sin(1.2 * t + p), 0.09 * math.sin(0.9 * t + 1.5 * p),
-                       0.03 * math.sin(0.7 * t + p)))
+        return cb["flip"] + Vector((0.07 * math.sin(1.2 * t + p), 0.09 * math.sin(0.9 * t + 1.5 * p),
+                                    cb["tilt"] + 0.03 * math.sin(0.7 * t + p)))
+
+    def times(cb):
+        s = cb["start"]
+        t_hold = s + cb["t_app"]
+        t_fly = t_hold + cb["t_hold"]
+        return s, t_hold, t_fly, t_fly + cb["t_fly"]
 
     def state(cb, t):
-        s = cb["start"]
-        t_hold, t_fly = s + T_APPROACH, s + T_APPROACH + T_HOLD
-        t_land = t_fly + T_FLY
+        s, t_hold, t_fly, t_land = times(cb)
+        size = cb["size"]
+        final_rot = cb["flip"] + Vector((0, 0, cb["tilt"] + cb["spin"]))
         st = dict(text=1.0, bevel=0.06, mix=0.0, emit=0.0)
         if t < s:
             a = ease_out_back((t - cb["appear"]) / 0.6, 1.7) if t > cb["appear"] else 0.0
             st.update(loc=float_pos(cb, t), rot=float_rot(cb, t), scale=SWARM_SIZE * max(a, 0.0))
         elif t < t_hold:
-            x = (t - s) / T_APPROACH
+            x = (t - s) / cb["t_app"]
             e = ease_in_out_cubic(x)
-            st.update(loc=vlerp(float_pos(cb, t), hold_pos(cb, t), e),
-                      rot=vlerp(float_rot(cb, t), hold_rot(cb, t), ease_out_back(x, 1.1)),
-                      scale=lerp(SWARM_SIZE, CUBE_SIZE, ease_out_cubic(x)),
+            p0, p1 = float_pos(cb, t), hold_pos(cb, t)
+            ctrl = (p0 + p1) * 0.5 + cb["app_bend"]
+            st.update(loc=bezier(p0, ctrl, p1, e),
+                      rot=vlerp(float_rot(cb, t), hold_rot(cb, t), ease_out_back(x, cb["app_back"])),
+                      scale=lerp(SWARM_SIZE, size, ease_out_cubic(x)),
                       mix=smoothstep(0.2, 0.8, x), emit=EMIT_HOLD * smoothstep(0.2, 0.8, x))
         elif t < t_fly:
-            st.update(loc=hold_pos(cb, t), rot=hold_rot(cb, t), scale=CUBE_SIZE, mix=1.0, emit=EMIT_HOLD)
+            st.update(loc=hold_pos(cb, t), rot=hold_rot(cb, t), scale=size, mix=1.0, emit=EMIT_HOLD)
         elif t < t_land:
-            x = (t - t_fly) / T_FLY
+            x = (t - t_fly) / cb["t_fly"]
             e = ease_in_out_cubic(x)
-            final_rot = Vector((math.pi, 0, cb["spin"]))
-            st.update(loc=vlerp(hold_pos(cb, t_fly), cb["target"], e),
+            p0, p1 = hold_pos(cb, t_fly), cb["target"]
+            ctrl = (p0 + p1) * 0.5 + cb["fly_bend"]
+            ctrl.z = max(ctrl.z, p1.z + 0.5)
+            st.update(loc=bezier(p0, ctrl, p1, e),
                       rot=vlerp(hold_rot(cb, t_fly), final_rot, e),
-                      scale=CUBE_SIZE * (POINT_SIZE / CUBE_SIZE) ** e,
+                      scale=size * (POINT_SIZE / size) ** e,
                       text=1.0 - smoothstep(0.0, 0.45, x),
                       bevel=lerp(0.06, 0.45, smoothstep(0.25, 1.0, x)),
                       mix=1.0, emit=lerp(EMIT_HOLD, EMIT_POINT, e))
@@ -814,19 +957,19 @@ def animate(cubes):
             dt = t - t_land
             pop = 1.0 + 0.6 * math.exp(-dt * 9) * math.sin(min(dt * 18, math.pi))
             breathe = POINT_BREATHE * math.sin(1.6 * t + cb["phase"]) * smoothstep(0, 0.8, dt)
-            st.update(loc=cb["target"], rot=Vector((math.pi, 0, cb["spin"])),
+            st.update(loc=cb["target"], rot=final_rot,
                       scale=POINT_SIZE * pop, text=0.0, bevel=0.45, mix=1.0,
                       emit=EMIT_POINT + EMIT_PING * math.exp(-dt * 5) + breathe)
-        return st, (s, t_hold, t_fly, t_land)
+        return st
 
     for cb in cubes:
         ob = cb["ob"]
-        s, t_hold, t_fly, t_land = state(cb, 0)[1]
+        s, t_hold, t_fly, t_land = times(cb)
         f_s, f_h, f_fly, f_land = frame_of(s), frame_of(t_hold), frame_of(t_fly), frame_of(t_land)
-        f_appear0, f_appear1 = frame_of(cb["appear"]) - 1, frame_of(cb["appear"] + 0.6) + 1
+        f_appear1 = frame_of(cb["appear"] + 0.6) + 1
         f_pop_end = min(N_FRAMES, f_land + int(0.5 * FPS))
         for f in range(1, N_FRAMES + 1):
-            st, _ = state(cb, time_of(f))
+            st = state(cb, time_of(f))
 
             # Transformations : chaque image tant que ça bouge, puis seulement aux bords
             if f <= f_pop_end or f == N_FRAMES:
@@ -835,7 +978,7 @@ def animate(cubes):
                 ob.scale = (st["scale"],) * 3
                 ob.keyframe_insert("location", frame=f)
                 ob.keyframe_insert("rotation_euler", frame=f)
-                if f <= f_appear1 or f >= f_s:
+                if f <= f_appear1 or f >= f_s - 1:
                     ob.keyframe_insert("scale", frame=f)
 
             # Couleur : pendant le retournement
