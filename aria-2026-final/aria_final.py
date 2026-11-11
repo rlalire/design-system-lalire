@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-ARIA 2026 — Séquence finale (25 s @ 30 im/s)
+ARIA 2026 — Séquence finale (46 s @ 30 im/s, calée sur la musique)
 ============================================
 
 La carte de l'Europe se dessine, 24 cubes sombres flottent devant.
@@ -38,7 +38,7 @@ from mathutils import Vector
 
 SCENE_NAME = "ARIA_Final"
 FPS = 30
-DURATION = 25.0                     # secondes
+DURATION = 46.0                     # secondes (dernier point posé à 44 s + 2 s de plan final)
 RESOLUTION = (1920, 1080)
 
 # Carte ----------------------------------------------------------------------
@@ -56,12 +56,29 @@ REVEAL_MODE = "categories"          # "categories" : vagues de 6 par catégorie
                                     # "relais"     : un par un (version précédente)
 VARIATION = 1.0                     # 0 = tous les cubes bougent pareil · 1 = variés · 1.5 = très variés
 
-# Timeline (secondes) --------------------------------------------------------
-MAP_LINES = (0.0, 2.2)              # les contours lumineux se tracent
-MAP_FILL = (0.7, 3.0)               # puis la carte se remplit
-SWARM_IN = (0.2, 2.0)               # les cubes sombres apparaissent
-FIRST_REVEAL = 2.8                  # départ du 1er cube
-LAST_LANDING = 23.2                 # le dernier point se pose ici ; puis plan final
+# ═══ CALAGE MUSICAL (secondes) ═════════════════════════════════════════════
+# Intro 0 → 15 s : mise en place de la carte et des cubes ----------------------
+MAP_LINES = (1.0, 8.5)              # les contours lumineux se tracent
+MAP_FILL = (5.0, 12.5)              # puis la carte se remplit
+SWARM_IN = (3.0, 10.0)              # les cubes émergent de l'ombre, un à un
+SWARM_APPEAR = 1.8                  # durée d'émergence d'un cube (il monte et se déroule)
+CAM_PUSH = (0.0, 15.0, 2.5)         # (début, fin, recul au départ) : lente avancée de la caméra
+LIGHT_RIM = (3.0, 9.0)              # les contre-jours rasants se lèvent : cubes en silhouette
+LIGHT_SWEEP = (6.5, 12.5)           # une lumière chaude traverse le nuage de cubes (None = aucune)
+LIGHT_KEY = (10.0, 14.5)            # la lumière principale monte jusqu'à la révélation
+RIPPLE = (12.0, 14.7)               # quart de tour en vague, de gauche à droite (None = aucun)
+
+# Vagues (mode « categories ») : (arrivée, départ vers la carte, tous posés) ---
+WAVE_TIMES = [
+    (15.0, 20.5, 22.5),             # EP
+    (22.0, 27.5, 29.5),             # GE
+    (29.0, 34.5, 36.5),             # SA
+    (36.0, 41.0, 44.0),             # SE : se place à partir de 41 s, en place à 44 s
+]
+
+# Mode « relais » : premier départ et dernier atterrissage
+FIRST_REVEAL = 15.0
+LAST_LANDING = 44.0
 T_APPROACH = 0.55                   # vol + retournement vers le premier plan
 T_HOLD = 1.5                        # temps affiché en grand
 T_FLY = 0.75                        # vol vers le pays + réduction en point
@@ -70,12 +87,10 @@ T_FLY = 0.75                        # vol vers le pays + réduction en point
 # Mode « categories » : 4 vagues de 6 cubes en grille 3 x 2
 WAVE_ORDER = ("EP", "GE", "SA", "SE")
 WAVE_APPROACH = 0.8                 # durée moyenne du vol + retournement d'un cube
-WAVE_FLY = 0.9                      # durée moyenne du vol vers la carte
 WAVE_STAGGER_IN = 0.55              # étalement des arrivées dans une vague
 WAVE_STAGGER_OUT = 0.65             # étalement des départs vers la carte
-WAVE_GAP = 0.3                      # la vague suivante décolle ce temps après les premiers départs
-# Le temps de lecture (les 6 cubes affichés ensemble) est calculé pour remplir
-# FIRST_REVEAL → LAST_LANDING ; il est affiché dans la console (≈ 3,2 s).
+# La durée des vols vers la carte découle de WAVE_TIMES (départ → tous posés).
+# Le temps de lecture de chaque vague est affiché dans la console.
 WAVE_HOLD_HEIGHT = 12.0
 WAVE_CUBE_SIZE = 1.25
 WAVE_GRID = (2.2, 1.65)             # écart entre colonnes / entre rangées
@@ -96,6 +111,10 @@ CLUSTER_RADIUS = 0.17               # écart entre plusieurs points d'un même p
 # Lumière des cubes ----------------------------------------------------------
 EMIT_HOLD = 0.10                    # éclat de la couleur quand le cube est en grand
 EMIT_PING = 5.0                     # flash à l'atterrissage
+KEY_ENERGY = 3500                   # lumière principale (W)
+RIM_ENERGY = 1400                   # contre-jour froid du dessus (W)
+SIDE_RIM_ENERGY = 5500              # contre-jours rasants gauche / droite (W)
+SWEEP_ENERGY = 400                  # lumière qui traverse le nuage (W)
 EMIT_POINT = 1.6                    # éclat des points posés
 POINT_BREATHE = 0.25                # respiration lente des points (0 = aucune)
 
@@ -371,6 +390,11 @@ def const_vec(nt, v, loc=(0, 0)):
     return n.outputs[0]
 
 
+def key_value_prop(owner, prop, frame, value):
+    setattr(owner, prop, value)
+    owner.keyframe_insert(prop, frame=frame)
+
+
 def key_value(socket, frame, value):
     socket.default_value = value
     socket.keyframe_insert("default_value", frame=frame)
@@ -479,10 +503,55 @@ def build_camera_and_lights(coll):
         d = Vector((0, 0, HOLD_HEIGHT * 0.6)) - Vector(loc)
         ob.rotation_euler = d.to_track_quat("-Z", "Y").to_euler()
         coll.objects.link(ob)
+        return ob
 
-    area("Key_Warm", (-9, 8, 22), 3500, (1.0, 0.86, 0.7), 6)     # lueur chaude haut-gauche
-    area("Rim_Cool", (10, -7, 18), 1400, (0.6, 0.75, 1.0), 8)    # contre-jour froid
-    return cam
+    lights = {
+        "key": area("Key_Warm", (-9, 8, 22), KEY_ENERGY, (1.0, 0.86, 0.7), 6),
+        "rim": area("Rim_Cool", (10, -7, 18), RIM_ENERGY, (0.6, 0.75, 1.0), 8),
+        # Contre-jours rasants : ils accrochent les arêtes du dessus des cubes
+        "side_l": area("Rim_Side_L", (-17, 3, 8), SIDE_RIM_ENERGY, (1.0, 0.8, 0.6), 4),
+        "side_r": area("Rim_Side_R", (17, -3, 8), SIDE_RIM_ENERGY, (0.65, 0.8, 1.0), 4),
+    }
+    sd = bpy.data.lights.new(PREFIX + "Sweep_Warm", "POINT")
+    sd.energy = 0
+    sd.color = (1.0, 0.78, 0.5)
+    sd.shadow_soft_size = 0.6
+    sweep = bpy.data.objects.new(PREFIX + "Sweep_Warm", sd)
+    coll.objects.link(sweep)
+    lights["sweep"] = sweep
+    return cam, lights
+
+
+def animate_intro(scn, cam, lights):
+    """Avancée caméra + lumières de l'intro."""
+    def ramp(t, window, e=ease_in_out_cubic):
+        return e((t - window[0]) / max(1e-6, window[1] - window[0]))
+
+    end_f = frame_of(max(CAM_PUSH[1], LIGHT_KEY[1], LIGHT_RIM[1],
+                         LIGHT_SWEEP[1] if LIGHT_SWEEP else 0)) + 1
+    for f in list(range(1, min(end_f, N_FRAMES) + 1)) + [N_FRAMES]:
+        t = time_of(f)
+        cam.location.z = CAM_HEIGHT + CAM_PUSH[2] * (1 - ramp(t, CAM_PUSH[:2]))
+        cam.keyframe_insert("location", frame=f)
+        k = ramp(t, LIGHT_KEY)
+        key_value_prop(lights["key"].data, "energy", f, KEY_ENERGY * k)
+        key_value_prop(lights["rim"].data, "energy", f, RIM_ENERGY * k)
+        # les deux contre-jours se lèvent l'un après l'autre, puis se calment à la révélation
+        mid = (LIGHT_RIM[0] + LIGHT_RIM[1]) / 2
+        settle = 1 - 0.45 * k
+        key_value_prop(lights["side_l"].data, "energy", f,
+                       SIDE_RIM_ENERGY * ramp(t, (LIGHT_RIM[0], mid + 1)) * settle)
+        key_value_prop(lights["side_r"].data, "energy", f,
+                       SIDE_RIM_ENERGY * ramp(t, (mid - 1, LIGHT_RIM[1])) * settle)
+        if LIGHT_SWEEP:
+            x = (t - LIGHT_SWEEP[0]) / (LIGHT_SWEEP[1] - LIGHT_SWEEP[0])
+            xe = ease_in_out_cubic(x)
+            sw = lights["sweep"]
+            sw.location = (lerp(-SWARM_AREA[0] * 0.75, SWARM_AREA[0] * 0.75, xe),
+                           1.8 * math.sin(math.pi * xe * 1.3) - 0.5,
+                           SWARM_Z[1] + 1.4 - 0.6 * math.sin(math.pi * xe))
+            sw.keyframe_insert("location", frame=f)
+            key_value_prop(sw.data, "energy", f, SWEEP_ENERGY * math.sin(math.pi * clamp01(x)) ** 1.5)
 
 
 def build_map(coll):
@@ -800,16 +869,10 @@ def plan_categories(cubes, rng):
     waves = [[cb for cb in cubes if cb["cat"] == cat] for cat in WAVE_ORDER]
     waves = [w for w in waves if w]
     nw = len(waves)
+    if len(WAVE_TIMES) < nw:
+        raise ValueError(f"WAVE_TIMES doit contenir {nw} lignes (une par vague).")
     amax = WAVE_APPROACH * (1 + 0.2 * V)
-    fmax = WAVE_FLY * (1 + 0.2 * V)
     a_w = WAVE_STAGGER_IN + amax                       # toute la vague est arrivée
-    f_w = WAVE_STAGGER_OUT + fmax                      # toute la vague est posée
-    hold = (LAST_LANDING - FIRST_REVEAL - f_w - (nw - 1) * WAVE_GAP) / nw - a_w
-    if hold < 0.8:
-        print("[ARIA] ⚠ Pas assez de temps pour les vagues : réduis WAVE_* ou élargis la timeline.")
-        hold = 0.8
-    period = a_w + hold + WAVE_GAP
-    print(f"[ARIA] Mode catégories : {nw} vagues, les 6 titres restent lisibles ensemble ≈ {hold:.2f} s")
 
     # Grille 3 x 2 ; l'ordre d'arrivée d'une vague = ordre de départ de la précédente,
     # ainsi un emplacement est toujours libéré avant d'être réoccupé.
@@ -818,7 +881,16 @@ def plan_categories(cubes, rng):
     slot_order = list(range(6))
     rng.shuffle(slot_order)
     for w, wave in enumerate(waves):
-        ws = FIRST_REVEAL + w * period
+        ws, t_out, t_land = WAVE_TIMES[w]
+        fly_dur = (t_land - t_out) - WAVE_STAGGER_OUT
+        if fly_dur < 0.4:
+            print(f"[ARIA] ⚠ Vague {w + 1} : pas assez de temps entre départ et « tous posés ».")
+            fly_dur = 0.4
+        read = t_out - (ws + a_w)
+        print(f"[ARIA] Vague {w + 1} ({WAVE_ORDER[w]}) : arrivée {ws:g} s · lecture des 6 titres ≈ {read:.1f} s"
+              f" · départ {t_out:g} s · posés à {t_land:g} s")
+        if read < 0.5:
+            print(f"[ARIA] ⚠ Vague {w + 1} : le départ arrive avant que tous les cubes soient en place.")
         # Chaque cube rejoint l'emplacement « de son côté » (évite que les trajectoires se croisent)
         m = len(wave)
         targets = [base_slots[slot_order[j % 6]] * 2.6 for j in range(m)]
@@ -846,9 +918,9 @@ def plan_categories(cubes, rng):
             cb["start"] = ws + WAVE_STAGGER_IN * rank_in + rng.uniform(-0.05, 0.05) * V
             cb["start"] = max(ws, cb["start"])
             cb["t_app"] = WAVE_APPROACH * (1 + rng.uniform(-0.2, 0.2) * V)
-            fly_start = ws + a_w + hold + WAVE_STAGGER_OUT * out_order[j] / max(1, len(wave) - 1)
-            cb["t_hold"] = fly_start - cb["start"] - cb["t_app"]
-            cb["t_fly"] = WAVE_FLY * (1 + rng.uniform(-0.2, 0.2) * V)
+            fly_start = t_out + WAVE_STAGGER_OUT * out_order[j] / max(1, len(wave) - 1)
+            cb["t_hold"] = max(0.05, fly_start - cb["start"] - cb["t_app"])
+            cb["t_fly"] = fly_dur * (1 - rng.uniform(0.0, 0.2) * V)
         # emplacements dans l'ordre où ils se libèrent
         slot_order = [slot_order[j % 6] for j in sorted(range(len(wave)), key=lambda j: out_order[j])]
         slot_order += [k for k in range(6) if k not in slot_order]
@@ -873,6 +945,7 @@ def animate(cubes):
                               rng.uniform(*SWARM_Z)))
         cb["phase"] = rng.uniform(0, 2 * math.pi)
         cb["appear"] = SWARM_IN[0] + (SWARM_IN[1] - SWARM_IN[0]) * appear_rank[rank] / max(1, n - 1)
+        cb["ripple_dir"] = rng.choice((-1, 1)) if V > 0 else 1
 
         # Variations individuelles (VARIATION = 0 → toutes identiques)
         # Retournement : 4 façons d'arriver face cachée vers le haut (toutes équivalentes à l'arrivée)
@@ -896,15 +969,32 @@ def animate(cubes):
     else:
         plan_categories(cubes, rng)
 
+    def emerge(cb, t):
+        return ease_out_cubic((t - cb["appear"]) / SWARM_APPEAR)
+
+    def ripple(cb, t):
+        """Progression 0 → 1 du quart de tour de ce cube (vague de gauche à droite)."""
+        if not RIPPLE:
+            return 0.0
+        u = clamp01(cb["swarm"].x / SWARM_AREA[0] + 0.5)
+        dur = 0.9
+        t0 = RIPPLE[0] + u * (RIPPLE[1] - RIPPLE[0] - dur)
+        return (t - t0) / dur
+
     def float_pos(cb, t):
         p, s = cb["phase"], cb["swarm"]
+        r = ripple(cb, t)
+        lift = 0.45 * math.sin(math.pi * r) if 0 < r < 1 else 0.0
+        rise = -2.5 * (1 - emerge(cb, t))                       # émerge depuis la carte
         return s + Vector((0.10 * math.sin(0.7 * t + p), 0.08 * math.cos(0.55 * t + 1.3 * p),
-                           0.22 * math.sin(0.9 * t + 2.1 * p)))
+                           0.22 * math.sin(0.9 * t + 2.1 * p) + lift + rise))
 
     def float_rot(cb, t):
         p = cb["phase"]
+        turn = cb["ripple_dir"] * (math.pi / 2) * ease_in_out_cubic(ripple(cb, t))
+        unwind = 1.6 * (1 - emerge(cb, t)) * cb["ripple_dir"]
         return Vector((0.16 * math.sin(0.6 * t + p), 0.14 * math.cos(0.5 * t + 1.7 * p),
-                       0.35 * math.sin(0.3 * t + 0.4 * p) + p * 0.2))
+                       0.35 * math.sin(0.3 * t + 0.4 * p) + p * 0.2 + turn + unwind))
 
     def hold_pos(cb, t):
         p = cb["phase"]
@@ -928,7 +1018,7 @@ def animate(cubes):
         final_rot = cb["flip"] + Vector((0, 0, cb["tilt"] + cb["spin"]))
         st = dict(text=1.0, bevel=0.06, mix=0.0, emit=0.0)
         if t < s:
-            a = ease_out_back((t - cb["appear"]) / 0.6, 1.7) if t > cb["appear"] else 0.0
+            a = ease_out_back((t - cb["appear"]) / SWARM_APPEAR, 1.2) if t > cb["appear"] else 0.0
             st.update(loc=float_pos(cb, t), rot=float_rot(cb, t), scale=SWARM_SIZE * max(a, 0.0))
         elif t < t_hold:
             x = (t - s) / cb["t_app"]
@@ -966,7 +1056,7 @@ def animate(cubes):
         ob = cb["ob"]
         s, t_hold, t_fly, t_land = times(cb)
         f_s, f_h, f_fly, f_land = frame_of(s), frame_of(t_hold), frame_of(t_fly), frame_of(t_land)
-        f_appear1 = frame_of(cb["appear"] + 0.6) + 1
+        f_appear1 = frame_of(cb["appear"] + SWARM_APPEAR) + 1
         f_pop_end = min(N_FRAMES, f_land + int(0.5 * FPS))
         for f in range(1, N_FRAMES + 1):
             st = state(cb, time_of(f))
@@ -1039,13 +1129,14 @@ def main():
         c_map = make_collection(scn, "Carte")
         c_cubes = make_collection(scn, "Cubes")
         c_targets = make_collection(scn, "Cibles")
-        cam = build_camera_and_lights(c_map)
+        cam, lights = build_camera_and_lights(c_map)
         scn.camera = cam
+        animate_intro(scn, cam, lights)
         build_map(c_map)
         cubes = build_cubes(scn, c_cubes, c_targets, saved)
         animate(cubes)
         # On se place après le dessin de la carte (à l'image 1 elle est encore noire)
-        scn.frame_set(frame_of(MAP_FILL[1]) + 1)
+        scn.frame_set(frame_of(WAVE_TIMES[0][0] if REVEAL_MODE != "relais" else FIRST_REVEAL))
         show_in_viewport(cam)
         if not MAP_FOUND:
             notify("Carte introuvable : mets carte_europe.png à côté du .blend "

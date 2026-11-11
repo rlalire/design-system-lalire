@@ -1,21 +1,26 @@
 # ARIA 2026 : séquence finale (carte + 24 cubes)
 
-Durée 25 s · 30 im/s · 1920×1080 · Blender 5.x · police Inter
+Durée 46 s · 30 im/s · 1920×1080 · Blender 5.x · police Inter
 
-Deux modes, au choix en haut du script :
+Calé sur la musique. Tous les temps se règlent dans le bloc **CALAGE MUSICAL** en haut du script.
 
-- `REVEAL_MODE = "categories"` (par défaut) : 4 vagues de 6 cubes, une par catégorie (EP › GE › SA › SE). Les 6 titres restent affichés ensemble ≈ 2,9 s en grille 3 × 2. La vague suivante monte pendant que la précédente file sur la carte.
-- `REVEAL_MODE = "relais"` : la version un par un décrite ci-dessous.
+| Temps | Ce qui se passe | Réglage |
+|---|---|---|
+| 0 → 15 s | **Intro.** La caméra avance lentement. Les contours de la carte se tracent (1 → 8,5 s), puis la carte se remplit (5 → 12,5 s). Les cubes émergent un à un de la carte en se déroulant (3 → 10 s). Deux contre-jours rasants se lèvent : cubes en silhouette, arêtes qui accrochent la lumière (3 → 9 s). Une lumière chaude traverse le nuage de gauche à droite (6,5 → 12,5 s). La lumière principale monte (10 → 14,5 s). Les cubes font un quart de tour en vague de gauche à droite (12 → 14,7 s). | `MAP_LINES`, `MAP_FILL`, `SWARM_IN`, `CAM_PUSH`, `LIGHT_RIM`, `LIGHT_SWEEP`, `LIGHT_KEY`, `RIPPLE` |
+| 15 s | Vague 1 (EP) | `WAVE_TIMES` ligne 1 |
+| 22 s | Vague 2 (GE) | ligne 2 |
+| 29 s | Vague 3 (SA) | ligne 3 |
+| 36 s | Vague 4 (SE). Départ vers la carte à 41 s, tous posés à 44 s. | ligne 4 |
+| 44 → 46 s | Plan final, les 24 points respirent. | `DURATION` |
 
-`VARIATION` (0 à 1,5) casse le côté mécanique : chaque cube a sa trajectoire courbe, sa façon de se retourner (4 sens, parfois un tour complet), son rebond, sa durée, sa légère inclinaison, son départ et sa rotation à l'atterrissage. Les départs d'une vague se font dans un ordre différent des arrivées. `0` = tous identiques. Au-delà de ~1,2, deux cubes peuvent parfois se frôler pendant un changement de vague. Change `SEED` pour tirer une autre combinaison de mouvements.
+Chaque ligne de `WAVE_TIMES` vaut `(arrivée, départ vers la carte, tous posés)`. La console affiche pour chaque vague le temps de lecture des 6 titres (≈ 4 s), et prévient si un temps est trop serré.
 
-Mode relais :
+Deux modes, au choix :
 
-| Temps | Ce qui se passe |
-|---|---|
-| 0 → 3 s | Les contours lumineux de la carte se tracent depuis le centre de l'Europe, puis la carte se remplit. Les 24 cubes sombres apparaissent et flottent. |
-| 2,8 → 23,2 s | Relais : un cube part toutes les 0,77 s. Il se retourne en venant au premier plan (il passe du sombre à la couleur de sa catégorie et révèle son titre), reste 1,5 s, puis file sur son pays en s'arrondissant jusqu'à devenir un point lumineux, avec un petit flash à l'atterrissage. Trois emplacements tournent (gauche, centre, droite) pour que les cubes ne se croisent pas. |
-| 23,2 → 25 s | Plan final : les 24 points respirent doucement sur la carte. |
+- `REVEAL_MODE = "categories"` (par défaut) : 4 vagues de 6 cubes en grille 3 × 2.
+- `REVEAL_MODE = "relais"` : un par un entre `FIRST_REVEAL` (15 s) et `LAST_LANDING` (44 s).
+
+`VARIATION` (0 à 1,5) casse le côté mécanique : chaque cube a sa trajectoire courbe, sa façon de se retourner (4 sens, parfois un tour complet), son rebond, sa durée, sa légère inclinaison, son départ et sa rotation à l'atterrissage. `0` = tous identiques. Au-delà de ~1,2, deux cubes peuvent parfois se frôler. Change `SEED` pour tirer une autre combinaison de mouvements.
 
 ## Fichiers
 
@@ -40,10 +45,11 @@ Mode relais :
 | Réglage | Effet |
 |---|---|
 | `REVEAL_MODE`, `VARIATION`, `SEED` | Mode de révélation, dose de variété, tirage aléatoire. |
-| `WAVE_APPROACH`, `WAVE_FLY`, `WAVE_STAGGER_IN/OUT`, `WAVE_GAP` | Mode catégories : durées et étalement. Le temps de lecture s'en déduit (affiché dans la console). |
+| `WAVE_TIMES` | Temps de chaque vague : arrivée, départ vers la carte, tous posés. |
+| `WAVE_APPROACH`, `WAVE_STAGGER_IN/OUT` | Durée du retournement, étalement des arrivées et des départs dans une vague. |
+| `KEY_ENERGY`, `RIM_ENERGY`, `SIDE_RIM_ENERGY`, `SWEEP_ENERGY` | Puissance des lumières (principale, contre-jour du dessus, contre-jours rasants, lumière qui traverse). |
 | `WAVE_CUBE_SIZE`, `WAVE_GRID`, `WAVE_HOLD_HEIGHT`, `WAVE_ORDER` | Mode catégories : taille et espacement de la grille, ordre des vagues. |
 | `T_APPROACH`, `T_HOLD`, `T_FLY` | Durées du retournement, de l'arrêt en grand et du vol. La cadence s'adapte toute seule pour finir à `LAST_LANDING`. |
-| `FIRST_REVEAL`, `LAST_LANDING` | Début et fin de la valse des cubes. |
 | `ORDER` | `"tableau"` (vagues de couleur EP › GE › SA › SE), `"alterne"` (couleurs mélangées) ou `"ouest_est"`. |
 | `PALETTE` | `"harmonisee"` (teintes ajustées pour la carte de nuit) ou `"originale"` (couleurs du tableau). |
 | `CUBE_SIZE`, `HOLD_HEIGHT`, `SLOTS_X` | Taille et placement des cubes en grand. |
@@ -55,7 +61,7 @@ Valeurs animables à la main si besoin : le nœud **Reveal_Lines / Reveal_Fill**
 
 ## Intégration dans le show
 
-- La scène règle déjà : EEVEE, transformation de vue **Standard** (pour garder les couleurs exactes de la carte), 30 im/s, images 1 à 750.
+- La scène règle déjà : EEVEE, transformation de vue **Standard** (pour garder les couleurs exactes de la carte), 30 im/s, images 1 à 1380.
 - **Lueur** : pour le halo des points et des contours, ajoute dans le compositeur un nœud **Glare** (type *Bloom*, seuil ≈ 0,8), ou reprends le même traitement que dans le reste du show.
 - **Motion blur** : Propriétés de rendu › Flou de mouvement, à activer comme dans tes autres plans pour que les vols soient raccord.
 - **Montage** :
