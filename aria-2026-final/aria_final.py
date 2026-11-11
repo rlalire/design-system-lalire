@@ -766,7 +766,8 @@ def build_cubes(scn, coll_cubes, coll_targets, saved_targets):
 
         # Repère cible (positions conservées entre deux exécutions)
         if i in saved_targets:
-            target = saved_targets[i]
+            target = saved_targets[i].copy()
+            target.z = POINT_Z          # le point reste posé sur la carte même si le repère a bougé en hauteur
         else:
             group = by_country[country]
             k, j = len(group), group.index(i)
