@@ -134,6 +134,14 @@ CUBE_METALLIC = 0.0                 # 0 = plastique / peinture · 1 = métal
 CUBE_COAT = 0.0                     # vernis transparent par-dessus (0 → 1) : effet laqué
 CUBE_BEVEL = 0.06                   # arrondi des arêtes (0 = arêtes vives · 0.15 = très arrondi)
 CUBE_BEVEL_SEGMENTS = 5             # finesse de l'arrondi (1 = simple chanfrein)
+
+# Verre ------------------------------------------------------------------------
+CUBE_STYLE = "opaque"               # "opaque" ou "verre" (verre teinté de la couleur du projet)
+GLASS_ROUGHNESS = 0.04              # 0 = verre clair · 0.3 = verre dépoli
+GLASS_IOR = 1.45                    # indice de réfraction (1.45 verre · 1.33 eau · 2.4 diamant)
+GLASS_DARK = "#1A2233"              # teinte du verre fumé avant retournement
+GLASS_GLOW = 0.3                    # lueur colorée dans le verre (la carte derrière est sombre :
+                                    # sans lueur, les couleurs restent ternes)
 TEXT_COLOR = "#FFFFFF"
 
 # Textes sur les cubes (tailles en proportion de la face : 1 = toute la face) ----
@@ -472,6 +480,8 @@ def setup_scene():
             continue
     try:
         scn.view_settings.view_transform = "Standard"   # couleurs de la carte fidèles
+        if CUBE_STYLE == "verre" and hasattr(scn.eevee, "use_raytracing"):
+            scn.eevee.use_raytracing = True            # réfraction du verre dans EEVEE
         scn.view_settings.look = "None"
     except TypeError:
         pass
@@ -810,11 +820,24 @@ def build_cubes(scn, coll_cubes, coll_targets, saved_targets):
         coat = bsdf.inputs.get("Coat Weight")
         if coat:
             coat.default_value = CUBE_COAT
+        if CUBE_STYLE == "verre":
+            # Verre : la couleur de base devient la teinte du verre (fumé → couleur du projet)
+            bsdf.inputs["Transmission Weight"].default_value = 1.0
+            bsdf.inputs["Roughness"].default_value = GLASS_ROUGHNESS
+            bsdf.inputs["Metallic"].default_value = 0.0
+            bsdf.inputs["IOR"].default_value = GLASS_IOR
+            for attr, val in (("surface_render_method", "DITHERED"),
+                              ("use_raytrace_refraction", True), ("thickness_mode", "SLAB")):
+                if hasattr(mat, attr):
+                    try:
+                        setattr(mat, attr, val)
+                    except (TypeError, ValueError):
+                        pass
         link(nt, bsdf.outputs[0], out.inputs["Surface"])
         mix = nt.nodes.new("ShaderNodeValue")
         mix.name = mix.label = "Color_Mix"
         mix.location = (-500, 100)
-        dark = Vector(hex_to_linear(CUBE_DARK)[:3])
+        dark = Vector(hex_to_linear(GLASS_DARK if CUBE_STYLE == "verre" else CUBE_DARK)[:3])
         colr = Vector(hex_to_linear(palette[cat])[:3])
         diff = const_vec(nt, colr - dark, loc=(-500, 300))
         base = vec_math(nt, "ADD", vec_math(nt, "SCALE", diff, mix.outputs[0], loc=(-250, 300)),
@@ -995,6 +1018,9 @@ def plan_categories(cubes, rng):
 
 
 def animate(cubes):
+    global EMIT_HOLD
+    if CUBE_STYLE == "verre":
+        EMIT_HOLD = GLASS_GLOW
     rng = random.Random(SEED)
     V = VARIATION
     n = len(cubes)
@@ -1087,7 +1113,8 @@ def animate(cubes):
         st = dict(text=1.0, bevel=CUBE_BEVEL, mix=0.0, emit=0.0)
         if t < s:
             a = ease_out_back((t - cb["appear"]) / SWARM_APPEAR, 1.2) if t > cb["appear"] else 0.0
-            st.update(loc=float_pos(cb, t), rot=float_rot(cb, t), scale=SWARM_SIZE * max(a, 0.0))
+            st.update(loc=float_pos(cb, t), rot=float_rot(cb, t), scale=SWARM_SIZE * max(a, 0.0),
+                      text=0.0 if CUBE_STYLE == "verre" else 1.0)   # en verre, le titre se verrait à travers
         elif t < t_hold:
             x = (t - s) / cb["t_app"]
             e = ease_in_out_cubic(x)
@@ -1096,7 +1123,8 @@ def animate(cubes):
             st.update(loc=bezier(p0, ctrl, p1, e),
                       rot=vlerp(float_rot(cb, t), hold_rot(cb, t), ease_out_back(x, cb["app_back"])),
                       scale=lerp(SWARM_SIZE, size, ease_out_cubic(x)),
-                      mix=smoothstep(0.2, 0.8, x), emit=EMIT_HOLD * smoothstep(0.2, 0.8, x))
+                      mix=smoothstep(0.2, 0.8, x), emit=EMIT_HOLD * smoothstep(0.2, 0.8, x),
+                      text=smoothstep(0.3, 0.6, x) if CUBE_STYLE == "verre" else 1.0)
         elif t < t_fly:
             st.update(loc=hold_pos(cb, t), rot=hold_rot(cb, t), scale=size, mix=1.0, emit=EMIT_HOLD)
         elif t < t_land:
@@ -1146,8 +1174,9 @@ def animate(cubes):
             if f in (1, N_FRAMES) or f_s - 1 <= f <= f_h + 1 or f >= f_fly - 1:
                 if f < f_land or f <= f_pop_end or f % 2 == 0 or f == N_FRAMES:
                     key_value(cb["emit"], f, st["emit"])
-            # Arrondi + disparition du texte pendant le vol
-            if f in (1, N_FRAMES) or f_fly - 1 <= f <= f_land + 1:
+            # Arrondi + disparition du texte pendant le vol (et apparition au retournement en verre)
+            glass_reveal = CUBE_STYLE == "verre" and f_s - 1 <= f <= f_h + 1
+            if f in (1, N_FRAMES) or f_fly - 1 <= f <= f_land + 1 or glass_reveal:
                 cb["bevel"].width = st["bevel"]
                 cb["bevel"].keyframe_insert("width", frame=f)
                 for txt in cb["texts"]:

@@ -58,6 +58,7 @@ Deux modes, au choix :
 | `CUBE_DARK` | Teinte des cubes avant retournement. |
 | `CUBE_ROUGHNESS`, `CUBE_METALLIC`, `CUBE_COAT` | Matière : brillant ↔ mat, plastique ↔ métal, vernis laqué. |
 | `TITLE_TEXT_SIZE`, `COUNTRY_TEXT_SIZE`, `COUNTRY_LETTER_SPACING` | Taille des titres et du nom de pays, espacement des lettres du pays. Le titre s'adapte à la place restante. |
+| `CUBE_STYLE`, `GLASS_ROUGHNESS`, `GLASS_IOR`, `GLASS_DARK`, `GLASS_GLOW` | `"verre"` : cubes en verre teinté de la couleur du projet (verre fumé avant retournement), la carte se voit à travers. Le rendu est plus lent (raytracing EEVEE activé automatiquement). |
 | `CUBE_BEVEL`, `CUBE_BEVEL_SEGMENTS` | Arrondi des arêtes (0 = arêtes vives) et finesse de l'arrondi. |
 
 Valeurs animables à la main si besoin : le nœud **Reveal_Lines / Reveal_Fill** du matériau `ARIA_Map`, et **Color_Mix** dans chaque matériau de cube.
