@@ -1,8 +1,8 @@
-// Bloc treuil « lévitation » — firmware v0.1
+// Bloc treuil micro — firmware v0.2
 //
-// Version micro : moteur pas-à-pas en prise directe, bobine étroite de 80 mm, œillet de sortie fixe.
-// Les sorties « servo » pilotent ici le driver du pas-à-pas ; la sortie frein n'est pas câblée.
-// Un bloc = un moteur (pas/direction) qui entraîne la bobine, et une liaison Ethernet qui reçoit de l'OSC (Chataigne, Orchestr…).
+// Un moteur de gimbal avec encodeur entraîne directement une bobine étroite. Le moteur est
+// piloté en couple : le courant qu'on lui donne fixe la force sur le fil. Cela permet de
+// plafonner la tension du fil, de sentir un fil accroché et de mesurer sa charge de rupture.
 //
 // Position = longueur de fil déroulée en mm ; 0 = origine haute, positif = descente.
 // Le protocole OSC est décrit dans ../README.md.
@@ -10,29 +10,28 @@
 #include <Arduino.h>
 #include <ETH.h>
 #include <WiFiUdp.h>
+#include <SPI.h>
 #include <Preferences.h>
-#include <FastAccelStepper.h>
+#include <SimpleFOC.h>
 #include "config.h"
 #include "osc.h"
 
 enum State : uint8_t {
-  ST_DISARMED = 0,  // frein serré, servo coupé
-  ST_ARMING   = 1,  // servo sous tension, frein en cours de desserrage
-  ST_HOLD     = 2,  // armé, immobile
-  ST_GOTO     = 3,  // déplacement temporisé (courbe douce)
-  ST_STREAM   = 4,  // suivi d'une consigne envoyée en continu
-  ST_JOG      = 5,  // déplacement manuel en vitesse
-  ST_HOMING   = 6,  // recherche de l'origine haute
-  ST_STOPPING = 7,  // décélération jusqu'à l'arrêt
-  ST_FAULT    = 8,  // défaut : frein serré, il faut /reset
+  ST_DISARMED  = 0,  // moteur coupé : l'objet n'est plus retenu
+  ST_HOLD      = 2,  // armé, immobile
+  ST_GOTO      = 3,  // déplacement temporisé (courbe douce)
+  ST_STREAM    = 4,  // suivi d'une consigne envoyée en continu
+  ST_JOG       = 5,  // déplacement manuel en vitesse
+  ST_HOMING    = 6,  // remontée douce jusqu'à la butée haute
+  ST_STOPPING  = 7,  // décélération jusqu'à l'arrêt
+  ST_FAULT     = 8,  // défaut : il faut /reset
+  ST_BREAKTEST = 9,  // mesure de la charge de rupture du fil
 };
-enum Fault : uint8_t { F_NONE = 0, F_ESTOP = 1, F_SERVO_ALARM = 2, F_SLACK = 3 };
+enum Fault : uint8_t { F_NONE = 0, F_ESTOP = 1, F_SNAG = 3 };
 
-static FastAccelStepperEngine engine;
-static FastAccelStepper* servo = nullptr;
-#if LW_ENABLED
-static FastAccelStepper* lw = nullptr;
-#endif
+static BLDCMotor motor(MOTOR_POLE_PAIRS, MOTOR_PHASE_R, MOTOR_KV);
+static BLDCDriver3PWM driver(PIN_PWM_A, PIN_PWM_B, PIN_PWM_C, PIN_DRV_EN);
+static MagneticSensorSPI encoder(AS5048_SPI, PIN_ENC_CS);
 static WiFiUDP udp;
 static Preferences prefs;
 
@@ -41,29 +40,43 @@ static Fault fault = F_NONE;
 static bool homed = false;
 static bool ethUp = false;
 
-static float pRef = 0, vRef = 0;          // consigne interne (mm, mm/s)
+static float pos = 0, vel = 0;            // mesurés par l'encodeur (mm, mm/s)
+static float angle0 = 0;                  // angle moteur qui correspond à la position 0
+static float pRef = 0, vRef = 0;          // consigne interne
+static float vRefPrev = 0;
+static float iCmd = 0;                    // courant demandé ; positif = sens du déroulement
+static float iInt = 0;                    // terme intégral : il porte le poids de l'objet
+static float tensionEstG = 0;             // tension du fil estimée, en grammes
 static float posMin = 0, posMax = TRAVEL_DEFAULT_MM;
+static float tensionMaxG = TENSION_MAX_DEFAULT_G;
+static float homeTensionG = HOME_TENSION_DEFAULT_G;
 
-static float gotoP0, gotoP1, gotoT;       // déplacement temporisé
+static float gotoP0, gotoP1, gotoT;
 static uint32_t gotoStartMs;
-static float streamTarget, streamVel;   // dernière consigne reçue et sa vitesse estimée
+static float streamTarget, streamVel, streamDt;
 static uint32_t streamLastUs;
-static float streamDt;
 static float jogVel;
 static uint32_t jogLastMs;
-static uint32_t armAtMs;
 static uint32_t idleSinceMs;
-static float savedPos = NAN;
+static uint32_t snagSinceMs, stallSinceMs;
+static float breakG;                      // tension en cours pendant le test de rupture
 
 static IPAddress peer(255, 255, 255, 255);
 static bool hasPeer = false;
 
-// ---------------------------------------------------------------- entrées/sorties
+// ---------------------------------------------------------------- utilitaires
 
 static inline bool inActive(uint8_t pin, bool activeHigh) { return digitalRead(pin) == (activeHigh ? HIGH : LOW); }
-static inline void servoEnable(bool on) { digitalWrite(PIN_SERVO_EN, on == (bool)SERVO_EN_ACTIVE ? HIGH : LOW); }
-static inline void brakeRelease(bool on) { digitalWrite(PIN_BRAKE, on ? HIGH : LOW); }
-static inline float actualPos() { return servo->getCurrentPosition() / STEPS_PER_MM; }
+
+static void readPosition() {
+  pos = DIR_SIGN * (motor.shaft_angle - angle0) * R_EFF_MM;
+  vel = DIR_SIGN * motor.shaft_velocity * R_EFF_MM;
+}
+
+static void setPosition(float p) {
+  angle0 = motor.shaft_angle - DIR_SIGN * p / R_EFF_MM;
+  pos = p;
+}
 
 static void sendOsc(const char* leaf, const char* tags, const float* vals) {
   if (!ethUp) return;
@@ -85,56 +98,44 @@ static void warn(int code) {
 // Codes : 1 = pas armé, 2 = origine non faite, 3 = durée allongée (limites),
 //         4 = consigne hors course (écrêtée), 5 = commande refusée en mouvement
 
-static void savePosition() {
-  float p = actualPos();
-  if (homed && !isnan(savedPos) && fabsf(p - savedPos) < 0.02f) return;
-  prefs.putFloat("pos", p);
-  prefs.putBool("homed", homed);
-  savedPos = p;
+static void holdHere() {
+  pRef = pos; vRef = 0; vRefPrev = 0;
+  idleSinceMs = millis();
 }
 
 // ---------------------------------------------------------------- sécurité
 
 static void enterFault(Fault f) {
   if (state == ST_FAULT) return;
-  brakeRelease(false);                      // frein serré tout de suite
-  servo->forceStopAndNewPosition(servo->getCurrentPosition());
-  servoEnable(false);
-  // Après un arrêt brutal ou une alarme servo, la position n'est plus garantie.
-  if (f == F_SERVO_ALARM || fabsf(vRef) > 1.0f) homed = false;
-  vRef = 0;
-  pRef = actualPos();
+  if (f == F_ESTOP) {
+    motor.disable();                        // arrêt d'urgence : plus aucune force sur le fil
+    iCmd = 0; iInt = 0;
+    homed = false;                          // moteur coupé, l'objet redescend : position perdue
+  }
+  holdHere();                               // fil accroché : on tient en place, sans forcer
   fault = f;
   state = ST_FAULT;
-  prefs.putBool("homed", homed);
-  prefs.putFloat("pos", pRef);
-  savedPos = pRef;
   Serial.printf("DEFAUT %d\n", (int)f);
-}
-
-static void disarm() {
-  brakeRelease(false);
-  servo->forceStopAndNewPosition(servo->getCurrentPosition());
-  delay(150);                               // temps de serrage du frein
-  servoEnable(false);
-  vRef = 0;
-  pRef = actualPos();
-  state = ST_DISARMED;
-  savePosition();
 }
 
 static void arm() {
   if (state != ST_DISARMED) return;
-  pRef = actualPos();
-  vRef = 0;
-  servoEnable(true);                        // le servo tient avant d'ouvrir le frein
-  armAtMs = millis();
-  state = ST_ARMING;
+  iInt = 0;
+  motor.enable();
+  holdHere();
+  state = ST_HOLD;
+}
+
+static void disarm() {
+  motor.disable();
+  iCmd = 0; iInt = 0;
+  homed = false;
+  state = ST_DISARMED;
 }
 
 static bool readyToMove() {
-  if (state == ST_FAULT || state == ST_DISARMED || state == ST_ARMING) { warn(1); return false; }
-  if (state == ST_HOMING) { warn(5); return false; }
+  if (state == ST_FAULT || state == ST_DISARMED) { warn(1); return false; }
+  if (state == ST_HOMING || state == ST_BREAKTEST) { warn(5); return false; }
   return true;
 }
 
@@ -156,8 +157,8 @@ static void cmdGoto(float target, float dur) {
     return;
   }
   float d = fabsf(target - pRef);
-  // Courbe en S (polynôme de degré 5) : v max = 1,875·d/T ; a max = 5,774·d/T²
   float vLim = target > pRef ? VMAX_DOWN_MM_S : VMAX_MM_S;   // la descente est plus lente que la montée
+  // Courbe en S (polynôme de degré 5) : v max = 1,875·d/T ; a max = 5,774·d/T²
   float tMin = max(1.875f * d / vLim, sqrtf(5.774f * d / AMAX_MM_S2));
   if (dur < tMin) { if (dur > 0) warn(3); dur = tMin; }
   if (d < 0.01f || dur <= 0) return;
@@ -169,8 +170,6 @@ static void cmdStream(float target) {
   if (!readyToMove()) return;
   if (!homed) { warn(2); return; }
   target = clampTarget(target);
-  // La vitesse de la consigne est estimée d'un paquet au suivant : le bloc peut ainsi
-  // prolonger le mouvement entre deux paquets au lieu d'avancer par à-coups.
   uint32_t nowUs = micros();
   float dt = (nowUs - streamLastUs) * 1e-6f;
   if (state == ST_STREAM && dt > 0.002f && dt < 0.2f) {
@@ -184,39 +183,48 @@ static void cmdStream(float target) {
   state = ST_STREAM;
 }
 
-static void cmdJog(float vel) {
+static void cmdJog(float v) {
   if (!readyToMove()) return;
   if (state == ST_GOTO || state == ST_STREAM) { warn(5); return; }
-  jogVel = constrain(vel, -VMAX_MM_S, VMAX_DOWN_MM_S);
-  if (!homed) jogVel = constrain(jogVel, -200.0f, 200.0f);  // lent tant que l'origine est inconnue
+  jogVel = constrain(v, -VMAX_MM_S, VMAX_DOWN_MM_S);
+  if (!homed) jogVel = constrain(jogVel, -200.0f, 200.0f);
   jogLastMs = millis();
   state = ST_JOG;
 }
 
 static void cmdStop() {
-  if (state == ST_GOTO || state == ST_STREAM || state == ST_JOG || state == ST_HOMING) state = ST_STOPPING;
+  if (state == ST_GOTO || state == ST_STREAM || state == ST_JOG) state = ST_STOPPING;
+  else if (state == ST_HOMING || state == ST_BREAKTEST) { holdHere(); state = ST_HOLD; }
 }
 
 static void cmdHome() {
   if (state != ST_HOLD) { warn(state == ST_DISARMED || state == ST_FAULT ? 1 : 5); return; }
   homed = false;
+  stallSinceMs = 0;
   state = ST_HOMING;
 }
 
 static void cmdZero() {                     // la position actuelle devient l'origine
-  if (state != ST_HOLD && state != ST_DISARMED) { warn(5); return; }
-  servo->forceStopAndNewPosition(0);
-  pRef = 0; vRef = 0;
+  if (state != ST_HOLD) { warn(state == ST_DISARMED || state == ST_FAULT ? 1 : 5); return; }
+  setPosition(0);
+  holdHere();
   homed = true;
-  savedPos = NAN;
-  savePosition();
+}
+
+static void cmdBreakTest() {
+  // Le fil doit être attaché à un point fixe, légèrement tendu.
+  if (state != ST_HOLD) { warn(state == ST_DISARMED || state == ST_FAULT ? 1 : 5); return; }
+  breakG = 0;
+  state = ST_BREAKTEST;
 }
 
 static void cmdReset() {
   if (state != ST_FAULT) return;
-  if (inActive(PIN_ESTOP, ESTOP_ACTIVE) || inActive(PIN_SERVO_ALARM, SERVO_ALARM_ACTIVE)) return;
+  if (inActive(PIN_ESTOP, ESTOP_ACTIVE)) return;
+  bool wasEstop = fault == F_ESTOP;
   fault = F_NONE;
-  state = ST_DISARMED;
+  if (wasEstop) { state = ST_DISARMED; }
+  else { holdHere(); state = ST_HOLD; }
 }
 
 static void handleOsc(const OscMsg& m) {
@@ -244,7 +252,12 @@ static void handleOsc(const OscMsg& m) {
   else if (!strcmp(cmd, "home")) cmdHome();
   else if (!strcmp(cmd, "zero")) cmdZero();
   else if (!strcmp(cmd, "reset")) cmdReset();
-  else if (!strcmp(cmd, "limits") && !all && m.n >= 2 && m.arg[1] > m.arg[0]) {
+  else if (!strcmp(cmd, "breaktest") && !all) cmdBreakTest();
+  else if (!strcmp(cmd, "tension") && !all && m.n >= 1 && m.arg[0] > 0 && m.arg[0] <= BREAKTEST_MAX_G) {
+    tensionMaxG = m.arg[0]; prefs.putFloat("tmax", tensionMaxG);
+  } else if (!strcmp(cmd, "hometension") && !all && m.n >= 1 && m.arg[0] > 0 && m.arg[0] <= BREAKTEST_MAX_G) {
+    homeTensionG = m.arg[0]; prefs.putFloat("thome", homeTensionG);
+  } else if (!strcmp(cmd, "limits") && !all && m.n >= 2 && m.arg[1] > m.arg[0]) {
     posMin = m.arg[0]; posMax = m.arg[1];
     prefs.putFloat("pmin", posMin); prefs.putFloat("pmax", posMax);
   }
@@ -257,27 +270,18 @@ static void approach(float& v, float target, float maxStep) {
   else v = max(v - maxStep, target);
 }
 
+// Calcule la consigne de position selon l'état, puis le courant à donner au moteur.
 static void controlTick(float dt) {
   const uint32_t now = millis();
+  readPosition();
 
-  // Sécurités, vérifiées à chaque cycle
-  if (state != ST_FAULT) {
-    if (inActive(PIN_ESTOP, ESTOP_ACTIVE)) enterFault(F_ESTOP);
-    else if (state != ST_DISARMED && inActive(PIN_SERVO_ALARM, SERVO_ALARM_ACTIVE)) enterFault(F_SERVO_ALARM);
-    else if (SLACK_ENABLED && vRef > 5.0f && inActive(PIN_SLACK, SLACK_ACTIVE)) enterFault(F_SLACK);
-  }
+  if (state != ST_FAULT && inActive(PIN_ESTOP, ESTOP_ACTIVE)) enterFault(F_ESTOP);
+  if (state == ST_DISARMED || (state == ST_FAULT && fault == F_ESTOP)) { iCmd = 0; return; }
 
   switch (state) {
-    case ST_ARMING:
-      if (now - armAtMs > 150) brakeRelease(true);
-      if (now - armAtMs > 350) { state = ST_HOLD; idleSinceMs = now; }
-      break;
-
     case ST_HOLD:
+    case ST_FAULT:
       vRef = 0;
-      // Position mémorisée dès que le bloc est immobile, pour la retrouver après une coupure
-      if (homed && now - idleSinceMs > 2000) savePosition();
-      if (AUTO_DISARM_S > 0 && now - idleSinceMs > AUTO_DISARM_S * 1000UL) disarm();
       break;
 
     case ST_GOTO: {
@@ -309,7 +313,7 @@ static void controlTick(float dt) {
     case ST_JOG: {
       if (now - jogLastMs > JOG_DEADMAN_MS) jogVel = 0;   // « homme mort » : il faut renvoyer la commande
       float target = jogVel;
-      if (homed) {                                        // freinage à l'approche des butées logicielles
+      if (homed) {
         float stopDist = vRef * vRef / (2.0f * AMAX_MM_S2) + 1.0f;
         if (target > 0 && pRef + stopDist >= posMax) target = 0;
         if (target < 0 && pRef - stopDist <= posMin) target = 0;
@@ -320,20 +324,25 @@ static void controlTick(float dt) {
       break;
     }
 
-    case ST_HOMING:
-      if (inActive(PIN_HOME, HOME_ACTIVE)) {
-        servo->forceStopAndNewPosition(0);
-        pRef = 0; vRef = 0;
-        homed = true;
-        savedPos = NAN;
-        savePosition();
-        gotoP0 = 0; gotoP1 = HOME_BACKOFF_MM; gotoT = 1.0f; gotoStartMs = now;
-        state = ST_GOTO;
-        break;
-      }
+    case ST_HOMING: {
+      // On remonte doucement, avec une force plafonnée, jusqu'à ce que l'objet (ou une perle
+      // sur le fil) bute contre l'œillet : le moteur n'avance plus, c'est l'origine.
       approach(vRef, -HOME_SPEED_MM_S, AMAX_MM_S2 * dt);
       pRef += vRef * dt;
+      if (pRef < pos - 8.0f) pRef = pos - 8.0f;           // la consigne n'a pas à s'éloigner de l'objet
+      bool atSensor = HOME_SENSOR_ENABLED && inActive(PIN_HOME, HOME_ACTIVE);
+      bool blocked = (pRef < pos - 5.0f) && fabsf(vel) < 5.0f;
+      if (!blocked) stallSinceMs = now;
+      if (atSensor || now - stallSinceMs > 300) {
+        setPosition(0);
+        homed = true;
+        iInt = 0;
+        pRef = 0; vRef = 0;
+        gotoP0 = 0; gotoP1 = HOME_BACKOFF_MM; gotoT = 1.0f; gotoStartMs = now;
+        state = ST_GOTO;
+      }
       break;
+    }
 
     case ST_STOPPING:
       approach(vRef, 0, AMAX_MM_S2 * dt);
@@ -341,38 +350,50 @@ static void controlTick(float dt) {
       if (vRef == 0) { state = ST_HOLD; idleSinceMs = now; }
       break;
 
+    case ST_BREAKTEST: {
+      // Le fil est attaché à un point fixe. On tire de plus en plus fort ; quand la bobine
+      // s'emballe, le fil vient de casser et la dernière tension appliquée est sa rupture.
+      bool broke = vel < -BREAKTEST_SPEED_MM_S;
+      if (broke || breakG >= BREAKTEST_MAX_G) {
+        float r[2] = { breakG, broke ? 1.0f : 0.0f };
+        sendOsc("break", "fi", r);
+        Serial.printf("rupture : %.1f g (%s)\n", breakG, broke ? "fil casse" : "maximum atteint sans casser");
+        iInt = 0;
+        holdHere();
+        state = ST_HOLD;
+        break;
+      }
+      breakG += BREAKTEST_RATE_G_S * dt;
+      iCmd = -breakG * AMP_PER_GRAM;
+      tensionEstG = breakG;
+      return;
+    }
+
     default:
       break;
   }
 
-  // Génération des pas : vitesse de consigne + rattrapage de l'écart de position
-  if (state == ST_HOLD) {
-    // A l'arrêt : positionnement exact sur le pas visé, sans oscillation autour
-    servo->setSpeedInHz((uint32_t)(100.0f * STEPS_PER_MM));
-    servo->moveTo((int32_t)lroundf(pRef * STEPS_PER_MM));
-  } else if (state > ST_HOLD && state <= ST_STOPPING) {
-    float vCmd = vRef + KP_POS * (pRef - actualPos());
-    vCmd = constrain(vCmd, -VMAX_MM_S * 1.05f, VMAX_MM_S * 1.05f);
-    uint32_t mHz = (uint32_t)(fabsf(vCmd) * STEPS_PER_MM * 1000.0f);
-    if (mHz < 1000) {
-      servo->stopMove();
-    } else {
-      servo->setSpeedInMilliHz(mHz);
-      if (vCmd > 0) servo->runForward(); else servo->runBackward();
-    }
-  }
+  // Asservissement : proportionnel sur l'écart, amortissement sur la vitesse, intégral pour
+  // porter le poids, plus l'anticipation de l'accélération demandée.
+  float windMax = (state == ST_HOMING ? min(homeTensionG, tensionMaxG) : tensionMaxG) * AMP_PER_GRAM;
+  float aRef = (vRef - vRefPrev) / dt;
+  vRefPrev = vRef;
+  float err = pRef - pos;
+  float raw = KP_A_PER_MM * err + KD_A_PER_MM_S * (vRef - vel) + iInt + aRef / ACC_PER_AMP;
+  iCmd = constrain(raw, -windMax, PUSH_CURRENT_A);
+  if (raw == iCmd) iInt = constrain(iInt + KI_A_PER_MM_S * err * dt, -windMax, PUSH_CURRENT_A);   // pas d'emballement en butée
+  tensionEstG += 0.02f * (-iCmd / AMP_PER_GRAM - tensionEstG);
 
-#if LW_ENABLED
-  // Le guide-fil suit le tambour : une avance de LW_PITCH_MM par tour
-  float x = LW_X_AT_ZERO_MM + LW_SIGN * (actualPos() / LINE_PER_TURN_MM) * LW_PITCH_MM;
-  x = constrain(x, 0.0f, LW_TRAVEL_MM);
-  lw->moveTo((int32_t)lroundf(x * LW_STEPS_PER_MM));
-#endif
+  // Fil accroché, ou objet trop lourd pour la tension autorisée : l'écart ne se résorbe pas.
+  if (state != ST_HOMING && state != ST_FAULT) {
+    if (fabsf(err) < SNAG_ERROR_MM) snagSinceMs = now;
+    else if (now - snagSinceMs > SNAG_TIME_MS) enterFault(F_SNAG);
+  }
 }
 
 static void sendFeedback() {
-  float v[5] = { actualPos(), vRef, (float)state, homed ? 1.0f : 0.0f, (float)fault };
-  sendOsc("state", "ffiii", v);
+  float v[6] = { pos, vel, (float)state, homed ? 1.0f : 0.0f, (float)fault, tensionEstG };
+  sendOsc("state", "ffiiif", v);
 }
 
 // ---------------------------------------------------------------- démarrage
@@ -382,56 +403,33 @@ static void onEthEvent(WiFiEvent_t event) {
   else if (event == ARDUINO_EVENT_ETH_DISCONNECTED || event == ARDUINO_EVENT_ETH_STOP) ethUp = false;
 }
 
-#if LW_ENABLED
-static void homeLevelWind() {
-  lw->setSpeedInHz((uint32_t)(LW_HOME_SPEED_MM_S * LW_STEPS_PER_MM));
-  lw->setAcceleration((uint32_t)(200.0f * LW_STEPS_PER_MM));
-  lw->runBackward();
-  uint32_t t0 = millis();
-  uint32_t timeout = (uint32_t)(LW_TRAVEL_MM / LW_HOME_SPEED_MM_S * 1500.0f);
-  while (!inActive(PIN_LW_HOME, LW_HOME_ACTIVE) && millis() - t0 < timeout) delay(1);
-  lw->forceStopAndNewPosition(0);
-  // En marche normale le guide doit pouvoir suivre le tambour à pleine vitesse
-  lw->setSpeedInHz((uint32_t)(60.0f * LW_STEPS_PER_MM));
-  lw->setAcceleration((uint32_t)(2000.0f * LW_STEPS_PER_MM));
-}
-#endif
-
 void setup() {
   Serial.begin(115200);
-
-  // Etat sûr avant tout : frein serré, servo coupé
-  pinMode(PIN_BRAKE, OUTPUT);     brakeRelease(false);
-  pinMode(PIN_SERVO_EN, OUTPUT);  servoEnable(false);
-  pinMode(PIN_SERVO_ALARM, INPUT);
   pinMode(PIN_HOME, INPUT);
-  pinMode(PIN_SLACK, INPUT);
-  pinMode(PIN_LW_HOME, INPUT);
   pinMode(PIN_ESTOP, INPUT_PULLDOWN);       // fil coupé = arrêt d'urgence
 
   prefs.begin("treuil", false);
   posMin = prefs.getFloat("pmin", 0);
   posMax = prefs.getFloat("pmax", TRAVEL_DEFAULT_MM);
-  homed = prefs.getBool("homed", false);
-  savedPos = prefs.getFloat("pos", 0);
+  tensionMaxG = prefs.getFloat("tmax", TENSION_MAX_DEFAULT_G);
+  homeTensionG = prefs.getFloat("thome", HOME_TENSION_DEFAULT_G);
 
-  engine.init();
-  servo = engine.stepperConnectToPin(PIN_SERVO_STEP);
-  servo->setDirectionPin(PIN_SERVO_DIR, !DIR_INVERT);
-  // Marge de 50 % : c'est la trajectoire qui fixe l'accélération, pas le générateur de pas
-  servo->setAcceleration((uint32_t)(AMAX_MM_S2 * 1.5f * STEPS_PER_MM));
-  servo->setSpeedInHz(1000);
-  // Le frein a tenu le tambour pendant la coupure : on reprend la position mémorisée
-  servo->setCurrentPosition((int32_t)lroundf(savedPos * STEPS_PER_MM));
-  pRef = actualPos();
-
-#if LW_ENABLED
-  lw = engine.stepperConnectToPin(PIN_LW_STEP);
-  lw->setDirectionPin(PIN_LW_DIR);
-  pinMode(PIN_LW_EN, OUTPUT);
-  digitalWrite(PIN_LW_EN, LW_EN_ACTIVE ? HIGH : LOW);
-  homeLevelWind();
-#endif
+  SPI.begin(PIN_ENC_SCK, PIN_ENC_MISO, PIN_ENC_MOSI, PIN_ENC_CS);
+  encoder.init();
+  motor.linkSensor(&encoder);
+  driver.voltage_power_supply = SUPPLY_VOLTAGE;
+  driver.init();
+  motor.linkDriver(&driver);
+  motor.torque_controller = TorqueControlType::voltage;   // courant estimé à partir de R et du KV
+  motor.controller = MotionControlType::torque;
+  motor.voltage_limit = SUPPLY_VOLTAGE;
+  motor.current_limit = BREAKTEST_MAX_G * AMP_PER_GRAM * 1.2f;
+  motor.LPF_velocity.Tf = VELOCITY_FILTER_S;
+  motor.init();
+  motor.initFOC();                          // aligne l'encodeur : la bobine bouge un peu
+  motor.disable();                          // on démarre désarmé
+  motor.move(0);
+  readPosition();
 
   WiFi.onEvent(onEthEvent);
   ETH.begin();
@@ -439,28 +437,32 @@ void setup() {
              IPAddress(255, 255, 255, 0));
   udp.begin(OSC_IN_PORT);
 
-  Serial.printf("Treuil %d pret - %.3f pas/mm - position %.1f mm - origine %s\n",
-                WINCH_ID, STEPS_PER_MM, pRef, homed ? "connue" : "A FAIRE");
+  Serial.printf("Treuil micro %d pret - %.1f mA par gramme - tension max %.0f g\n",
+                WINCH_ID, AMP_PER_GRAM * 1000.0f, tensionMaxG);
 }
 
 void loop() {
-  static uint8_t buf[512];
-  int len;
-  while ((len = udp.parsePacket()) > 0) {
-    IPAddress from = udp.remoteIP();
-    int n = udp.read(buf, sizeof(buf));
-    if (n > 0) {
-      peer = from; hasPeer = true;
-      oscDispatch(buf, (size_t)n, handleOsc);
-    }
-  }
+  motor.loopFOC();                          // commutation du moteur, aussi souvent que possible
 
   static uint32_t lastTickUs = micros();
   uint32_t nowUs = micros();
-  if (nowUs - lastTickUs >= 5000) {          // boucle de mouvement à 200 Hz
-    float dt = (nowUs - lastTickUs) * 1e-6f;
+  if (nowUs - lastTickUs >= 1000) {          // asservissement de position à 1 kHz
+    float dt = min((nowUs - lastTickUs) * 1e-6f, 0.01f);
     lastTickUs = nowUs;
-    controlTick(min(dt, 0.02f));
+
+    static uint8_t buf[512];
+    int len;
+    while ((len = udp.parsePacket()) > 0) {
+      IPAddress from = udp.remoteIP();
+      int n = udp.read(buf, sizeof(buf));
+      if (n > 0) {
+        peer = from; hasPeer = true;
+        oscDispatch(buf, (size_t)n, handleOsc);
+      }
+    }
+
+    controlTick(dt);
+    motor.move(DIR_SIGN * iCmd);            // en mode couple, la consigne est un courant (A)
   }
 
   static uint32_t lastFbMs = 0;
