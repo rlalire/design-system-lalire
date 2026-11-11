@@ -206,6 +206,10 @@ def ease_in_out_cubic(x):
     return 4 * x ** 3 if x < 0.5 else 1 - (-2 * x + 2) ** 3 / 2
 
 
+def ease_in_out_sine(x):
+    return 0.5 - 0.5 * math.cos(math.pi * clamp01(x))
+
+
 def ease_out_cubic(x):
     return 1 - (1 - clamp01(x)) ** 3
 
@@ -554,6 +558,28 @@ def animate_intro(scn, cam, lights):
             key_value_prop(sw.data, "energy", f, SWEEP_ENERGY * math.sin(math.pi * clamp01(x)) ** 1.5)
 
 
+def nearest_bright(img, aspect, ox, oy):
+    """Distance (espace du shader) entre l'origine du dessin et le contour lumineux le plus proche."""
+    if img is None:
+        return 0.0
+    try:
+        import numpy as np
+        w, h = img.size
+        px = np.empty(w * h * 4, dtype=np.float32)
+        img.pixels.foreach_get(px)
+        px = px.reshape(h, w, 4)[::4, ::4]
+        lum = px[..., 0] * 0.3 + px[..., 1] * 0.59 + px[..., 2] * 0.11
+        ys, xs = np.nonzero(lum > 0.5)
+        if len(xs) == 0:
+            return 0.0
+        u = (xs * 4 + 0.5) / w * aspect
+        v = (ys * 4 + 0.5) / h
+        return float(np.min(np.hypot(u - ox, v - oy)))
+    except Exception as exc:
+        print(f"[ARIA] (analyse de la carte impossible : {exc})")
+        return 0.0
+
+
 def build_map(coll):
     me = bpy.data.meshes.new(PREFIX + "Map")
     w, h = MAP_WIDTH / 2, MAP_HEIGHT / 2
@@ -649,14 +675,18 @@ def build_map(coll):
     ob.data.materials.append(mat)
 
     # Animation du dessin : la valeur de révélation parcourt toute la carte
-    max_d = 1.9
-    for node, (t0, t1) in ((rl_node, MAP_LINES), (rf_node, MAP_FILL)):
+    # Bornes exactes : rien n'est visible au temps de début, tout est révélé au temps de fin.
+    # d = distance au point d'origine + bruit (entre -0.175 et +0.175)
+    far = max(math.hypot(cx - ox, cy - oy) for cx in (0.0, aspect) for cy in (0.0, 1.0))
+    near = nearest_bright(tex.image, aspect, ox, oy)   # premier contour lumineux autour de l'origine
+    for node, (t0, t1), soft, start_d in ((rl_node, MAP_LINES, 0.03, near), (rf_node, MAP_FILL, 0.22, 0.0)):
+        v0, v1 = start_d - 0.06, far + 0.18 + soft
         f0, f1 = frame_of(t0), frame_of(t1)
-        key_value(node.outputs[0], 1, -0.3)
+        key_value(node.outputs[0], 1, v0)
         for f in range(max(f0, 1), f1 + 1):
             x = (f - f0) / max(1, f1 - f0)
-            key_value(node.outputs[0], f, lerp(-0.3, max_d, ease_in_out_cubic(x)))
-        key_value(node.outputs[0], N_FRAMES, max_d)
+            key_value(node.outputs[0], f, lerp(v0, v1, 0.5 * x + 0.5 * ease_in_out_sine(x)))  # démarre tout de suite, sans à-coup
+        key_value(node.outputs[0], N_FRAMES, v1)
     return ob
 
 
