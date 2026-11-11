@@ -135,6 +135,11 @@ CUBE_COAT = 0.0                     # vernis transparent par-dessus (0 → 1) : 
 CUBE_BEVEL = 0.06                   # arrondi des arêtes (0 = arêtes vives · 0.15 = très arrondi)
 CUBE_BEVEL_SEGMENTS = 5             # finesse de l'arrondi (1 = simple chanfrein)
 TEXT_COLOR = "#FFFFFF"
+
+# Textes sur les cubes (tailles en proportion de la face : 1 = toute la face) ----
+TITLE_TEXT_SIZE = 0.19              # taille max des titres (les titres longs rétrécissent pour tenir)
+COUNTRY_TEXT_SIZE = 0.075           # taille du nom de pays
+COUNTRY_LETTER_SPACING = 1.25       # espacement des lettres du nom de pays (1 = normal)
 GLOW_COLOR = "#FFD9A8"              # lueur chaude au front du dessin de la carte
 
 ORDER = "tableau"                   # "tableau" | "alterne" (catégories mélangées) | "ouest_est"
@@ -834,13 +839,21 @@ def build_cubes(scn, coll_cubes, coll_targets, saved_targets):
             pass
 
         # Textes sur la face du dessous (révélée par le retournement autour de X)
+        # Mise en page de la face : pays en bas, titre dans l'espace restant au-dessus
+        margin, gap = 0.08, 0.05
+        c_size = COUNTRY_TEXT_SIZE
+        c_center = -0.5 + margin + c_size * 0.5
+        title_bottom = c_center + c_size * 0.6 + gap
+        box_h = max(0.15, min(0.50, (0.5 - margin) - title_bottom))
+        t_center = max(0.05, title_bottom + box_h / 2)
+
         lines = balanced_lines(title)
         t_ob = make_text(f"Title_{tag}", "\n".join(lines), font_t, 0.1, coll_cubes, text_mat, 1.0)
-        fit_text(scn, t_ob, 0.80, 0.50, 0.19)
-        c_ob = make_text(f"Country_{tag}", COUNTRY_NAMES.get(country, country), font_s, 0.075,
-                         coll_cubes, text_mat, 1.25)
-        fit_text(scn, c_ob, 0.80, 0.08, 0.075)
-        for txt, ty in ((t_ob, 0.05), (c_ob, -0.37)):
+        fit_text(scn, t_ob, 0.80, box_h, TITLE_TEXT_SIZE)
+        c_ob = make_text(f"Country_{tag}", COUNTRY_NAMES.get(country, country), font_s, c_size,
+                         coll_cubes, text_mat, COUNTRY_LETTER_SPACING)
+        fit_text(scn, c_ob, 0.84, c_size * 1.1, c_size)
+        for txt, ty in ((t_ob, t_center), (c_ob, c_center)):
             txt.parent = ob
             txt.location = (0, -ty, -0.5 - 0.004)   # y inversé : le cube se retourne
             txt.rotation_euler = (math.pi, 0, 0)
