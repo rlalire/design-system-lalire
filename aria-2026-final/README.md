@@ -56,6 +56,8 @@ Deux modes, au choix :
 | `POINT_SIZE`, `EMIT_POINT`, `EMIT_PING`, `POINT_BREATHE` | Taille, éclat, flash et respiration des points finaux. |
 | `MAP_LINES`, `MAP_FILL`, `REVEAL_ORIGIN_PX`, `GLOW_COLOR` | Dessin de la carte : timing, point de départ, lueur du front. |
 | `CUBE_DARK` | Teinte des cubes avant retournement. |
+| `CUBE_ROUGHNESS`, `CUBE_METALLIC`, `CUBE_COAT` | Matière : brillant ↔ mat, plastique ↔ métal, vernis laqué. |
+| `CUBE_BEVEL`, `CUBE_BEVEL_SEGMENTS` | Arrondi des arêtes (0 = arêtes vives) et finesse de l'arrondi. |
 
 Valeurs animables à la main si besoin : le nœud **Reveal_Lines / Reveal_Fill** du matériau `ARIA_Map`, et **Color_Mix** dans chaque matériau de cube.
 

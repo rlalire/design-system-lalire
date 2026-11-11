@@ -91,9 +91,11 @@ WAVE_STAGGER_IN = 0.55              # étalement des arrivées dans une vague
 WAVE_STAGGER_OUT = 0.65             # étalement des départs vers la carte
 # La durée des vols vers la carte découle de WAVE_TIMES (départ → tous posés).
 # Le temps de lecture de chaque vague est affiché dans la console.
-WAVE_HOLD_HEIGHT = 12.0
-WAVE_CUBE_SIZE = 1.25
+WAVE_HOLD_HEIGHT = 12.0             # altitude face caméra (carte = 0, caméra = 20) :
+                                    # plus haut = plus près de la caméra = plus gros à l'image
+WAVE_CUBE_SIZE = 1.25               # taille réelle des cubes face caméra
 WAVE_GRID = (2.2, 1.65)             # écart entre colonnes / entre rangées
+# La console prévient si la grille déborde du cadre : baisse alors la hauteur ou l'écart.
 
 # Géométrie / caméra ---------------------------------------------------------
 CAM_HEIGHT = 20.0                   # caméra en plongée verticale
@@ -125,6 +127,13 @@ PALETTES = {
     "harmonisee": {"EP": "#74BF55", "GE": "#9677D4", "SA": "#4A95C8", "SE": "#E2458F"},
 }
 CUBE_DARK = "#0D1422"               # couleur des cubes avant retournement
+
+# Matière des cubes ----------------------------------------------------------
+CUBE_ROUGHNESS = 0.32               # 0 = brillant, miroir · 1 = mat, poudré
+CUBE_METALLIC = 0.0                 # 0 = plastique / peinture · 1 = métal
+CUBE_COAT = 0.0                     # vernis transparent par-dessus (0 → 1) : effet laqué
+CUBE_BEVEL = 0.06                   # arrondi des arêtes (0 = arêtes vives · 0.15 = très arrondi)
+CUBE_BEVEL_SEGMENTS = 5             # finesse de l'arrondi (1 = simple chanfrein)
 TEXT_COLOR = "#FFFFFF"
 GLOW_COLOR = "#FFD9A8"              # lueur chaude au front du dessin de la carte
 
@@ -791,7 +800,11 @@ def build_cubes(scn, coll_cubes, coll_targets, saved_targets):
         out.location = (600, 0)
         bsdf = nt.nodes.new("ShaderNodeBsdfPrincipled")
         bsdf.location = (300, 0)
-        bsdf.inputs["Roughness"].default_value = 0.32
+        bsdf.inputs["Roughness"].default_value = CUBE_ROUGHNESS
+        bsdf.inputs["Metallic"].default_value = CUBE_METALLIC
+        coat = bsdf.inputs.get("Coat Weight")
+        if coat:
+            coat.default_value = CUBE_COAT
         link(nt, bsdf.outputs[0], out.inputs["Surface"])
         mix = nt.nodes.new("ShaderNodeValue")
         mix.name = mix.label = "Color_Mix"
@@ -812,8 +825,8 @@ def build_cubes(scn, coll_cubes, coll_targets, saved_targets):
         ob.data.materials.append(mat)
         coll_cubes.objects.link(ob)
         bev = ob.modifiers.new("Bevel", "BEVEL")
-        bev.width = 0.06
-        bev.segments = 5
+        bev.width = CUBE_BEVEL
+        bev.segments = max(1, CUBE_BEVEL_SEGMENTS)
         bev.limit_method = "NONE"
         try:
             bev.harden_normals = True
@@ -904,6 +917,17 @@ def plan_categories(cubes, rng):
         raise ValueError(f"WAVE_TIMES doit contenir {nw} lignes (une par vague).")
     amax = WAVE_APPROACH * (1 + 0.2 * V)
     a_w = WAVE_STAGGER_IN + amax                       # toute la vague est arrivée
+
+    # La grille tient-elle dans le cadre ? (le dessus des cubes est plus près de la caméra)
+    top = WAVE_HOLD_HEIGHT + WAVE_CUBE_SIZE / 2 + 0.2 * V
+    k = (CAM_HEIGHT - top) / CAM_HEIGHT
+    half_h = FRAME_HEIGHT / 2 * k
+    half_w = FRAME_HEIGHT * RESOLUTION[0] / RESOLUTION[1] / 2 * k
+    need_w = WAVE_GRID[0] + WAVE_CUBE_SIZE * 0.55 + 0.25 * V
+    need_h = WAVE_GRID[1] / 2 + WAVE_CUBE_SIZE * 0.55 + 0.1 * V
+    if need_w > half_w or need_h > half_h:
+        print(f"[ARIA] ⚠ La grille de cubes déborde du cadre à cette hauteur : baisse "
+              f"WAVE_HOLD_HEIGHT, WAVE_CUBE_SIZE ou WAVE_GRID.")
 
     # Grille 3 x 2 ; l'ordre d'arrivée d'une vague = ordre de départ de la précédente,
     # ainsi un emplacement est toujours libéré avant d'être réoccupé.
@@ -1047,7 +1071,7 @@ def animate(cubes):
         s, t_hold, t_fly, t_land = times(cb)
         size = cb["size"]
         final_rot = cb["flip"] + Vector((0, 0, cb["tilt"] + cb["spin"]))
-        st = dict(text=1.0, bevel=0.06, mix=0.0, emit=0.0)
+        st = dict(text=1.0, bevel=CUBE_BEVEL, mix=0.0, emit=0.0)
         if t < s:
             a = ease_out_back((t - cb["appear"]) / SWARM_APPEAR, 1.2) if t > cb["appear"] else 0.0
             st.update(loc=float_pos(cb, t), rot=float_rot(cb, t), scale=SWARM_SIZE * max(a, 0.0))
@@ -1072,7 +1096,7 @@ def animate(cubes):
                       rot=vlerp(hold_rot(cb, t_fly), final_rot, e),
                       scale=size * (POINT_SIZE / size) ** e,
                       text=1.0 - smoothstep(0.0, 0.45, x),
-                      bevel=lerp(0.06, 0.45, smoothstep(0.25, 1.0, x)),
+                      bevel=lerp(CUBE_BEVEL, 0.45, smoothstep(0.25, 1.0, x)),
                       mix=1.0, emit=lerp(EMIT_HOLD, EMIT_POINT, e))
         else:
             dt = t - t_land
