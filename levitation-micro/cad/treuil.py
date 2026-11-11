@@ -11,9 +11,9 @@ fermé : moteur, bobine et électronique.
 Produit dans ./export : l'assemblage (treuil.step), le boîtier, ses deux couvercles et
 la bobine (STEP et STL).
 
-Les perçages de fixation du moteur (côté cloison et côté bobine) sont provisoires : leur
-diamètre et leur entraxe sont à reprendre sur le plan du moteur reçu, comme les logements
-des cartes.
+Les perçages de fixation du moteur suivent le plan coté du GL35 : 4 vis M3 sur un cercle
+de 24 mm côté cloison, 4 vis M3 sur un cercle de 20 mm côté bobine. Les logements des
+cartes restent à ajuster sur les pièces achetées.
 Cotes en millimètres. X = axe du moteur, Z = vertical, le fil sort vers le bas.
 """
 import math
@@ -33,8 +33,9 @@ TURNS = TRAVEL_M * 1000 / LINE_PER_TURN
 FLANGE_D = DRUM_D + 2 * SLOT_DEPTH
 REEL_W = SLOT_W + 4.0                              # deux joues de 2 mm
 WALL, PART_T = 2.5, 3.0                            # parois et cloison porte-moteur
-MOTOR_D, MOTOR_L = 42.0, 21.0                      # CubeMars GL35 (cotes à confirmer)
-BORE_D = MOTOR_D + 18.0                            # la cloche de la bobine entoure le moteur
+MOTOR_D, MOTOR_L = 41.8, 21.0                      # CubeMars GL35, d'après son plan coté
+BASE_PCD, ROTOR_PCD, ROTOR_BORE = 24.0, 20.0, 6.0  # cercles de perçage M3 et alésage central
+BORE_D = 60.0                                      # la cloche de la bobine entoure le moteur (jeu de 9 mm)
 X_MOTOR = PART_T                                   # le moteur est vissé sur la cloison
 X_REEL = X_MOTOR + 4.0                             # face arrière de la bobine
 X_DISC = X_MOTOR + MOTOR_L                         # face tournante du moteur = fond de la cloche
@@ -64,9 +65,11 @@ def body():
     b = b.cut(box(PART_T, X_FRONT, IN_Y[0], IN_Y[1], IN_Z[0], IN_Z[1]).edges("|X").fillet(4))   # chambre du fil
     b = b.cut(box(X_REAR, 0, IN_Y[0], IN_Y[1], IN_Z[0], IN_Z[1]).edges("|X").fillet(4))         # chambre technique
     b = b.cut(cyl_x(14, PART_T, 0))                                                             # passage de l'encodeur et des fils
-    for a in range(4):                                                                          # 4 vis du moteur (provisoire)
-        ang = a * math.pi / 2 + math.pi / 4
-        b = b.cut(cyl_x(3.4, PART_T, 0, (15 * math.cos(ang), 15 * math.sin(ang))))
+    for a in range(4):                                                                          # 4 vis M3 sur Ø 24
+        ang = a * math.pi / 2
+        b = b.cut(cyl_x(3.4, PART_T, 0, (BASE_PCD / 2 * math.cos(ang), BASE_PCD / 2 * math.sin(ang))))
+    wires = math.pi / 4                                                                         # passage des 3 fils de phase
+    b = b.cut(cyl_x(9, PART_T, 0, (15 * math.cos(wires), 15 * math.sin(wires))))
     eye = (cq.Workplane("XY").workplane(offset=IN_Z[0] - WALL).center(X_LINE, EYE_Y)
            .circle(3.05).extrude(WALL))                                                         # logement de l'œillet
     b = b.cut(eye)
@@ -93,10 +96,10 @@ def reel():
     r = cyl_x(DRUM_D, REEL_W, 0).union(cyl_x(BORE_D + 6, depth, 0))                             # jante + manchon
     r = r.union(cyl_x(FLANGE_D, 2, 0)).union(cyl_x(FLANGE_D, 2, REEL_W - 2))                    # deux joues
     r = r.cut(cyl_x(BORE_D, depth - 2.5, 0))                                                    # logement du moteur
-    r = r.cut(cyl_x(8, depth, 0))                                                               # arbre creux
-    for a in range(4):                                                                          # 4 vis sur le rotor (provisoire)
+    r = r.cut(cyl_x(ROTOR_BORE, depth, 0))                                                      # arbre creux
+    for a in range(4):                                                                          # 4 vis M3 x 5 sur Ø 20
         ang = a * math.pi / 2
-        r = r.cut(cyl_x(2.7, depth, 0, (9.5 * math.cos(ang), 9.5 * math.sin(ang))))
+        r = r.cut(cyl_x(3.4, depth, 0, (ROTOR_PCD / 2 * math.cos(ang), ROTOR_PCD / 2 * math.sin(ang))))
     anchor = (cq.Workplane("XZ").workplane(offset=-(FLANGE_D / 2 + 1)).center(1, 0)
               .circle(0.5).extrude(SLOT_DEPTH + 3))                                             # trou d'ancrage dans une joue
     return r.cut(anchor)

@@ -111,15 +111,28 @@ Il faut un switch réseau PoE pour alimenter les blocs. Le moteur est donné pou
 | Broche 33 | boucle d'arrêt d'urgence, ou pont vers le 3,3 V si elle n'est pas câblée |
 | Broche 36 | capteur d'origine, facultatif |
 
+## Fixation du moteur
+
+D'après le plan coté du GL35 (41,8 mm de diamètre, 21 mm d'épaisseur) :
+
+| Côté | Perçages | Sur la maquette |
+|---|---|---|
+| Base fixe (celle qui porte les trois plots de câblage) | 4 × M3 sur un cercle de 24 mm, profondeur 3,5 mm. Aussi 4 × M2,5 sur 36 mm | vissée sur la cloison par les 4 × M3 ; un passage est prévu pour les trois fils |
+| Face tournante | 4 × M3 sur un cercle de 20 mm, **profondeur 2,5 mm seulement**, alésage central de 6 mm | la bobine s'y visse |
+
+**Attention aux vis de la bobine.** Le filetage ne fait que 2,5 mm de profondeur. Le fond de
+la bobine fait 2,5 mm : il faut des vis M3 × 5, pas plus longues, sinon elles butent dans le
+moteur et peuvent le bloquer ou l'abîmer.
+
 ## Avant de commander
 
-Quatre valeurs du moteur manquent et se lisent sur sa fiche ou se mesurent à réception. Elles
-se règlent dans `firmware/src/config.h` et `cad/treuil.py` :
+Il reste trois points à confirmer sur la fiche du moteur ou à réception. Ils se règlent dans
+`firmware/src/config.h` et `cad/treuil.py` :
 
 1. Le nombre de paires de pôles et la résistance d'une phase (réglage du pilotage).
 2. Le modèle d'encodeur et sa liaison (le firmware suppose un AS5048A en SPI).
-3. Les perçages de fixation, côté cloison et côté face tournante (provisoires sur la maquette).
-4. Ses cotes exactes : la maquette suppose 42 × 21 mm.
+3. L'épaisseur de la version avec encodeur : le plan montre le moteur seul. La carte de
+   l'encodeur se loge derrière la cloison, où 14 mm sont disponibles.
 
 Restent aussi à dessiner : les vis de fermeture des couvercles et les supports des cartes.
 
