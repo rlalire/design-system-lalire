@@ -273,6 +273,8 @@ static void controlTick(float dt) {
 
     case ST_HOLD:
       vRef = 0;
+      // Position mémorisée dès que le bloc est immobile, pour la retrouver après une coupure
+      if (homed && now - idleSinceMs > 2000) savePosition();
       if (AUTO_DISARM_S > 0 && now - idleSinceMs > AUTO_DISARM_S * 1000UL) disarm();
       break;
 
