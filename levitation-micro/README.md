@@ -3,7 +3,7 @@
 Un boîtier fermé de **112 × 123 × 66 mm**, accroché par un spigot de 16 mm pour faire voler des objets de quelques grammes
 (bague, pliage de papier, carton) au bout d'un fil très fin. Le fil sort par un seul œillet.
 
-**État : conception v0.6, pièces du prototype dessinées pour l'impression 3D, rien n'est encore construit.** Le firmware passe 31 vérifications
+**État : conception v0.7, pièces du prototype dessinées pour l'impression 3D, rien n'est encore construit.** Le firmware passe 31 vérifications
 dans une simulation sur PC qui reproduit le moteur, la bobine et un objet suspendu. Il n'a pas
 été compilé pour la carte ni essayé sur un moteur.
 
@@ -118,22 +118,29 @@ Il faut un switch réseau PoE pour alimenter les blocs. Le moteur est donné pou
 
 ## Accroche du bloc
 
-Le bloc se suspend par un **spigot de 16 mm à filetage M10**, vissé sur le dessus et pris
-dans une pince de type Super Clamp serrée sur un tube ou une perche.
+Le bloc se fixe par un **spigot de 16 mm à filetage M10**, pris dans une pince de type Super
+Clamp serrée sur un tube ou une perche. Deux emplacements sont prévus ; on n'en utilise
+qu'un à la fois.
 
-- Le filetage M10 du spigot traverse la paroi du haut et se visse dans un **écrou M10
-  prisonnier**, glissé dans un bossage du corps. L'écrou ne peut ni tourner ni sortir une
-  fois le couvercle avant fermé.
-- Le spigot est à l'aplomb du moteur, la pièce la plus lourde : le bloc pend droit et
-  l'œillet regarde vers le bas.
-- Le bloc tourne autour du spigot tant que la pince n'est pas serrée, ce qui permet
-  d'orienter la sortie du fil.
+| Emplacement | Usage | Comportement |
+|---|---|---|
+| **Dessus**, à l'aplomb du moteur | sous un tube horizontal | le bloc pend droit, l'œillet vers le bas ; il tourne autour du spigot pour orienter la sortie du fil |
+| **Côté**, à la hauteur de l'axe du moteur, à l'opposé de la sortie du fil | contre une perche verticale ou un mur | le bloc est tenu en porte-à-faux ; c'est le serrage de la pince qui l'empêche de pivoter |
+
+- Chaque filetage se visse dans un **écrou M10 prisonnier**, glissé par l'avant dans un
+  bossage du corps. Les écrous ne peuvent ni tourner ni sortir une fois le couvercle fermé.
+- Monter les deux écrous dès l'assemblage : on change ensuite d'emplacement sans rouvrir.
 - Une patte percée à 5,2 mm, sur le dessus, reçoit une **élingue de sécurité** reliée au
-  tube, comme pour tout appareil accroché en hauteur.
-- Le câble réseau sort par le côté du capot, pour ne pas gêner la pince.
+  support, comme pour tout appareil accroché en hauteur.
+- Le câble réseau sort par l'autre côté du capot, pour ne gêner aucune des deux pinces.
 
 Le filetage du spigot fait 20 mm : il traverse tout l'écrou et s'arrête à 8,5 mm de la
-bobine en rotation. Ne pas monter un spigot au filetage plus long.
+bobine en rotation, sur le dessus comme sur le côté. Ne pas monter un spigot au filetage
+plus long.
+
+**Accroche sur le côté.** Avec le spigot à l'horizontale, vérifier après serrage que
+l'œillet regarde bien à la verticale : un bloc incliné fait frotter le fil sur le bord de
+l'œillet. Serrer la pince fermement, le bloc ne devant pas pouvoir tourner sur lui-même.
 
 ## Fixation du moteur
 
@@ -176,7 +183,7 @@ Quatre pièces à imprimer. Chacune se pose à plat sur le plateau et s'imprime 
 
 | Pièce | Fichiers | Taille | Matière | Sens d'impression |
 |---|---|---|---|---|
-| Corps | `cad/export/corps.stl` / `.step` | 112 × 135 × 43 mm, 102 cm³ | nylon PA12 (MJF) ou PETG | cloison sur le plateau |
+| Corps | `cad/export/corps.stl` / `.step` | 112 × 135 × 43 mm, 106 cm³ | nylon PA12 (MJF) ou PETG | cloison sur le plateau |
 | Capot arrière | `cad/export/capot_arriere.stl` / `.step` | 112 × 123 × 20,5 mm, 58 cm³ | nylon PA12 (MJF) ou PETG | fond sur le plateau |
 | Couvercle avant | `cad/export/couvercle_avant.stl` / `.step` | 112 × 123 × 2,5 mm, 34 cm³ | nylon PA12 (MJF) ou PETG | à plat |
 | Bobine | `cad/export/bobine.stl` / `.step` | Ø 92 × 32,7 mm, 44 cm³ | **résine (SLA)** | fond de la cloche sur le plateau |
@@ -196,7 +203,8 @@ Toutes les pièces tiennent sur un plateau de 180 × 180 mm. Chez un imprimeur e
 | Bobine sur la face tournante du moteur | M3 × 5, tête cylindrique basse | 4 |
 | Couvercle avant | M3 × 10 | 4 |
 | Capot arrière | M3 × 30 | 4 |
-| Accroche | spigot 16 mm à filetage M10 de 20 mm, écrou M10 (17 sur plats), pince Super Clamp | 1 de chaque |
+| Accroche | spigot 16 mm à filetage M10 de 20 mm, pince Super Clamp | 1 de chaque |
+| Accroche | écrou M10 (17 sur plats, 8 d'épaisseur) | 2 |
 | Sécurité | élingue fine avec mousqueton, dans la patte de 5,2 mm | 1 |
 
 Les vis du couvercle et du capot se vissent directement dans le plastique des colonnes
@@ -208,8 +216,8 @@ vis M3 × 6 s'engage de 3 mm. Côté bobine, voir l'avertissement plus haut : M3
 
 ### Montage
 
-1. Sertir ou coller l'œillet céramique dans le trou du fond du corps. Glisser l'écrou M10
-   dans son logement par l'avant, puis visser le spigot par le dessus.
+1. Sertir ou coller l'œillet céramique dans le trou du fond du corps. Glisser les deux écrous
+   M10 dans leurs logements par l'avant, puis visser le spigot à l'emplacement voulu.
 2. Poser le moteur dans le corps, fils vers la cloison, et le visser par l'arrière (4 × M3 × 6).
    Passer ses fils par les deux trous prévus.
 3. Nouer le fil dans le trou d'ancrage de la bobine, l'enrouler, puis poser la bobine sur

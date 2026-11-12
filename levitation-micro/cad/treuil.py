@@ -8,7 +8,7 @@ KV100 avec encodeur, en prise directe : la bobine est une cloche vissée sur la 
 tournante du moteur et l'entoure. Le fil sort par un œillet céramique fixe.
 
 Quatre pièces à imprimer, toutes posées à plat et sans supports :
-  corps            cloison porte-moteur + chambre du fil + bossage du spigot M10
+  corps            cloison porte-moteur + chambre du fil + deux bossages pour spigot M10
   capot_arriere    bac qui ferme la chambre de l'électronique
   couvercle_avant  plaque qui ferme la chambre du fil
   bobine           cloche à gorge (à imprimer en résine pour une surface lisse)
@@ -64,7 +64,8 @@ FLEET_DEG = math.degrees(math.atan((SLOT_W / 2) / abs(IN_Z[0])))
 COL_D = 9.0                                        # colonnes de vissage dans les quatre angles
 CORNERS = [(y, z) for y in (IN_Y[0] + 4.5, IN_Y[1] - 4.5) for z in (IN_Z[0] + 4.5, IN_Z[1] - 4.5)]
 # Accroche : un spigot de 16 mm à filetage M10 (pour pince type Super Clamp) se visse dans un
-# écrou M10 prisonnier, logé dans un bossage sous la paroi du haut, au-dessus du moteur.
+# écrou M10 prisonnier. Deux emplacements : sur le dessus, à l'aplomb du moteur, et sur le
+# côté opposé à la sortie du fil, à la hauteur de l'axe du moteur.
 SPIGOT_X = 27.0                                    # à l'aplomb du moteur, pour que le bloc pende droit
 NUT_AF, NUT_H = 17.0, 8.0                          # écrou M10 : 17 sur plats, 8 d'épaisseur
 SPIGOT_THREAD = 20.0                               # longueur du filetage M10 du spigot
@@ -110,13 +111,19 @@ def corps():
     eye = (cq.Workplane("XY").workplane(offset=OUT_Z[0]).center(X_LINE, EYE_Y)
            .circle((EYELET_OD + FIT) / 2).extrude(WALL))                 # logement de l'œillet
     b = b.cut(eye)
-    # Bossage du spigot : il pend sous la paroi du haut, au-dessus de la cloche de la bobine
-    b = b.union(box(16, X_FRONT, -BOSS_HALF_W, BOSS_HALF_W, IN_Z[1] - BOSS_H, IN_Z[1]))
-    nut_z0 = IN_Z[1] - BOSS_H + 2.0                                      # 2 mm de matière sous l'écrou
+    # Bossages des spigots : chacun loge un écrou M10 glissé par l'avant, au-dessus ou à côté
+    # de la cloche de la bobine. L'écrou garde 2 mm de matière côté intérieur.
+    half = (NUT_AF + 0.4) / 2
     back = SPIGOT_X - NUT_AF / math.sqrt(3) - 0.3                        # fond de la glissière (pointe de l'écrou)
-    b = b.cut(box(back, X_FRONT, -(NUT_AF + 0.4) / 2, (NUT_AF + 0.4) / 2, nut_z0, nut_z0 + NUT_H + 0.6))
-    b = b.cut(cq.Workplane("XY").workplane(offset=IN_Z[1] - BOSS_H).center(SPIGOT_X, 0)
-              .circle(5.25).extrude(BOSS_H + WALL))                      # passage du filetage M10
+    hole = cq.Workplane("XY").circle(5.25).extrude(BOSS_H + WALL)        # passage du filetage M10
+    # Dessus
+    b = b.union(box(16, X_FRONT, -BOSS_HALF_W, BOSS_HALF_W, IN_Z[1] - BOSS_H, IN_Z[1]))
+    b = b.cut(box(back, X_FRONT, -half, half, IN_Z[1] - BOSS_H + 2.0, IN_Z[1] - BOSS_H + 2.6 + NUT_H))
+    b = b.cut(hole.translate((SPIGOT_X, 0, IN_Z[1] - BOSS_H)))
+    # Côté (paroi y négatif, à l'opposé de la sortie du fil)
+    b = b.union(box(16, X_FRONT, IN_Y[0], IN_Y[0] + BOSS_H, -BOSS_HALF_W, BOSS_HALF_W))
+    b = b.cut(box(back, X_FRONT, IN_Y[0] + BOSS_H - 2.6 - NUT_H, IN_Y[0] + BOSS_H - 2.0, -half, half))
+    b = b.cut(hole.rotate((0, 0, 0), (1, 0, 0), 90).translate((SPIGOT_X, IN_Y[0] + BOSS_H, 0)))
     # Patte pour l'élingue de sécurité, trou de 5,2
     b = b.union(box(0, 12, SAFETY_Y - 8, SAFETY_Y + 8, OUT_Z[1], OUT_Z[1] + 12))
     b = b.cut(cyl_x(5.2, 12, 0, (SAFETY_Y, OUT_Z[1] + 6)))
@@ -185,6 +192,9 @@ def build():
         "oeillet": (eye, "oeillet"),
         "ecrou_m10": (cq.Workplane("XY").workplane(offset=IN_Z[1] - BOSS_H + 2.2).center(SPIGOT_X, 0)
                       .polygon(6, NUT_AF * 2 / math.sqrt(3)).circle(5).extrude(NUT_H), "oeillet"),
+        "ecrou_m10_cote": (cq.Workplane("XY").polygon(6, NUT_AF * 2 / math.sqrt(3)).circle(5).extrude(NUT_H)
+                           .rotate((0, 0, 0), (1, 0, 0), 90)
+                           .translate((SPIGOT_X, IN_Y[0] + BOSS_H - 2.2, 0)), "oeillet"),
         "spigot": (cq.Workplane("XY").workplane(offset=OUT_Z[1]).center(SPIGOT_X, 0).circle(11).extrude(4)
                    .faces(">Z").workplane().circle(8).extrude(21.4)
                    .union(cq.Workplane("XY").workplane(offset=OUT_Z[1] - SPIGOT_THREAD).center(SPIGOT_X, 0)
@@ -221,7 +231,7 @@ if __name__ == "__main__":
           f"(+ 25 mm de spigot au-dessus)")
     tip = OUT_Z[1] - SPIGOT_THREAD                                       # bas du filetage M10 dans le boîtier
     print(f"Spigot : le filetage traverse tout l'écrou et s'arrête à {tip - (BORE_D + 6) / 2:.1f} mm "
-          f"de la cloche tournante")
+          f"de la cloche tournante (dessus) et {-(OUT_Y[0] + SPIGOT_THREAD) - (BORE_D + 6) / 2:.1f} mm (côté)")
     for name in PRINTED:
         s = (parts[name][0] if name != "bobine" else bobine()).val()
         bb = s.BoundingBox()

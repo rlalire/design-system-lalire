@@ -20,7 +20,7 @@ NOTES = {
         ("Passage des fils du moteur", f"2 trous Ø 8 au rayon {t.WIRES_R} mm, autour de {t.WIRES_DEG:.0f}°"),
         ("Colonnes de vissage", f"4 avant-trous Ø {t.M3_PILOT} traversants, dans les angles"),
         ("Logement de l'œillet", f"Ø {t.EYELET_OD + t.FIT:.1f} dans le fond, à {t.EYE_Y:.1f} mm de l'axe"),
-        ("Accroche", f"bossage avec écrou M10 prisonnier (17 sur plats), trou Ø 10,5 dans la paroi du haut, à {t.SPIGOT_X:.0f} mm de la cloison"),
+        ("Accroche", f"2 bossages avec écrou M10 prisonnier (17 sur plats) et trou Ø 10,5, à {t.SPIGOT_X:.0f} mm de la cloison : un sur le dessus, un sur le côté"),
         ("Élingue de sécurité", "1 patte de 16 × 12 × 12 mm, trou Ø 5,2"),
         ("Parois", f"{t.WALL} mm"),
     ],
