@@ -1,14 +1,14 @@
 # Lévitation — bloc treuil micro
 
-Un boîtier fermé de **112 × 135 × 59 mm** pour faire voler des objets de quelques grammes
+Un boîtier fermé de **112 × 123 × 64 mm** (135 mm de haut avec les pattes d'accroche) pour faire voler des objets de quelques grammes
 (bague, pliage de papier, carton) au bout d'un fil très fin. Le fil sort par un seul œillet.
 
-**État : conception v0.3, rien n'est encore construit.** Le firmware passe 31 vérifications
+**État : conception v0.4, pièces du prototype dessinées pour l'impression 3D, rien n'est encore construit.** Le firmware passe 31 vérifications
 dans une simulation sur PC qui reproduit le moteur, la bobine et un objet suspendu. Il n'a pas
 été compilé pour la carte ni essayé sur un moteur.
 
 - `simulation.html` : vue 3D animée (boîtier, objet, salle).
-- `cad/` : maquette paramétrique, boîtier, couvercles et bobine.
+- `cad/` : modèle paramétrique, les quatre pièces à imprimer et leurs planches.
 - `firmware/` : le firmware, avec sa simulation dans `firmware/test/sim/`.
 
 ## Le moteur
@@ -57,7 +57,7 @@ origine connue, défaut, tension estimée (g). L'état 9 est le test de rupture.
 | Vitesse en montée | jusqu'à 3 m/s (717 tr/min), **à confirmer sur le prototype** |
 | Vitesse en descente | limitée à 1,5 m/s, réglable par objet |
 | Accélération | 4 m/s² |
-| Boîtier | 112 × 135 × 59 mm, moteur et électronique compris |
+| Boîtier | 112 × 123 × 64 mm, moteur et électronique compris |
 
 En simulation, avec un objet de 5 g : arrivée à moins de 0,3 mm de la cible, écart de suivi
 de 1,6 mm à 0,9 m/s et de 5 mm à 3 m/s, retard d'environ 8 ms sur une consigne envoyée en
@@ -94,8 +94,8 @@ Références et prix à confirmer ; ce sont des ordres de grandeur.
 | Carte | Olimex ESP32-POE (Ethernet) | 25 € |
 | Alimentation | Séparateur PoE 12 V (le courant arrive par le câble réseau) et petit convertisseur 5 V | 15 € |
 | Sortie du fil | Œillet céramique, diamètre intérieur 2 à 3 mm | 2 € |
-| Bobine | Impression résine, 92 mm de diamètre, environ 49 g | à chiffrer |
-| Boîtier | Corps et deux couvercles imprimés | à chiffrer |
+| Bobine | Impression résine, 92 mm de diamètre, environ 53 g | à chiffrer |
+| Boîtier | Corps, capot arrière et couvercle avant imprimés | à chiffrer |
 | Divers | Visserie, connecteurs, mousse | 10 € |
 | | **Total par bloc** | **environ 150 à 200 €** |
 
@@ -151,21 +151,67 @@ estimation.
 en 12 V, pour 717 nécessaires à 3 m/s. La marge est faible : prévoir une alimentation 16 V
 si les 3 m/s comptent, ou accepter environ 2,5 m/s en 12 V.
 
-Restent aussi à dessiner : les vis de fermeture des couvercles et les supports des cartes.
+## Fabrication du prototype
 
-## Fabrication
+Quatre pièces à imprimer. Chacune se pose à plat sur le plateau et s'imprime sans supports.
+
+| Pièce | Fichiers | Taille | Matière | Sens d'impression |
+|---|---|---|---|---|
+| Corps | `cad/export/corps.stl` / `.step` | 112 × 135 × 41 mm, 97 cm³ | nylon PA12 (MJF) ou PETG | cloison sur le plateau |
+| Capot arrière | `cad/export/capot_arriere.stl` / `.step` | 112 × 123 × 20,5 mm, 58 cm³ | nylon PA12 (MJF) ou PETG | fond sur le plateau |
+| Couvercle avant | `cad/export/couvercle_avant.stl` / `.step` | 112 × 123 × 2,5 mm, 34 cm³ | nylon PA12 (MJF) ou PETG | à plat |
+| Bobine | `cad/export/bobine.stl` / `.step` | Ø 92 × 30,6 mm, 44 cm³ | **résine (SLA)** | fond de la cloche sur le plateau |
+
+`cad/export/planches.pdf` donne pour chaque pièce trois vues, une perspective et le tableau
+de ses cotes. Ce sont des planches de contrôle, sans lignes de cote dessinées : pour
+l'impression 3D, les fichiers STL et STEP suffisent et font foi.
+
+Toutes les pièces tiennent sur un plateau de 180 × 180 mm. Chez un imprimeur en ligne
+(JLC3DP par exemple), envoyer les fichiers STEP.
+
+### Visserie
+
+| Usage | Vis | Quantité |
+|---|---|---|
+| Moteur sur la cloison (par l'arrière) | M3 × 6, tête cylindrique | 4 |
+| Bobine sur le moyeu du moteur | M3 × 8, tête cylindrique basse | 4 |
+| Couvercle avant | M3 × 10 | 4 |
+| Capot arrière | M3 × 30 | 4 |
+| Accroche | vis ou tige de 5 mm dans les deux pattes | 2 |
+
+Les vis du couvercle et du capot se vissent directement dans le plastique des colonnes
+d'angle (avant-trous de 2,6 mm) : elles y forment leur filet. Cela tient une dizaine de
+démontages ; au-delà, passer à des inserts filetés.
+
+**Longueur des vis du moteur.** Le filetage arrière du moteur fait 4 mm de profondeur et la
+cloison 3 mm : une vis M3 × 6 s'engage de 3 mm, ne pas prendre plus long. Côté bobine, le
+filetage fait 6 mm et le fond de la cloche 3,5 mm : une vis M3 × 8 s'engage de 4,5 mm.
+
+### Montage
+
+1. Sertir ou coller l'œillet céramique dans le trou du fond du corps.
+2. Poser le moteur dans le corps, fils vers la cloison, et le visser par l'arrière (4 × M3 × 6).
+   Passer ses fils par les deux trous prévus.
+3. Nouer le fil dans le trou d'ancrage de la bobine, l'enrouler, puis poser la bobine sur
+   le moyeu : sa collerette la centre. Visser (4 × M3 × 8).
+4. Passer le fil dans l'œillet, visser le couvercle avant.
+5. Coller les cartes au dos de la cloison (mousse adhésive double face), câbler, passer le
+   câble réseau par l'encoche du capot, visser le capot arrière.
+
+### Ce qui reste approximatif
+
+- **Les cartes électroniques** n'ont pas de support dédié : je n'ai pas leurs cotes
+  vérifiées. Le capot offre 18 mm de profondeur, prévus pour la prise réseau de la carte.
+  À contrôler sur les cartes achetées avant de lancer l'impression du capot.
+- **L'œillet** : le logement fait 6,2 mm, pour un œillet de 6 mm de diamètre extérieur.
+  À ajuster à l'œillet acheté (`EYELET_OD` dans `cad/treuil.py`).
+- **Les jeux** (0,2 mm) conviennent au nylon MJF et à la résine. En dépôt de fil, les trous
+  sortent souvent plus petits : repasser un foret de 3,5 mm dans les trous de passage.
 
 ```
-cd cad && python3 treuil.py              # régénère toutes les pièces
-cd firmware && ./test/sim/run.sh         # simulation du firmware sur PC
+cd cad && python3 treuil.py && python3 planches.py     # régénère pièces et planches
+cd firmware && ./test/sim/run.sh                       # simulation du firmware sur PC
 ```
-
-| Fichier | Usage |
-|---|---|
-| `cad/export/bobine.stl` / `.step` | bobine en cloche, à imprimer en résine |
-| `cad/export/boitier.step` | corps du boîtier, avec la cloison porte-moteur et les pattes d'accroche |
-| `cad/export/couvercle_avant.step`, `couvercle_arriere.step` | les deux couvercles |
-| `cad/export/treuil.step` | l'assemblage complet |
 
 ## À confirmer sur le prototype
 
