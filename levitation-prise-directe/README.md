@@ -4,7 +4,7 @@ Variante du bloc décrit dans [`../levitation`](../levitation/README.md) : la bo
 directement sur l'arbre du servo. Plus de courroie, plus de poulies, un bloc long et fin.
 
 **État : conception v0.1, rien n'est encore construit.** Le firmware passe ses 25 vérifications
-en simulation sur PC ; il n'a pas été compilé pour la carte ni essayé sur un moteur.
+en simulation sur PC ; il compile pour la carte Olimex ESP32-POE, mais n'a pas été essayé sur un moteur.
 
 - `simulation.html` : vue 3D animée du mécanisme, à ouvrir dans un navigateur.
 - `cad/` : maquette paramétrique, avec la bobine prête à imprimer (`cad/export/bobine.stl`).

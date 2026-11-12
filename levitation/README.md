@@ -11,7 +11,7 @@ synchronise avec d'autres blocs pour faire voler un objet sur 2, 3 ou 4 fils. Pi
 | Élément | Où | Ce qui a été vérifié |
 |---|---|---|
 | Dimensionnement, composants, câblage | ce document | calculs ci-dessous ; références et prix à confirmer sur les fiches techniques avant achat |
-| Firmware | `firmware/` | 25 vérifications passent en simulation sur PC ; **pas encore compilé pour la carte ni essayé sur un moteur** |
+| Firmware | `firmware/` | 25 vérifications passent en simulation sur PC ; **compile pour la carte Olimex ESP32-POE ; pas encore essayé sur un moteur** |
 | Maquette 3D paramétrique | `cad/` | volumes et entraxes sans interférence ; les perçages et tolérances restent à dessiner |
 
 ## 1. Ce que fait un bloc

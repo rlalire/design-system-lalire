@@ -5,7 +5,7 @@ bobine plate de 25 cm et une poulie de sortie fixe. **Le fil sort toujours au m�
 qui est indispensable pour faire voler un objet sur plusieurs fils.
 
 **État : conception v0.1, rien n'est encore construit ni commandé.** Le firmware passe ses
-vérifications en simulation sur PC ; il n'a pas été compilé pour la carte ni essayé sur un
+vérifications en simulation sur PC ; il compile pour la carte Olimex ESP32-POE, mais n'a pas été essayé sur un
 moteur. Les pièces dessinées ne sont pas encore prêtes à être envoyées en fabrication (voir
 « Avant de commander »).
 

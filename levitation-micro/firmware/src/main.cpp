@@ -422,7 +422,10 @@ void setup() {
   motor.linkDriver(&driver);
   motor.torque_controller = TorqueControlType::voltage;   // courant estimé à partir de R et du KV
   motor.controller = MotionControlType::torque;
-  motor.voltage_limit = SUPPLY_VOLTAGE;
+  // Modulation vectorielle : c'est elle qui tire le plus de tension de l'alimentation sans
+  // déformer le courant. La tension utile par phase est alors l'alimentation divisée par 1,73.
+  motor.foc_modulation = FOCModulationType::SpaceVectorPWM;
+  motor.voltage_limit = SUPPLY_VOLTAGE / _SQRT3;
   motor.current_limit = BREAKTEST_MAX_G * AMP_PER_GRAM * 1.2f;
   motor.LPF_velocity.Tf = VELOCITY_FILTER_S;
   motor.init();

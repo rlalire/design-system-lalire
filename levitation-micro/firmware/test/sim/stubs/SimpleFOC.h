@@ -39,6 +39,8 @@ struct SimPlant {
 };
 extern SimPlant plant;
 
+#define _SQRT3 1.73205080757f
+enum class FOCModulationType { SinePWM, SpaceVectorPWM };
 enum class TorqueControlType { voltage };
 enum class MotionControlType { torque };
 struct LowPass { float Tf = 0.005f; };
@@ -50,6 +52,7 @@ struct BLDCDriver3PWM { float voltage_power_supply = 12; BLDCDriver3PWM(int, int
 struct BLDCMotor {
   float shaft_angle = 0, shaft_velocity = 0, voltage_limit = 12, current_limit = 1;
   TorqueControlType torque_controller; MotionControlType controller; LowPass LPF_velocity;
+  FOCModulationType foc_modulation = FOCModulationType::SinePWM;
   double lastTheta = 0; uint64_t lastUs = 0;
   BLDCMotor(int, float, float) {}
   void linkSensor(MagneticSensorSPI*) {}

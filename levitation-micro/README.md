@@ -3,9 +3,10 @@
 Un boîtier fermé de **112 × 123 × 70 mm**, accroché par un spigot de 16 mm pour faire voler des objets de quelques grammes
 (bague, pliage de papier, carton) au bout d'un fil très fin. Le fil sort par un seul œillet.
 
-**État : conception v0.9, pièces du prototype dessinées pour l'impression 3D, rien n'est encore construit.** Le firmware passe 31 vérifications
-dans une simulation sur PC qui reproduit le moteur, la bobine et un objet suspendu. Il n'a pas
-été compilé pour la carte ni essayé sur un moteur.
+**État : conception v1.0, pièces du prototype dessinées pour l'impression 3D, rien n'est encore construit.** Le firmware **compile pour
+la carte Olimex ESP32-POE** et passe 31 vérifications dans une simulation sur PC qui reproduit
+le moteur, la bobine et un objet suspendu. Il n'a pas encore tourné sur une vraie carte ni
+sur un moteur.
 
 - `simulation.html` : vue 3D animée (boîtier, objet, salle).
 - `cad/` : modèle paramétrique, les quatre pièces à imprimer et leurs planches.
@@ -299,7 +300,32 @@ vis M3 × 6 s'engage de 3 mm. Côté bobine, voir l'avertissement plus haut : M3
 ```
 cd cad && python3 treuil.py && python3 planches.py     # régénère pièces et planches
 cd firmware && ./test/sim/run.sh                       # simulation du firmware sur PC
+cd firmware && pio run                                 # compilation pour la carte
+cd firmware && pio run -t upload                       # envoi dans la carte, par USB
 ```
+
+### Envoyer le firmware sans rien installer
+
+`firmware/binaires/` contient un fichier prêt à l'emploi par bloc (`treuil-micro-bloc1.bin`
+à `bloc4.bin`), chacun avec son numéro et son adresse réseau.
+
+1. Relier la carte à l'ordinateur par USB, **sans câble réseau PoE branché**.
+2. Ouvrir l'outil en ligne d'Espressif, [esptool-js](https://espressif.github.io/esptool-js/),
+   dans Chrome ou Edge.
+3. Cliquer « Connect », choisir le port de la carte, puis envoyer le fichier à l'adresse
+   `0x0`.
+
+Ces fichiers contiennent les réglages actuels de `config.h`. Tout changement de réglage
+(sens de rotation, raideur, vitesses) demande de recompiler : c'est là que PlatformIO
+devient nécessaire, ou bien je régénère les fichiers.
+
+Je n'ai vérifié ni cette procédure ni ces fichiers sur une vraie carte.
+
+### Versions utilisées pour la compilation
+
+Plateforme PlatformIO `espressif32` 6.9.0 et bibliothèque SimpleFOC 2.3.3. La version 2.3.4
+de SimpleFOC ne compile pas avec cette plateforme : ne pas la mettre à jour sans changer
+les deux.
 
 ## À confirmer sur le prototype
 
