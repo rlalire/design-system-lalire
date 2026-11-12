@@ -3,17 +3,18 @@
     pip install cadquery
     python3 treuil.py
 
-Pour des objets de quelques grammes sur un fil très fin. Moteur de gimbal CubeMars GL35
-avec encodeur, en prise directe : la bobine est une cloche vissée sur la face tournante du
-moteur et l'entoure. Fil qui sort par un œillet céramique fixe. Tout tient dans un boîtier
+Pour des objets de quelques grammes sur un fil très fin. Moteur de gimbal CubeMars G35
+(encodeur intégré, carter fixe), en prise directe : la bobine est une cloche vissée sur le
+moyeu tournant du moteur et entoure son carter. Fil qui sort par un œillet céramique fixe. Tout tient dans un boîtier
 fermé : moteur, bobine et électronique.
 
 Produit dans ./export : l'assemblage (treuil.step), le boîtier, ses deux couvercles et
 la bobine (STEP et STL).
 
-Les perçages de fixation du moteur suivent le plan coté du GL35 : 4 vis M3 sur un cercle
-de 24 mm côté cloison, 4 vis M3 sur un cercle de 20 mm côté bobine. Les logements des
-cartes restent à ajuster sur les pièces achetées.
+Les perçages suivent le plan coté du G35 : bossage de 32 mm et 3 vis M3 sur un cercle de
+40 mm côté cloison, 4 vis M3 sur un cercle de 15 mm côté bobine. L'orientation des 3 vis
+par rapport à la sortie du câble est à vérifier sur le fichier 3D du fabricant. Les
+logements des cartes restent à ajuster sur les pièces achetées.
 Cotes en millimètres. X = axe du moteur, Z = vertical, le fil sort vers le bas.
 """
 import math
@@ -33,9 +34,10 @@ TURNS = TRAVEL_M * 1000 / LINE_PER_TURN
 FLANGE_D = DRUM_D + 2 * SLOT_DEPTH
 REEL_W = SLOT_W + 4.0                              # deux joues de 2 mm
 WALL, PART_T = 2.5, 3.0                            # parois et cloison porte-moteur
-MOTOR_D, MOTOR_L = 41.8, 21.0                      # CubeMars GL35, d'après son plan coté
-BASE_PCD, ROTOR_PCD, ROTOR_BORE = 24.0, 20.0, 6.0  # cercles de perçage M3 et alésage central
-BORE_D = 60.0                                      # la cloche de la bobine entoure le moteur (jeu de 9 mm)
+MOTOR_D, MOTOR_L = 49.8, 31.6                      # CubeMars G35, d'après son plan coté (moyeu compris)
+BOSS_D = 32.0                                      # bossage arrière, sert de centrage dans la cloison
+BASE_PCD, ROTOR_PCD, ROTOR_BORE = 40.0, 15.0, 6.5  # 3 x M3 côté cloison, 4 x M3 côté bobine, arbre creux
+BORE_D = 56.0                                      # la cloche de la bobine entoure le carter (jeu de 3 mm)
 X_MOTOR = PART_T                                   # le moteur est vissé sur la cloison
 X_REEL = X_MOTOR + 4.0                             # face arrière de la bobine
 X_DISC = X_MOTOR + MOTOR_L                         # face tournante du moteur = fond de la cloche
@@ -64,12 +66,12 @@ def body():
     b = b.edges("|X").fillet(6)
     b = b.cut(box(PART_T, X_FRONT, IN_Y[0], IN_Y[1], IN_Z[0], IN_Z[1]).edges("|X").fillet(4))   # chambre du fil
     b = b.cut(box(X_REAR, 0, IN_Y[0], IN_Y[1], IN_Z[0], IN_Z[1]).edges("|X").fillet(4))         # chambre technique
-    b = b.cut(cyl_x(14, PART_T, 0))                                                             # passage de l'encodeur et des fils
-    for a in range(4):                                                                          # 4 vis M3 sur Ø 24
-        ang = a * math.pi / 2
+    b = b.cut(cyl_x(BOSS_D + 0.3, PART_T, 0))                                                   # le bossage du moteur s'y centre
+    for a in range(3):                                                                          # 3 vis M3 sur Ø 40
+        ang = math.radians(135 + 120 * a)
         b = b.cut(cyl_x(3.4, PART_T, 0, (BASE_PCD / 2 * math.cos(ang), BASE_PCD / 2 * math.sin(ang))))
-    wires = math.pi / 4                                                                         # passage des 3 fils de phase
-    b = b.cut(cyl_x(9, PART_T, 0, (15 * math.cos(wires), 15 * math.sin(wires))))
+    wires = math.radians(45)                                                                    # sortie du câble du moteur
+    b = b.cut(cyl_x(10, PART_T, 0, (20 * math.cos(wires), 20 * math.sin(wires))))
     eye = (cq.Workplane("XY").workplane(offset=IN_Z[0] - WALL).center(X_LINE, EYE_Y)
            .circle(3.05).extrude(WALL))                                                         # logement de l'œillet
     b = b.cut(eye)
@@ -94,10 +96,11 @@ def reel():
     tournante du moteur. Le fil s'y range sur un ou deux rangs."""
     depth = X_DISC + 2.5 - X_REEL                                                               # longueur totale
     r = cyl_x(DRUM_D, REEL_W, 0).union(cyl_x(BORE_D + 6, depth, 0))                             # jante + manchon
+    r = r.union(cyl_x(BORE_D + 6, 2.5, depth - 2.5))
     r = r.union(cyl_x(FLANGE_D, 2, 0)).union(cyl_x(FLANGE_D, 2, REEL_W - 2))                    # deux joues
     r = r.cut(cyl_x(BORE_D, depth - 2.5, 0))                                                    # logement du moteur
     r = r.cut(cyl_x(ROTOR_BORE, depth, 0))                                                      # arbre creux
-    for a in range(4):                                                                          # 4 vis M3 x 5 sur Ø 20
+    for a in range(4):                                                                          # 4 vis M3 x 8 sur Ø 15
         ang = a * math.pi / 2
         r = r.cut(cyl_x(3.4, depth, 0, (ROTOR_PCD / 2 * math.cos(ang), ROTOR_PCD / 2 * math.sin(ang))))
     anchor = (cq.Workplane("XZ").workplane(offset=-(FLANGE_D / 2 + 1)).center(1, 0)
@@ -110,8 +113,8 @@ def build():
            .circle(3.0).circle(1.25).extrude(WALL + 2))
     return {
         "boitier": (body(), "boitier"),
-        "moteur": (cyl_x(MOTOR_D, MOTOR_L, X_MOTOR), "moteur"),
-        "encodeur": (cyl_x(13, 6, -6), "carte"),
+        "moteur": (cyl_x(MOTOR_D, MOTOR_L - 0.5, X_MOTOR).union(cyl_x(20, 0.5, X_MOTOR + MOTOR_L - 0.5))
+                   .union(cyl_x(BOSS_D, PART_T, 0)), "moteur"),
         "bobine": (reel().translate((X_REEL, 0, 0)), "bobine"),
         "oeillet": (eye, "oeillet"),
         "carte_reseau": (box(-12, -2, -40, 36, 22, 50), "carte"),
@@ -149,6 +152,8 @@ if __name__ == "__main__":
     print(f"Boîtier fermé : {bb.ylen:.0f} x {bb.zlen:.0f} x {depth:.0f} mm (largeur x hauteur avec pattes x épaisseur)")
     names = list(parts)
     ok_pairs = {("boitier", "oeillet")}                       # l'œillet est serti dans le fond
+    gap = parts["boitier"][0].intersect(parts["moteur"][0]).val().Volume()
+    print("Bossage du moteur libre dans la cloison :", "oui" if gap < 1e-3 else f"NON ({gap:.1f} mm3)")
     clash = [(a, b) for i, a in enumerate(names) for b in names[i + 1:]
              if (a, b) not in ok_pairs and parts[a][0].intersect(parts[b][0]).val().Volume() > 1e-3]
     print("Interférences :", clash or "aucune")

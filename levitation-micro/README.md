@@ -1,9 +1,9 @@
 # Lévitation — bloc treuil micro
 
-Un boîtier fermé de **112 × 135 × 49 mm** pour faire voler des objets de quelques grammes
+Un boîtier fermé de **112 × 135 × 60 mm** pour faire voler des objets de quelques grammes
 (bague, pliage de papier, carton) au bout d'un fil très fin. Le fil sort par un seul œillet.
 
-**État : conception v0.2, rien n'est encore construit.** Le firmware passe 31 vérifications
+**État : conception v0.3, rien n'est encore construit.** Le firmware passe 31 vérifications
 dans une simulation sur PC qui reproduit le moteur, la bobine et un objet suspendu. Il n'a pas
 été compilé pour la carte ni essayé sur un moteur.
 
@@ -13,12 +13,13 @@ dans une simulation sur PC qui reproduit le moteur, la bobine et un objet suspen
 
 ## Le moteur
 
-Un moteur de gimbal **CubeMars GL35 KV100 avec encodeur** (vendu sous le nom G35), en prise
-directe. Trois raisons :
+Un moteur de gimbal **CubeMars G35 KV100**, en prise directe. C'est le GL35 dans un carter
+fermé, avec l'encodeur à l'intérieur (159 g, 49,8 mm de diamètre, 31,6 mm de long).
 
 - **Il est silencieux** : il tourne en continu, sans pas.
-- **Il est plat** (21 mm) : la bobine est une cloche vissée sur sa face tournante et
-  l'entoure. Il n'y a ni arbre, ni moyeu, ni roulement à ajouter.
+- **Son carter est fixe et fermé** : il se visse sur la cloison, et seul un petit moyeu
+  tourne. La bobine est une cloche vissée sur ce moyeu, qui revient entourer le carter. Il
+  n'y a ni arbre, ni roulement à ajouter, et le fil ne peut pas entrer dans le moteur.
 - **Il se pilote en force** : le courant qu'on lui donne fixe la tension du fil. Tout ce qui
   suit en découle.
 
@@ -56,7 +57,7 @@ origine connue, défaut, tension estimée (g). L'état 9 est le test de rupture.
 | Vitesse en montée | jusqu'à 3 m/s (717 tr/min), **à confirmer sur le prototype** |
 | Vitesse en descente | limitée à 1,5 m/s, réglable par objet |
 | Accélération | 4 m/s² |
-| Boîtier | 112 × 135 × 49 mm, moteur et électronique compris |
+| Boîtier | 112 × 135 × 60 mm, moteur et électronique compris |
 
 En simulation, avec un objet de 5 g : arrivée à moins de 0,3 mm de la cible, écart de suivi
 de 1,6 mm à 0,9 m/s et de 5 mm à 3 m/s, retard d'environ 8 ms sur une consigne envoyée en
@@ -88,12 +89,12 @@ Références et prix à confirmer ; ce sont des ordres de grandeur.
 
 | Fonction | Composant | Prix indicatif |
 |---|---|---|
-| Moteur | CubeMars GL35 KV100 avec encodeur (G35) | 65 à 92 € |
+| Moteur | CubeMars G35 KV100 (encodeur intégré) | à confirmer, 65 à 92 € relevés pour la version avec encodeur |
 | Carte de commande du moteur | Carte compatible SimpleFOC, 3 sorties, 12 V, 1 A ou plus (par exemple SimpleFOC Mini) | 15 € |
 | Carte | Olimex ESP32-POE (Ethernet) | 25 € |
 | Alimentation | Séparateur PoE 12 V (le courant arrive par le câble réseau) et petit convertisseur 5 V | 15 € |
 | Sortie du fil | Œillet céramique, diamètre intérieur 2 à 3 mm | 2 € |
-| Bobine | Impression résine, 92 mm de diamètre, environ 41 g | à chiffrer |
+| Bobine | Impression résine, 92 mm de diamètre, environ 49 g | à chiffrer |
 | Boîtier | Corps et deux couvercles imprimés | à chiffrer |
 | Divers | Visserie, connecteurs, mousse | 10 € |
 | | **Total par bloc** | **environ 150 à 200 €** |
@@ -113,29 +114,31 @@ Il faut un switch réseau PoE pour alimenter les blocs. Le moteur est donné pou
 
 ## Fixation du moteur
 
-D'après le plan coté du GL35 (41,8 mm de diamètre, 21 mm d'épaisseur) :
+D'après le plan coté du G35 :
 
-| Côté | Perçages | Sur la maquette |
+| Côté | Sur le plan | Sur la maquette |
 |---|---|---|
-| Base fixe (celle qui porte les trois plots de câblage) | 4 × M3 sur un cercle de 24 mm, profondeur 3,5 mm. Aussi 4 × M2,5 sur 36 mm | vissée sur la cloison par les 4 × M3 ; un passage est prévu pour les trois fils |
-| Face tournante | 4 × M3 sur un cercle de 20 mm, **profondeur 2,5 mm seulement**, alésage central de 6 mm | la bobine s'y visse |
+| Arrière (sortie du câble) | bossage de 32 mm, 3 × M3 sur un cercle de 40 mm et 4 × M3 sur 25 mm, profondeur 4 mm | le bossage se centre dans la cloison, fixation par les 3 × M3 |
+| Avant | moyeu avec 4 × M3 sur un cercle de 15 mm, profondeur 6 mm, arbre creux de 6,5 mm | la bobine s'y visse, par 4 vis M3 × 8 |
 
-**Attention aux vis de la bobine.** Le filetage ne fait que 2,5 mm de profondeur. Le fond de
-la bobine fait 2,5 mm : il faut des vis M3 × 5, pas plus longues, sinon elles butent dans le
-moteur et peuvent le bloquer ou l'abîmer.
+J'ai lu le plan ainsi : le carter à ailettes est fixe, et c'est le petit moyeu avant qui
+tourne. **C'est à faire confirmer par CubeMars avant de commander les pièces**, car tout le
+montage en dépend. L'orientation des 3 vis arrière par rapport à la sortie du câble est
+aussi à vérifier sur leur fichier 3D.
 
 ## Avant de commander
 
-Les valeurs électriques du moteur sont maintenant dans le firmware, d'après les fiches des
-revendeurs : 7 paires de pôles, 3,6 ohms entre phases, 0,115 N·m par ampère, 82,5 tr/min par
-volt. L'inertie du rotor reste une estimation.
+Les valeurs électriques sont dans le firmware, d'après les fiches des revendeurs pour le
+GL35 : 7 paires de pôles, 3,6 ohms entre phases, 0,115 N·m par ampère, 82,5 tr/min par volt.
+Le G35 contient a priori le même moteur ; c'est à confirmer. L'inertie du rotor reste une
+estimation.
 
-Il reste deux points à confirmer auprès de CubeMars :
+À confirmer auprès de CubeMars :
 
-1. Le modèle d'encodeur et sa liaison (le firmware suppose un AS5048A en SPI).
-2. Les cotes de la version avec encodeur. Le plan utilisé est celui du GL35 seul (90 g). Le
-   G35, vendu avec encodeur, est annoncé à 159 g : c'est probablement un boîtier différent,
-   plus épais, et la maquette devra être reprise sur son plan.
+1. Quelle partie tourne (voir ci-dessus).
+2. Le modèle d'encodeur, sa liaison, sa tension d'alimentation et le brochage du câble. Le
+   firmware suppose un AS5048A en SPI.
+3. Le fichier 3D (STEP) du G35.
 
 **Vitesse en 12 V.** Avec 82,5 tr/min par volt, le moteur plafonne vers 990 tr/min à vide
 en 12 V, pour 717 nécessaires à 3 m/s. La marge est faible : prévoir une alimentation 16 V

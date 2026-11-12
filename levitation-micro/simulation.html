@@ -121,7 +121,7 @@
   <header>
     <span class="eyebrow">Lévitation · bloc treuil</span>
     <h1>Treuil micro</h1>
-    <p class="lede">Un boîtier de 11 × 12 × 5 cm pour faire voler une bague ou un pliage de papier au bout d'un fil fin comme un cheveu. Un moteur de gimbal silencieux entraîne la bobine, et le fil sort par un seul œillet.</p>
+    <p class="lede">Un boîtier de 11 × 12 × 6 cm pour faire voler une bague ou un pliage de papier au bout d'un fil fin comme un cheveu. Un moteur de gimbal silencieux entraîne la bobine, et le fil sort par un seul œillet.</p>
   </header>
 
   <div class="stage" id="stage">
@@ -158,7 +158,7 @@
   <section class="notes">
     <div>
       <h2>Ce que montre la simulation</h2>
-      <p>Les cotes sont celles de la maquette : bobine de 80 mm vissée sur le moteur et qui l'entoure, 251 mm de fil par tour, œillet à la verticale du bord de la bobine. La bague pèse 5 g. La descente est limitée à 1,5 m/s, la montée à 3 m/s.</p>
+      <p>Les cotes sont celles de la maquette : bobine de 80 mm vissée sur le moyeu du moteur et qui entoure son carter, 251 mm de fil par tour, œillet à la verticale du bord de la bobine. La bague pèse 5 g. La descente est limitée à 1,5 m/s, la montée à 3 m/s.</p>
     </div>
     <div>
       <h2>La tension du fil</h2>
@@ -178,8 +178,8 @@
   // ---------- Cotes de la maquette (mm), identiques à cad/treuil.py ----------
   var DRUM_D = 80, LINE_D = 0.05, FLANGE_D = 92, REEL_W = 6, CAPACITY = 10000;
   var PER_TURN = Math.PI * (DRUM_D + LINE_D);                  // 251,5 mm de fil par tour
-  var X_REEL = 7, X_LINE = X_REEL + REEL_W / 2, R_LINE = DRUM_D / 2, X_DISC = 24;
-  var BOX = { x0: -16.5, x1: 32.5, y0: -68.5, y1: 54.5, z0: -54.5, z1: 57.5 }, WALL = 2.5;
+  var X_REEL = 7, X_LINE = X_REEL + REEL_W / 2, R_LINE = DRUM_D / 2, X_DISC = 34.6;
+  var BOX = { x0: -16.5, x1: 43, y0: -68.5, y1: 54.5, z0: -54.5, z1: 57.5 }, WALL = 2.5;
   var VUP = 3000, VDOWN = 1500, AMAX = 4000, G = 9810;          // mm/s et mm/s²
   var TRAVEL = 3000, CEILING = 3600, HANG_MIN = 60, MASS = 5;   // salle de 3,6 m, bague de 5 g
   var RING_R = 10;
@@ -240,8 +240,7 @@
   block.add(box(B.x1 - WALL, B.x1, B.y0, B.y1, B.z0, B.z1, mat.glass));
   [-40, 43].forEach(function (z) { block.add(box(-6, 6, B.y1, B.y1 + 12, z - 8, z + 8, mat.shell)); });
   // Moteur de gimbal vissé sur la cloison ; encodeur et cartes dans la chambre arrière
-  block.add(cylX(42, 21, 3, 0, 0, mat.dark));
-  block.add(cylX(13, 6, -6, 0, 0, mat.board, 24));
+  block.add(cylX(49.8, 31.1, 3, 0, 0, mat.dark));                                 // carter fixe, encodeur à l'intérieur
   block.add(box(-12, -2, 22, 50, -40, 36, mat.board));
   block.add(box(-10, -2, -15, 11, -48, -22, mat.board));
   block.add(box(-12, -2, -62, -34, -48, 22, mat.board));
@@ -253,10 +252,10 @@
   var rotor = new THREE.Group(); block.add(rotor);
   rotor.add(cylX(DRUM_D, REEL_W, X_REEL, 0, 0, mat.spool));                       // jante qui porte la gorge
   [X_REEL, X_REEL + REEL_W - 2].forEach(function (x) { rotor.add(cylX(FLANGE_D, 2, x, 0, 0, mat.spool)); });
-  rotor.add(cylX(66, X_DISC + 2.5 - X_REEL, X_REEL, 0, 0, mat.spool));            // cloche autour du moteur
+  rotor.add(cylX(62, X_DISC + 2.5 - X_REEL, X_REEL, 0, 0, mat.spool));            // cloche autour du carter
   rotor.add(cylX(14, 1.2, X_DISC + 2.5, 0, 0, mat.metal, 24));
   for (var k = 0; k < 3; k++) {
-    var sp = box(X_DISC + 2.5, X_DISC + 3, 9, 31, -1.5, 1.5, mat.dark);
+    var sp = box(X_DISC + 2.5, X_DISC + 3, 9, 29, -1.5, 1.5, mat.dark);
     var holder = new THREE.Group(); holder.add(sp); holder.rotation.x = k * 2 * Math.PI / 3; rotor.add(holder);
   }
 
@@ -303,7 +302,7 @@
   // ---------- Points de vue ----------
   var ringPos = new THREE.Vector3(X_LINE, B.y0 - HANG_MIN - RING_R, R_LINE), follow = false;
   var views = {
-    bloc: { pos: [250, 20, 200], target: [0, -25, 5] },
+    bloc: { pos: [270, 20, 200], target: [8, -25, 5] },
     salle: { pos: [3600, -900, 5200], target: [0, -1900, 200] }
   };
   function setView(name) {
