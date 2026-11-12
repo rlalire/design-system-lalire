@@ -1,9 +1,9 @@
 # Lévitation — bloc treuil micro
 
-Un boîtier fermé de **112 × 123 × 64 mm** (135 mm de haut avec les pattes d'accroche) pour faire voler des objets de quelques grammes
+Un boîtier fermé de **112 × 123 × 66 mm** (135 mm de haut avec les pattes d'accroche) pour faire voler des objets de quelques grammes
 (bague, pliage de papier, carton) au bout d'un fil très fin. Le fil sort par un seul œillet.
 
-**État : conception v0.4, pièces du prototype dessinées pour l'impression 3D, rien n'est encore construit.** Le firmware passe 31 vérifications
+**État : conception v0.5, pièces du prototype dessinées pour l'impression 3D, rien n'est encore construit.** Le firmware passe 31 vérifications
 dans une simulation sur PC qui reproduit le moteur, la bobine et un objet suspendu. Il n'a pas
 été compilé pour la carte ni essayé sur un moteur.
 
@@ -13,15 +13,19 @@ dans une simulation sur PC qui reproduit le moteur, la bobine et un objet suspen
 
 ## Le moteur
 
-Un moteur de gimbal **CubeMars G35 KV100**, en prise directe. C'est le GL35 dans un carter
-fermé, avec l'encodeur à l'intérieur (159 g, 49,8 mm de diamètre, 31,1 mm de long).
+Un moteur de gimbal **CubeMars GL35 KV100 avec encodeur**, en prise directe (41,8 mm de
+diamètre, 33,5 mm de long avec l'encodeur). Le G35 envisagé un temps n'est plus fabriqué ;
+CubeMars indique le GL35 comme son remplaçant.
 
-- **Il est silencieux** : il tourne en continu, sans pas.
-- **Son carter est fixe et fermé** : il se visse sur la cloison, et seul un petit moyeu
-  tourne. La bobine est une cloche vissée sur ce moyeu, qui revient entourer le carter. Il
-  n'y a ni arbre, ni roulement à ajouter, et le fil ne peut pas entrer dans le moteur.
+- **Il est silencieux** : il tourne en continu, sans pas, et CubeMars le donne pour un
+  moteur à faible couple de crantage.
+- **Il est court** : la bobine est une cloche vissée sur sa face tournante et l'entoure.
+  Il n'y a ni arbre, ni moyeu, ni roulement à ajouter.
 - **Il se pilote en force** : le courant qu'on lui donne fixe la tension du fil. Tout ce qui
   suit en découle.
+
+Il n'a pas de carte de commande intégrée : il lui faut une carte séparée, compatible
+SimpleFOC.
 
 ## Ce que le pilotage en force apporte
 
@@ -53,11 +57,11 @@ origine connue, défaut, tension estimée (g). L'état 9 est le test de rupture.
 | Objets | de 1 à 50 g |
 | Course | 10 m de fil, 40 spires sur un seul rang |
 | Fil par tour | 251,5 mm |
-| Résolution de l'encodeur | 0,015 mm si c'est un 14 bits (à confirmer) |
+| Résolution de l'encodeur | 0,015 mm de fil (AS5048A, 14 bits) |
 | Vitesse en montée | jusqu'à 3 m/s (717 tr/min), **à confirmer sur le prototype** |
 | Vitesse en descente | limitée à 1,5 m/s, réglable par objet |
 | Accélération | 4 m/s² |
-| Boîtier | 112 × 123 × 64 mm, moteur et électronique compris |
+| Boîtier | 112 × 123 × 66 mm, moteur et électronique compris |
 
 En simulation, avec un objet de 5 g : arrivée à moins de 0,3 mm de la cible, écart de suivi
 de 1,6 mm à 0,9 m/s et de 5 mm à 3 m/s, retard d'environ 8 ms sur une consigne envoyée en
@@ -89,7 +93,7 @@ Références et prix à confirmer ; ce sont des ordres de grandeur.
 
 | Fonction | Composant | Prix indicatif |
 |---|---|---|
-| Moteur | CubeMars G35 KV100 (encodeur intégré) | à confirmer, 65 à 92 € relevés pour la version avec encodeur |
+| Moteur | CubeMars GL35 KV100 avec encodeur | 73 $ pièce par 4 (devis CubeMars), 79,99 $ à l'unité |
 | Carte de commande du moteur | Carte compatible SimpleFOC, 3 sorties, 12 V, 1 A ou plus (par exemple SimpleFOC Mini) | 15 € |
 | Carte | Olimex ESP32-POE (Ethernet) | 25 € |
 | Alimentation | Séparateur PoE 12 V (le courant arrive par le câble réseau) et petit convertisseur 5 V | 15 € |
@@ -100,7 +104,7 @@ Références et prix à confirmer ; ce sont des ordres de grandeur.
 | | **Total par bloc** | **environ 150 à 200 €** |
 
 Il faut un switch réseau PoE pour alimenter les blocs. Le moteur est donné pour 16 V ; voir
-« Avant de commander » pour la vitesse en 12 V.
+« Ce qui reste à vérifier » pour la vitesse en 12 V.
 
 ## Câblage
 
@@ -114,42 +118,38 @@ Il faut un switch réseau PoE pour alimenter les blocs. Le moteur est donné pou
 
 ## Fixation du moteur
 
-Relevé sur le fichier 3D fourni par CubeMars (`cad/fabricant/G35_sans_driver.stp`), qui est
-repris tel quel dans l'assemblage :
+D'après le plan coté du GL35 avec encodeur et la réponse de CubeMars :
 
-| Côté | Sur le fichier du fabricant | Sur la maquette |
+| Côté | Sur le plan | Sur les pièces |
 |---|---|---|
-| Arrière : face plate de 48,8 mm, d'où sortent les fils | 4 × M3 sur un cercle de 25 mm, profondeur 4 mm ; trou central de 10 mm ; trois sorties de fils à 135° | vissée à plat sur la cloison par 4 vis M3 × 6, avec un passage pour les fils |
-| Avant : petit moyeu de 20 mm, en saillie de 1 mm sur un épaulement de 32 mm | 4 × M3 sur un cercle de 15 mm, profondeur 6 mm, arbre creux de 6,5 mm | la bobine s'y pose et s'y visse par 4 vis M3 × 8 |
+| Arrière, fixe (encodeur, sortie des fils) | 4 × M3 sur un cercle de 24 mm, profondeur 5 mm | vissé à plat sur la cloison par 4 vis M3 × 6, avec un passage pour les fils |
+| Avant, face tournante | 4 × M3 sur un cercle de 20 mm, **profondeur 2,5 mm seulement**, alésage central de 6 mm | la bobine s'y visse par 4 vis M3 × 5 ; un téton la centre dans l'alésage |
 
-Le moteur mesure 49,8 mm de diamètre et 31,1 mm de long. La bobine ne touche que la face du
-moyeu de 20 mm ; elle reste à 1 mm de l'épaulement et à 3 mm du carter.
+**Attention aux vis de la bobine.** Le filetage ne fait que 2,5 mm. Le fond de la bobine
+fait 3 mm : une vis M3 × 5 s'engage de 2 mm. Une vis plus longue bute dans le moteur et
+peut l'abîmer ; CubeMars le signale aussi.
 
-Deux réserves :
+## Ce qui reste à vérifier
 
-- Le plan coté mentionne aussi 3 vis M3 sur un cercle de 40 mm à l'arrière. Elles ne
-  figurent pas dans le fichier 3D ; je ne m'en sers pas.
-- Le fichier est un seul bloc : il ne dit pas quelle partie tourne. J'ai supposé que le
-  moyeu avant tourne et que le carter est fixe, ce qui est cohérent avec les fils qui
-  sortent à l'arrière. **À faire confirmer par CubeMars.**
+Confirmé par CubeMars : 7 paires de pôles, 3,6 ohms entre phases, 0,115 N·m par ampère,
+990 tr/min à vide sous 12 V, encodeur AS5048A en SPI (14 bits, 3,3 ou 5 V), face du rotor
+tournante et côté stator fixe. Ces valeurs sont dans le firmware.
 
-## Avant de commander
+Reste à vérifier, moteur en main :
 
-Les valeurs électriques sont dans le firmware, d'après les fiches des revendeurs pour le
-GL35 : 7 paires de pôles, 3,6 ohms entre phases, 0,115 N·m par ampère, 82,5 tr/min par volt.
-Le G35 contient a priori le même moteur ; c'est à confirmer. L'inertie du rotor reste une
-estimation.
+1. **Le brochage de l'encodeur.** CubeMars renvoie à son schéma officiel et prévient de ne
+   pas se fier aux couleurs des fils. Je n'ai pas ce schéma.
+2. **La profondeur de l'alésage de 6 mm** sur la face tournante. Avec l'encodeur, l'arbre
+   n'est plus creux de part en part. Le téton de centrage de la bobine y entre de 1,2 mm ;
+   s'il bute, le limer ou régler `SPIGOT_H` dans `cad/treuil.py`.
+3. **La position exacte de la sortie des fils** à l'arrière, pour le passage dans la cloison.
+   Le fichier 3D reçu de CubeMars est chiffré et illisible : je n'ai travaillé que sur le
+   plan en PDF.
+4. **L'inertie du rotor**, qui reste une estimation dans le firmware.
 
-À confirmer auprès de CubeMars :
-
-1. Quelle partie tourne (voir ci-dessus).
-2. Le modèle d'encodeur, sa liaison, sa tension d'alimentation et le brochage des fils. Le
-   firmware suppose un AS5048A en SPI. Le fichier ne montre que trois sorties de fils : il
-   faut savoir par où sortent ceux de l'encodeur.
-
-**Vitesse en 12 V.** Avec 82,5 tr/min par volt, le moteur plafonne vers 990 tr/min à vide
-en 12 V, pour 717 nécessaires à 3 m/s. La marge est faible : prévoir une alimentation 16 V
-si les 3 m/s comptent, ou accepter environ 2,5 m/s en 12 V.
+**Vitesse en 12 V.** Le moteur plafonne à 990 tr/min à vide en 12 V, pour 717 nécessaires
+à 3 m/s. La marge est faible : prévoir une alimentation 16 V si les 3 m/s comptent, ou
+accepter environ 2,5 m/s en 12 V.
 
 ## Fabrication du prototype
 
@@ -157,10 +157,10 @@ Quatre pièces à imprimer. Chacune se pose à plat sur le plateau et s'imprime 
 
 | Pièce | Fichiers | Taille | Matière | Sens d'impression |
 |---|---|---|---|---|
-| Corps | `cad/export/corps.stl` / `.step` | 112 × 135 × 41 mm, 97 cm³ | nylon PA12 (MJF) ou PETG | cloison sur le plateau |
+| Corps | `cad/export/corps.stl` / `.step` | 112 × 135 × 43 mm, 100 cm³ | nylon PA12 (MJF) ou PETG | cloison sur le plateau |
 | Capot arrière | `cad/export/capot_arriere.stl` / `.step` | 112 × 123 × 20,5 mm, 58 cm³ | nylon PA12 (MJF) ou PETG | fond sur le plateau |
 | Couvercle avant | `cad/export/couvercle_avant.stl` / `.step` | 112 × 123 × 2,5 mm, 34 cm³ | nylon PA12 (MJF) ou PETG | à plat |
-| Bobine | `cad/export/bobine.stl` / `.step` | Ø 92 × 30,6 mm, 44 cm³ | **résine (SLA)** | fond de la cloche sur le plateau |
+| Bobine | `cad/export/bobine.stl` / `.step` | Ø 92 × 32,7 mm, 44 cm³ | **résine (SLA)** | fond de la cloche sur le plateau |
 
 `cad/export/planches.pdf` donne pour chaque pièce trois vues, une perspective et le tableau
 de ses cotes. Ce sont des planches de contrôle, sans lignes de cote dessinées : pour
@@ -174,7 +174,7 @@ Toutes les pièces tiennent sur un plateau de 180 × 180 mm. Chez un imprimeur e
 | Usage | Vis | Quantité |
 |---|---|---|
 | Moteur sur la cloison (par l'arrière) | M3 × 6, tête cylindrique | 4 |
-| Bobine sur le moyeu du moteur | M3 × 8, tête cylindrique basse | 4 |
+| Bobine sur la face tournante du moteur | M3 × 5, tête cylindrique basse | 4 |
 | Couvercle avant | M3 × 10 | 4 |
 | Capot arrière | M3 × 30 | 4 |
 | Accroche | vis ou tige de 5 mm dans les deux pattes | 2 |
@@ -183,9 +183,8 @@ Les vis du couvercle et du capot se vissent directement dans le plastique des co
 d'angle (avant-trous de 2,6 mm) : elles y forment leur filet. Cela tient une dizaine de
 démontages ; au-delà, passer à des inserts filetés.
 
-**Longueur des vis du moteur.** Le filetage arrière du moteur fait 4 mm de profondeur et la
-cloison 3 mm : une vis M3 × 6 s'engage de 3 mm, ne pas prendre plus long. Côté bobine, le
-filetage fait 6 mm et le fond de la cloche 3,5 mm : une vis M3 × 8 s'engage de 4,5 mm.
+**Longueur des vis du moteur.** À l'arrière, le filetage fait 5 mm et la cloison 3 mm : une
+vis M3 × 6 s'engage de 3 mm. Côté bobine, voir l'avertissement plus haut : M3 × 5, pas plus.
 
 ### Montage
 
@@ -193,7 +192,7 @@ filetage fait 6 mm et le fond de la cloche 3,5 mm : une vis M3 × 8 s'engage de 
 2. Poser le moteur dans le corps, fils vers la cloison, et le visser par l'arrière (4 × M3 × 6).
    Passer ses fils par les deux trous prévus.
 3. Nouer le fil dans le trou d'ancrage de la bobine, l'enrouler, puis poser la bobine sur
-   le moyeu : sa collerette la centre. Visser (4 × M3 × 8).
+   la face du moteur : son téton la centre. Visser (4 × M3 × 5).
 4. Passer le fil dans l'œillet, visser le couvercle avant.
 5. Coller les cartes au dos de la cloison (mousse adhésive double face), câbler, passer le
    câble réseau par l'encoche du capot, visser le capot arrière.

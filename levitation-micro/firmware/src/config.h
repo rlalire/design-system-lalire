@@ -1,5 +1,5 @@
 // Réglages du bloc treuil, version MICRO : objets de quelques grammes sur fil très fin.
-// Moteur de gimbal CubeMars GL35 KV100 avec encodeur, en prise directe, piloté en couple
+// Moteur de gimbal CubeMars GL35 KV100 avec encodeur AS5048A, en prise directe, piloté en couple
 // (bibliothèque SimpleFOC). Bobine étroite de 80 mm, sortie du fil par un œillet fixe.
 #pragma once
 #include <Arduino.h>
@@ -24,10 +24,10 @@
 #define R_EFF_MM           ((DRUM_DIAMETER_MM + LINE_DIAMETER_MM) / 2.0f)
 #define DIR_SIGN           1.0f       // mettre -1 si « positif » fait monter l'objet
 
-// ---------- Moteur : CubeMars GL35 KV100, valeurs relevées sur les fiches des revendeurs ----------
+// ---------- Moteur : CubeMars GL35 KV100, valeurs confirmées par CubeMars ----------
 #define MOTOR_POLE_PAIRS   7
 #define MOTOR_PHASE_R      1.8f       // une phase = la moitié des 3,6 ohms annoncés entre phases
-#define MOTOR_KV           82.5f      // tr/min par volt, valeur mesurée annoncée (nom commercial : KV100)
+#define MOTOR_KV           82.5f      // tr/min par volt : 990 tr/min à vide sous 12 V (nom commercial : KV100)
 #define SUPPLY_VOLTAGE     12.0f
 #define MOTOR_KT           0.115f                             // N·m par ampère, annoncé
 // Inertie de la partie tournante (rotor + bobine), kg·m². Sert à calculer les gains.
@@ -71,7 +71,7 @@
 #define PIN_PWM_B        5
 #define PIN_PWM_C       13
 #define PIN_DRV_EN      14
-#define PIN_ENC_CS      16            // encodeur en SPI : SCK 15, MISO 35, MOSI 2
+#define PIN_ENC_CS      16            // encodeur AS5048A en SPI, 14 bits : SCK 15, MISO 35, MOSI 2
 #define PIN_ENC_SCK     15
 #define PIN_ENC_MISO    35
 #define PIN_ENC_MOSI     2

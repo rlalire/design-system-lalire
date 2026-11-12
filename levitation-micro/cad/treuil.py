@@ -3,9 +3,9 @@
     pip install cadquery
     python3 treuil.py
 
-Pour des objets de quelques grammes sur un fil très fin. Moteur de gimbal CubeMars G35
-(encodeur intégré, carter fixe) en prise directe : la bobine est une cloche vissée sur le
-moyeu tournant du moteur et entoure son carter. Le fil sort par un œillet céramique fixe.
+Pour des objets de quelques grammes sur un fil très fin. Moteur de gimbal CubeMars GL35
+KV100 avec encodeur, en prise directe : la bobine est une cloche vissée sur la face
+tournante du moteur et l'entoure. Le fil sort par un œillet céramique fixe.
 
 Quatre pièces à imprimer, toutes posées à plat et sans supports :
   corps            cloison porte-moteur + chambre du fil + pattes d'accroche
@@ -14,8 +14,8 @@ Quatre pièces à imprimer, toutes posées à plat et sans supports :
   bobine           cloche à gorge (à imprimer en résine pour une surface lisse)
 
 Produit dans ./export, pour chaque pièce, un fichier STEP et un fichier STL, plus
-l'assemblage complet (treuil.step). Les cotes du moteur viennent du fichier 3D du
-fabricant (fabricant/G35_sans_driver.stp), repris tel quel dans l'assemblage.
+l'assemblage complet (treuil.step). Les cotes du moteur viennent du plan coté fourni par
+CubeMars pour le GL35 avec encodeur ; le moteur est figuré par un simple cylindre.
 
 Cotes en millimètres. X = axe du moteur, Z = vertical, le fil sort vers le bas.
 """
@@ -24,7 +24,6 @@ import os
 import cadquery as cq
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-VENDOR_STEP = os.path.join(HERE, "fabricant", "G35_sans_driver.stp")
 
 # ---------- Paramètres (les mêmes que firmware/src/config.h) ----------
 DRUM_D = 80.0          # diamètre de la bobine, fond de gorge
@@ -33,12 +32,12 @@ SLOT_W = 2.0           # largeur de la gorge
 SLOT_DEPTH = 6.0
 TRAVEL_M = 10.0
 
-# ---------- Moteur CubeMars G35 (fichier 3D du fabricant) ----------
-MOTOR_D, MOTOR_L = 49.8, 31.11
-BASE_PCD = 25.0                                    # 4 x M3 à l'arrière, profondeur 4
-HUB_D, HUB_PCD, HUB_BORE = 20.0, 15.0, 6.5         # moyeu avant : 4 x M3, profondeur 6, arbre creux
-HUB_PROUD = 1.0                                    # le moyeu dépasse de 1 mm de l'épaulement de 32 mm
-WIRES_R, WIRES_DEG = 16.6, 135.0                   # sortie des fils sur la face arrière
+# ---------- Moteur CubeMars GL35 KV100 avec encodeur (plan coté du fabricant) ----------
+MOTOR_D, MOTOR_L = 41.8, 33.5                      # longueur avec l'encodeur, tolérance +/- 0,2
+BASE_PCD = 24.0                                    # 4 x M3 à l'arrière (côté fixe), profondeur 5
+HUB_PCD, HUB_BORE = 20.0, 6.0                      # face tournante : 4 x M3, profondeur 2,5 seulement
+SPIGOT_H = 1.2                                     # téton de centrage dans l'alésage de 6 mm
+WIRES_R, WIRES_DEG = 16.5, 135.0                   # sortie des fils sur la face arrière, en diagonale
 
 # ---------- Jeux et visserie ----------
 M3_CLEAR, M3_PILOT = 3.4, 2.6                      # trou de passage / avant-trou où la vis M3 forme son filet
@@ -50,11 +49,11 @@ LINE_PER_TURN = math.pi * (DRUM_D + LINE_D)
 TURNS = TRAVEL_M * 1000 / LINE_PER_TURN
 FLANGE_D = DRUM_D + 2 * SLOT_DEPTH
 REEL_W = SLOT_W + 4.0                              # deux joues de 2 mm
-WALL, PART_T, DISC_T = 2.5, 3.0, 3.5
-BORE_D = 56.0                                      # la cloche entoure le carter (jeu de 3 mm au rayon)
+WALL, PART_T, DISC_T = 2.5, 3.0, 3.0
+BORE_D = 46.0                                      # la cloche entoure le moteur (jeu de 2,1 mm au rayon)
 X_MOTOR = PART_T                                   # le moteur est vissé à plat sur la cloison
 X_REEL = X_MOTOR + 4.0                             # face arrière de la bobine
-X_HUB = X_MOTOR + MOTOR_L                          # face du moyeu = appui de la bobine
+X_HUB = X_MOTOR + MOTOR_L + 0.2                    # face tournante = appui de la bobine (tolérance comprise)
 X_LINE = X_REEL + REEL_W / 2                       # plan du fil
 X_FRONT = round(X_HUB + DISC_T + 3.6, 1)           # face intérieure du couvercle avant
 X_REAR = -18.0                                     # fond de la chambre de l'électronique
@@ -96,8 +95,7 @@ def corps():
         b = b.union(cyl_x(COL_D, X_FRONT - PART_T, PART_T, c).intersect(shell(0, X_FRONT)))
     for c in CORNERS:
         b = b.cut(cyl_x(M3_PILOT, X_FRONT, 0, c))                        # vis du capot (arrière) et du couvercle (avant)
-    b = b.cut(cyl_x(10.5, PART_T, 0))                                    # accès à l'arbre creux
-    for a in range(4):                                                   # 4 vis M3 x 6 du moteur, sur Ø 25
+    for a in range(4):                                                   # 4 vis M3 x 6 du moteur, sur Ø 24
         ang = a * math.pi / 2
         b = b.cut(cyl_x(M3_CLEAR, PART_T, 0, (BASE_PCD / 2 * math.cos(ang), BASE_PCD / 2 * math.sin(ang))))
     for d in (-10, 10):                                                  # passage des fils du moteur
@@ -133,17 +131,15 @@ def couvercle_avant():
 def bobine():
     """Bobine en cloche, repère local : x = 0 sur sa face arrière.
 
-    Une jante étroite porte la gorge ; un manchon mince la relie au fond, qui se pose sur le
-    moyeu du moteur. Une petite collerette centre la bobine sur ce moyeu."""
+    Une jante étroite porte la gorge ; un manchon mince la relie au fond, qui se pose sur la
+    face tournante du moteur. Un téton la centre dans l'alésage de 6 mm de cette face."""
     depth = X_HUB + DISC_T - X_REEL
     seat = depth - DISC_T                                                # plan d'appui sur le moyeu
     r = cyl_x(DRUM_D, REEL_W, 0).union(cyl_x(BORE_D + 6, depth, 0))      # jante + manchon
     r = r.union(cyl_x(FLANGE_D, 2, 0)).union(cyl_x(FLANGE_D, 2, REEL_W - 2))   # deux joues
     r = r.cut(cyl_x(BORE_D, seat, 0))                                    # logement du carter
-    collar = cyl_x(HUB_D + 4, 0.6, seat - 0.6).cut(cyl_x(HUB_D + FIT, 0.6, seat - 0.6))
-    r = r.union(collar)                                                  # collerette de centrage
-    r = r.cut(cyl_x(HUB_BORE, depth, 0))                                 # arbre creux
-    for a in range(4):                                                   # 4 vis M3 x 8 sur Ø 15
+    r = r.union(cyl_x(HUB_BORE - FIT, SPIGOT_H, seat - SPIGOT_H))        # téton de centrage
+    for a in range(4):                                                   # 4 vis M3 x 5 sur Ø 20
         ang = a * math.pi / 2
         r = r.cut(cyl_x(M3_CLEAR, depth, 0, (HUB_PCD / 2 * math.cos(ang), HUB_PCD / 2 * math.sin(ang))))
     r = r.cut(cyl_x(1.0, 2, 0, (DRUM_D / 2 + 1.5, 0)))                   # trou d'ancrage du fil dans une joue
@@ -151,11 +147,8 @@ def bobine():
 
 
 def motor_shape():
-    """Le moteur : le fichier du fabricant s'il est présent, sinon un simple cylindre."""
-    if os.path.exists(VENDOR_STEP):
-        m = cq.importers.importStep(VENDOR_STEP)                         # moyeu en x = 0 dans le fichier
-        return m.translate((X_MOTOR - m.val().BoundingBox().xmin, 0, 0))
-    return cyl_x(MOTOR_D, MOTOR_L - 4, X_MOTOR).union(cyl_x(HUB_D, 4, X_MOTOR + MOTOR_L - 4))
+    """Le moteur, figuré par son enveloppe : Ø 41,8 x 33,5 avec l'alésage de 6 mm en bout."""
+    return cyl_x(MOTOR_D, MOTOR_L, X_MOTOR).cut(cyl_x(HUB_BORE, 3, X_MOTOR + MOTOR_L - 3))
 
 
 # Pièces à imprimer : nom -> (fonction, direction d'impression, matière conseillée)
@@ -220,5 +213,5 @@ if __name__ == "__main__":
     clash = [(a, b) for i, a in enumerate(names) for b in names[i + 1:]
              if (a, b) not in ok_pairs and parts[a][0].intersect(parts[b][0]).val().Volume() > 1e-2]
     print("Interférences :", clash or "aucune")
-    hub_gap = HUB_PROUD - 0.6                                            # la collerette fait 0,6 mm de haut
-    print(f"Jeu entre la collerette de la bobine et l'épaulement du moteur : {hub_gap:.1f} mm")
+    print(f"Jeu entre la bobine et le moteur : {(BORE_D - MOTOR_D) / 2:.1f} mm au rayon, "
+          f"{X_HUB - X_MOTOR - MOTOR_L:.1f} mm en bout (tolérance de longueur du moteur)")
