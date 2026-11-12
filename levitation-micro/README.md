@@ -3,7 +3,7 @@
 Un boîtier fermé de **112 × 123 × 66 mm**, accroché par un spigot de 16 mm pour faire voler des objets de quelques grammes
 (bague, pliage de papier, carton) au bout d'un fil très fin. Le fil sort par un seul œillet.
 
-**État : conception v0.7, pièces du prototype dessinées pour l'impression 3D, rien n'est encore construit.** Le firmware passe 31 vérifications
+**État : conception v0.8, pièces du prototype dessinées pour l'impression 3D, rien n'est encore construit.** Le firmware passe 31 vérifications
 dans une simulation sur PC qui reproduit le moteur, la bobine et un objet suspendu. Il n'a pas
 été compilé pour la carte ni essayé sur un moteur.
 
@@ -130,8 +130,9 @@ qu'un à la fois.
 - Chaque filetage se visse dans un **écrou M10 prisonnier**, glissé par l'avant dans un
   bossage du corps. Les écrous ne peuvent ni tourner ni sortir une fois le couvercle fermé.
 - Monter les deux écrous dès l'assemblage : on change ensuite d'emplacement sans rouvrir.
-- Une patte percée à 5,2 mm, sur le dessus, reçoit une **élingue de sécurité** reliée au
-  support, comme pour tout appareil accroché en hauteur.
+- L'emplacement resté libre reçoit un **anneau à vis M10**, où passe l'**élingue de
+  sécurité** reliée au support, comme pour tout appareil accroché en hauteur. Le boîtier
+  n'a donc plus aucune patte qui dépasse. Filetage de l'anneau : 20 mm au plus.
 - Le câble réseau sort par l'autre côté du capot, pour ne gêner aucune des deux pinces.
 
 Le filetage du spigot fait 20 mm : il traverse tout l'écrou et s'arrête à 8,5 mm de la
@@ -183,7 +184,7 @@ Quatre pièces à imprimer. Chacune se pose à plat sur le plateau et s'imprime 
 
 | Pièce | Fichiers | Taille | Matière | Sens d'impression |
 |---|---|---|---|---|
-| Corps | `cad/export/corps.stl` / `.step` | 112 × 135 × 43 mm, 106 cm³ | nylon PA12 (MJF) ou PETG | cloison sur le plateau |
+| Corps | `cad/export/corps.stl` / `.step` | 112 × 123 × 43 mm, 104 cm³ | nylon PA12 (MJF) ou PETG | cloison sur le plateau |
 | Capot arrière | `cad/export/capot_arriere.stl` / `.step` | 112 × 123 × 20,5 mm, 58 cm³ | nylon PA12 (MJF) ou PETG | fond sur le plateau |
 | Couvercle avant | `cad/export/couvercle_avant.stl` / `.step` | 112 × 123 × 2,5 mm, 34 cm³ | nylon PA12 (MJF) ou PETG | à plat |
 | Bobine | `cad/export/bobine.stl` / `.step` | Ø 92 × 32,7 mm, 44 cm³ | **résine (SLA)** | fond de la cloche sur le plateau |
@@ -205,7 +206,7 @@ Toutes les pièces tiennent sur un plateau de 180 × 180 mm. Chez un imprimeur e
 | Capot arrière | M3 × 30 | 4 |
 | Accroche | spigot 16 mm à filetage M10 de 20 mm, pince Super Clamp | 1 de chaque |
 | Accroche | écrou M10 (17 sur plats, 8 d'épaisseur) | 2 |
-| Sécurité | élingue fine avec mousqueton, dans la patte de 5,2 mm | 1 |
+| Sécurité | anneau à vis M10 (filetage de 20 mm au plus) et élingue fine avec mousqueton | 1 |
 
 Les vis du couvercle et du capot se vissent directement dans le plastique des colonnes
 d'angle (avant-trous de 2,6 mm) : elles y forment leur filet. Cela tient une dizaine de

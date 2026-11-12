@@ -21,7 +21,7 @@ NOTES = {
         ("Colonnes de vissage", f"4 avant-trous Ø {t.M3_PILOT} traversants, dans les angles"),
         ("Logement de l'œillet", f"Ø {t.EYELET_OD + t.FIT:.1f} dans le fond, à {t.EYE_Y:.1f} mm de l'axe"),
         ("Accroche", f"2 bossages avec écrou M10 prisonnier (17 sur plats) et trou Ø 10,5, à {t.SPIGOT_X:.0f} mm de la cloison : un sur le dessus, un sur le côté"),
-        ("Élingue de sécurité", "1 patte de 16 × 12 × 12 mm, trou Ø 5,2"),
+        ("Élingue de sécurité", "anneau à vis M10 dans l'emplacement de spigot resté libre"),
         ("Parois", f"{t.WALL} mm"),
     ],
     "capot_arriere": [

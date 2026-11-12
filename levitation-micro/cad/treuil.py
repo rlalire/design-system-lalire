@@ -65,12 +65,12 @@ COL_D = 9.0                                        # colonnes de vissage dans le
 CORNERS = [(y, z) for y in (IN_Y[0] + 4.5, IN_Y[1] - 4.5) for z in (IN_Z[0] + 4.5, IN_Z[1] - 4.5)]
 # Accroche : un spigot de 16 mm à filetage M10 (pour pince type Super Clamp) se visse dans un
 # écrou M10 prisonnier. Deux emplacements : sur le dessus, à l'aplomb du moteur, et sur le
-# côté opposé à la sortie du fil, à la hauteur de l'axe du moteur.
+# côté opposé à la sortie du fil, à la hauteur de l'axe du moteur. L'emplacement libre
+# reçoit un anneau à vis M10 pour l'élingue de sécurité.
 SPIGOT_X = 27.0                                    # à l'aplomb du moteur, pour que le bloc pende droit
 NUT_AF, NUT_H = 17.0, 8.0                          # écrou M10 : 17 sur plats, 8 d'épaisseur
 SPIGOT_THREAD = 20.0                               # longueur du filetage M10 du spigot
 BOSS_HALF_W, BOSS_H = 13.0, 12.0
-SAFETY_Y = IN_Y[0] + 12                            # patte pour l'élingue de sécurité
 CABLE_Z = (18.0, 36.0)                             # passage du câble réseau, sur le côté du capot
 
 COLORS = {"boitier": (0.20, 0.20, 0.22), "capot": (0.26, 0.26, 0.29), "bobine": (0.85, 0.65, 0.15),
@@ -124,9 +124,6 @@ def corps():
     b = b.union(box(16, X_FRONT, IN_Y[0], IN_Y[0] + BOSS_H, -BOSS_HALF_W, BOSS_HALF_W))
     b = b.cut(box(back, X_FRONT, IN_Y[0] + BOSS_H - 2.6 - NUT_H, IN_Y[0] + BOSS_H - 2.0, -half, half))
     b = b.cut(hole.rotate((0, 0, 0), (1, 0, 0), 90).translate((SPIGOT_X, IN_Y[0] + BOSS_H, 0)))
-    # Patte pour l'élingue de sécurité, trou de 5,2
-    b = b.union(box(0, 12, SAFETY_Y - 8, SAFETY_Y + 8, OUT_Z[1], OUT_Z[1] + 12))
-    b = b.cut(cyl_x(5.2, 12, 0, (SAFETY_Y, OUT_Z[1] + 6)))
     return b
 
 
