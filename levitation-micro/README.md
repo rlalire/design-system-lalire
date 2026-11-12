@@ -98,8 +98,8 @@ Références et prix à confirmer ; ce sont des ordres de grandeur.
 | Divers | Visserie, connecteurs, mousse | 10 € |
 | | **Total par bloc** | **environ 150 à 200 €** |
 
-Il faut un switch réseau PoE pour alimenter les blocs. Le moteur est donné pour 16 V ; en
-12 V il garde assez de vitesse sur le papier (1200 tr/min à vide pour 717 nécessaires).
+Il faut un switch réseau PoE pour alimenter les blocs. Le moteur est donné pour 16 V ; voir
+« Avant de commander » pour la vitesse en 12 V.
 
 ## Câblage
 
@@ -126,13 +126,20 @@ moteur et peuvent le bloquer ou l'abîmer.
 
 ## Avant de commander
 
-Il reste trois points à confirmer sur la fiche du moteur ou à réception. Ils se règlent dans
-`firmware/src/config.h` et `cad/treuil.py` :
+Les valeurs électriques du moteur sont maintenant dans le firmware, d'après les fiches des
+revendeurs : 7 paires de pôles, 3,6 ohms entre phases, 0,115 N·m par ampère, 82,5 tr/min par
+volt. L'inertie du rotor reste une estimation.
 
-1. Le nombre de paires de pôles et la résistance d'une phase (réglage du pilotage).
-2. Le modèle d'encodeur et sa liaison (le firmware suppose un AS5048A en SPI).
-3. L'épaisseur de la version avec encodeur : le plan montre le moteur seul. La carte de
-   l'encodeur se loge derrière la cloison, où 14 mm sont disponibles.
+Il reste deux points à confirmer auprès de CubeMars :
+
+1. Le modèle d'encodeur et sa liaison (le firmware suppose un AS5048A en SPI).
+2. Les cotes de la version avec encodeur. Le plan utilisé est celui du GL35 seul (90 g). Le
+   G35, vendu avec encodeur, est annoncé à 159 g : c'est probablement un boîtier différent,
+   plus épais, et la maquette devra être reprise sur son plan.
+
+**Vitesse en 12 V.** Avec 82,5 tr/min par volt, le moteur plafonne vers 990 tr/min à vide
+en 12 V, pour 717 nécessaires à 3 m/s. La marge est faible : prévoir une alimentation 16 V
+si les 3 m/s comptent, ou accepter environ 2,5 m/s en 12 V.
 
 Restent aussi à dessiner : les vis de fermeture des couvercles et les supports des cartes.
 

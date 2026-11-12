@@ -5,7 +5,7 @@
 
 struct SimPlant {
   // Partie tournante et moteur
-  double J = 8.0e-5, Kt = 0.0827, R = 10.0, KV = 100.0, V = 12.0, r = 0.040025;
+  double J = 8.0e-5, Kt = 0.115, R = 1.8, KV = 82.5, V = 12.0, r = 0.040025;   // GL35 KV100
   double theta = 0, omega = 0, iq = 0, iReal = 0;
   bool enabled = false;
   // Monde

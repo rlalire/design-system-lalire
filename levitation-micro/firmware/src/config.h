@@ -24,12 +24,12 @@
 #define R_EFF_MM           ((DRUM_DIAMETER_MM + LINE_DIAMETER_MM) / 2.0f)
 #define DIR_SIGN           1.0f       // mettre -1 si « positif » fait monter l'objet
 
-// ---------- Moteur (valeurs à confirmer sur la fiche du moteur reçu) ----------
-#define MOTOR_POLE_PAIRS   11         // SimpleFOC affiche la valeur mesurée au démarrage
-#define MOTOR_PHASE_R      10.0f      // résistance d'une phase, ohms (à mesurer)
-#define MOTOR_KV           100.0f     // tr/min par volt
+// ---------- Moteur : CubeMars GL35 KV100, valeurs relevées sur les fiches des revendeurs ----------
+#define MOTOR_POLE_PAIRS   7
+#define MOTOR_PHASE_R      1.8f       // une phase = la moitié des 3,6 ohms annoncés entre phases
+#define MOTOR_KV           82.5f      // tr/min par volt, valeur mesurée annoncée (nom commercial : KV100)
 #define SUPPLY_VOLTAGE     12.0f
-#define MOTOR_KT           (8.27f / MOTOR_KV)                 // N·m par ampère
+#define MOTOR_KT           0.115f                             // N·m par ampère, annoncé
 // Inertie de la partie tournante (rotor + bobine), kg·m². Sert à calculer les gains.
 #define INERTIA_KGM2       8.0e-5f
 #define ACC_PER_AMP        (MOTOR_KT * R_EFF_MM / INERTIA_KGM2)   // mm/s² de fil par ampère
