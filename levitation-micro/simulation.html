@@ -121,7 +121,7 @@
   <header>
     <span class="eyebrow">Lévitation · bloc treuil</span>
     <h1>Treuil micro</h1>
-    <p class="lede">Un boîtier de 11 × 12 × 6,5 cm pour faire voler une bague ou un pliage de papier au bout d'un fil fin comme un cheveu. Un moteur de gimbal silencieux entraîne la bobine, et le fil sort par un seul œillet.</p>
+    <p class="lede">Un boîtier de 11 × 12 × 7 cm pour faire voler une bague ou un pliage de papier au bout d'un fil fin comme un cheveu. Un moteur de gimbal silencieux entraîne la bobine, et le fil sort par un seul œillet.</p>
   </header>
 
   <div class="stage" id="stage">
@@ -179,7 +179,7 @@
   var DRUM_D = 80, LINE_D = 0.05, FLANGE_D = 92, REEL_W = 6, CAPACITY = 10000;
   var PER_TURN = Math.PI * (DRUM_D + LINE_D);                  // 251,5 mm de fil par tour
   var X_REEL = 7, X_LINE = X_REEL + REEL_W / 2, R_LINE = DRUM_D / 2, X_DISC = 36.7;
-  var BOX = { x0: -20.5, x1: 45.8, y0: -68.5, y1: 54.5, z0: -54.5, z1: 57.5 }, WALL = 2.5;
+  var BOX = { x0: -24.5, x1: 45.8, y0: -68.5, y1: 54.5, z0: -54.5, z1: 57.5 }, WALL = 2.5;
   var VUP = 3000, VDOWN = 1500, AMAX = 4000, G = 9810;          // mm/s et mm/s²
   var TRAVEL = 3000, CEILING = 3600, HANG_MIN = 60, MASS = 5;   // salle de 3,6 m, bague de 5 g
   var RING_R = 10;
@@ -245,9 +245,9 @@
   var pipe = new THREE.Mesh(new THREE.CylinderGeometry(24, 24, 3000, 32), mat.metal); pipe.rotation.x = Math.PI / 2; pipe.position.set(27, B.y1 + 86, 0); block.add(pipe);
   // Moteur de gimbal vissé sur la cloison ; encodeur et cartes dans la chambre arrière
   block.add(cylX(41.8, 33.5, 3, 0, 0, mat.dark));                                 // moteur GL35 avec son encodeur
-  block.add(box(-12, -2, 22, 50, -40, 36, mat.board));
-  block.add(box(-10, -2, -15, 11, -48, -22, mat.board));
-  block.add(box(-12, -2, -62, -34, -48, 22, mat.board));
+  block.add(box(-17, -1, 22, 50, -40, 40, mat.board));
+  block.add(box(-9, -1, -12, 9, -50, -24, mat.board));
+  block.add(box(-19, -1, -64, -26, -12, 26, mat.board));
   // Œillet céramique dans le fond du boîtier
   var eye = new THREE.Mesh(new THREE.TorusGeometry(2.1, 0.9, 12, 28), mat.eye);
   eye.rotation.x = Math.PI / 2; eye.position.set(X_LINE, B.y0 + 1, R_LINE); block.add(eye);

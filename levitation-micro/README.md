@@ -1,9 +1,9 @@
 # Lévitation — bloc treuil micro
 
-Un boîtier fermé de **112 × 123 × 66 mm**, accroché par un spigot de 16 mm pour faire voler des objets de quelques grammes
+Un boîtier fermé de **112 × 123 × 70 mm**, accroché par un spigot de 16 mm pour faire voler des objets de quelques grammes
 (bague, pliage de papier, carton) au bout d'un fil très fin. Le fil sort par un seul œillet.
 
-**État : conception v0.8, pièces du prototype dessinées pour l'impression 3D, rien n'est encore construit.** Le firmware passe 31 vérifications
+**État : conception v0.9, pièces du prototype dessinées pour l'impression 3D, rien n'est encore construit.** Le firmware passe 31 vérifications
 dans une simulation sur PC qui reproduit le moteur, la bobine et un objet suspendu. Il n'a pas
 été compilé pour la carte ni essayé sur un moteur.
 
@@ -61,7 +61,7 @@ origine connue, défaut, tension estimée (g). L'état 9 est le test de rupture.
 | Vitesse en montée | jusqu'à 3 m/s (717 tr/min), **à confirmer sur le prototype** |
 | Vitesse en descente | limitée à 1,5 m/s, réglable par objet |
 | Accélération | 4 m/s² |
-| Boîtier | 112 × 123 × 66 mm, moteur et électronique compris |
+| Boîtier | 112 × 123 × 70 mm, moteur et électronique compris |
 
 En simulation, avec un objet de 5 g : arrivée à moins de 0,3 mm de la cible, écart de suivi
 de 1,6 mm à 0,9 m/s et de 5 mm à 3 m/s, retard d'environ 8 ms sur une consigne envoyée en
@@ -89,22 +89,53 @@ réelle) : ils donnent un ordre de grandeur, pas une garantie.
 
 ## Composants
 
-Références et prix à confirmer ; ce sont des ordres de grandeur.
+Prix en ordres de grandeur, non vérifiés sauf mention contraire.
 
-| Fonction | Composant | Prix indicatif |
-|---|---|---|
-| Moteur | CubeMars GL35 KV100 avec encodeur | 73 $ pièce par 4 (devis CubeMars), 79,99 $ à l'unité |
-| Carte de commande du moteur | Carte compatible SimpleFOC, 3 sorties, 12 V, 1 A ou plus (par exemple SimpleFOC Mini) | 15 € |
-| Carte | Olimex ESP32-POE (Ethernet) | 25 € |
-| Alimentation | Séparateur PoE 12 V (le courant arrive par le câble réseau) et petit convertisseur 5 V | 15 € |
-| Sortie du fil | Œillet céramique, diamètre intérieur 2 à 3 mm | 2 € |
-| Bobine | Impression résine, 92 mm de diamètre, environ 53 g | à chiffrer |
-| Boîtier | Corps, capot arrière et couvercle avant imprimés | à chiffrer |
-| Divers | Visserie, connecteurs, mousse | 10 € |
-| | **Total par bloc** | **environ 150 à 200 €** |
+| Fonction | Composant | Taille | Prix indicatif |
+|---|---|---|---|
+| Moteur | CubeMars GL35 KV100 avec encodeur | Ø 41,8 × 33,5 mm | 73 $ pièce par 4 (devis), 79,99 $ à l'unité |
+| Commande du moteur | SimpleFOC Mini (DRV8313), 8 à 30 V, 2,5 A par phase, sans mesure de courant | 26 × 21 mm | 15 € |
+| Carte | Olimex ESP32-POE (Ethernet) | 80 × 28 mm | 25 € |
+| Alimentation | Module séparateur PoE 802.3af avec sortie 12 V, 1 A (par exemple Banana Pi BPI-7604) | 38 × 38 × 18 mm | 10 à 15 € |
+| Alimentation | Convertisseur 12 V vers 5 V, 1 A | environ 22 × 17 mm | 3 € |
+| Sortie du fil | Bague céramique, diamètre extérieur 6 mm, trou de 2 à 3 mm | | 2 € |
+| Bobine | Impression résine, 92 mm de diamètre, environ 53 g | | à chiffrer |
+| Boîtier | Corps, capot arrière et couvercle avant imprimés | | à chiffrer |
+| Accroche | Spigot 16 mm M10, 2 écrous M10, pince Super Clamp, anneau à vis M10, élingue | | 40 à 50 € |
+| Divers | Visserie M3, câbles, mousse adhésive | | 10 € |
+| | **Total par bloc, hors impression** | | **environ 200 à 230 €** |
 
-Il faut un switch réseau PoE pour alimenter les blocs. Le moteur est donné pour 16 V ; voir
-« Ce qui reste à vérifier » pour la vitesse en 12 V.
+Pour l'ensemble : un **switch réseau PoE à la norme 802.3af**, au moins 5 ports pour quatre
+blocs et l'ordinateur (40 à 60 € en 8 ports), et des câbles réseau de catégorie 5e ou 6.
+
+## Alimentation
+
+Un seul câble réseau arrive à chaque bloc. Il apporte le courant (PoE) et les commandes.
+
+```
+ switch PoE ── câble réseau ── module séparateur PoE
+                                 ├─ 12 V ──> SimpleFOC Mini ──> moteur
+                                 ├─ 12 V ──> convertisseur 5 V ──> carte ESP32
+                                 └─ réseau ─> carte ESP32 (court câble interne)
+```
+
+- Le PoE fournit environ 12 W par bloc. Le moteur en consomme moins d'un pour tenir 50 g,
+  l'électronique environ 1,5 W.
+- Prendre un séparateur **actif, norme 802.3af**. Les modèles « passifs », moins chers, ne
+  suivent pas la norme et peuvent endommager une carte.
+- La carte Olimex sait s'alimenter seule par le câble réseau, mais seulement en 5 V : cette
+  fonction ne sert pas ici, puisque le moteur a besoin de 12 V. Une carte ESP32 Ethernet plus
+  petite (WT32-ETH01, 60 × 25 mm) conviendrait aussi, au prix d'une adaptation des broches
+  dans le firmware.
+
+**Pour les premiers essais sur table**, le plus simple est de se passer du PoE : un bloc
+secteur 12 V, 2 A sur la carte de commande et le convertisseur, et un câble réseau ordinaire.
+
+**Ce qui est vérifié et ce qui ne l'est pas.** Les tailles des cartes viennent de leurs
+fiches et tiennent sans se toucher dans le capot, profond de 22 mm. Je n'ai pas vérifié
+la hauteur réelle des prises réseau, la place des connecteurs et des câbles internes, ni le
+fait que le module Banana Pi soit isolé. Le capot est donc à imprimer une fois les cartes
+en main. Pour 3 m/s, le passage en 16 V demandera une autre alimentation.
 
 ## Câblage
 
@@ -185,7 +216,7 @@ Quatre pièces à imprimer. Chacune se pose à plat sur le plateau et s'imprime 
 | Pièce | Fichiers | Taille | Matière | Sens d'impression |
 |---|---|---|---|---|
 | Corps | `cad/export/corps.stl` / `.step` | 112 × 123 × 43 mm, 104 cm³ | nylon PA12 (MJF) ou PETG | cloison sur le plateau |
-| Capot arrière | `cad/export/capot_arriere.stl` / `.step` | 112 × 123 × 20,5 mm, 58 cm³ | nylon PA12 (MJF) ou PETG | fond sur le plateau |
+| Capot arrière | `cad/export/capot_arriere.stl` / `.step` | 112 × 123 × 24,5 mm, 63 cm³ | nylon PA12 (MJF) ou PETG | fond sur le plateau |
 | Couvercle avant | `cad/export/couvercle_avant.stl` / `.step` | 112 × 123 × 2,5 mm, 34 cm³ | nylon PA12 (MJF) ou PETG | à plat |
 | Bobine | `cad/export/bobine.stl` / `.step` | Ø 92 × 32,7 mm, 44 cm³ | **résine (SLA)** | fond de la cloche sur le plateau |
 
@@ -230,7 +261,7 @@ vis M3 × 6 s'engage de 3 mm. Côté bobine, voir l'avertissement plus haut : M3
 ### Ce qui reste approximatif
 
 - **Les cartes électroniques** n'ont pas de support dédié : je n'ai pas leurs cotes
-  vérifiées. Le capot offre 18 mm de profondeur, prévus pour la prise réseau de la carte.
+  vérifiées. Le capot offre 22 mm de profondeur, pour le module PoE et les prises réseau.
   À contrôler sur les cartes achetées avant de lancer l'impression du capot.
 - **L'œillet** : le logement fait 6,2 mm, pour un œillet de 6 mm de diamètre extérieur.
   À ajuster à l'œillet acheté (`EYELET_OD` dans `cad/treuil.py`).

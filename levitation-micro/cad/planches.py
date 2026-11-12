@@ -28,6 +28,7 @@ NOTES = {
         ("Encombrement", "{y:.0f} × {z:.0f} × {x:.1f} mm"),
         ("Profondeur utile pour les cartes", f"{-t.X_REAR:.0f} mm"),
         ("Fixation sur le corps", f"4 trous Ø {t.M3_CLEAR} dans les colonnes d'angle (vis M3 × 30)"),
+        ("Cartes logées", "ESP32 80 × 28, commande moteur 26 × 21, module PoE 38 × 38 × 18, convertisseur 5 V"),
         ("Passage du câble réseau", f"encoche de {t.CABLE_Z[1] - t.CABLE_Z[0]:.0f} × 14 mm dans une paroi latérale"),
         ("Parois et fond", f"{t.WALL} mm"),
     ],

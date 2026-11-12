@@ -56,7 +56,7 @@ X_REEL = X_MOTOR + 4.0                             # face arrière de la bobine
 X_HUB = X_MOTOR + MOTOR_L + 0.2                    # face tournante = appui de la bobine (tolérance comprise)
 X_LINE = X_REEL + REEL_W / 2                       # plan du fil
 X_FRONT = round(X_HUB + DISC_T + 3.6, 1)           # face intérieure du couvercle avant
-X_REAR = -18.0                                     # fond de la chambre de l'électronique
+X_REAR = -22.0                                     # fond de la chambre de l'électronique (module PoE de 18 mm)
 IN_Y, IN_Z = (-52.0, 55.0), (-66.0, 52.0)          # intérieur du boîtier
 OUT_Y, OUT_Z = (IN_Y[0] - WALL, IN_Y[1] + WALL), (IN_Z[0] - WALL, IN_Z[1] + WALL)
 EYE_Y = DRUM_D / 2 + LINE_D / 2                    # le fil descend à la verticale du bord de la bobine
@@ -71,7 +71,7 @@ SPIGOT_X = 27.0                                    # à l'aplomb du moteur, pour
 NUT_AF, NUT_H = 17.0, 8.0                          # écrou M10 : 17 sur plats, 8 d'épaisseur
 SPIGOT_THREAD = 20.0                               # longueur du filetage M10 du spigot
 BOSS_HALF_W, BOSS_H = 13.0, 12.0
-CABLE_Z = (18.0, 36.0)                             # passage du câble réseau, sur le côté du capot
+CABLE_Z = (-54.0, -36.0)                           # passage du câble réseau, sur le côté, face au module PoE
 
 COLORS = {"boitier": (0.20, 0.20, 0.22), "capot": (0.26, 0.26, 0.29), "bobine": (0.85, 0.65, 0.15),
           "moteur": (0.12, 0.12, 0.13), "carte": (0.18, 0.55, 0.34), "oeillet": (0.95, 0.95, 0.92)}
@@ -196,10 +196,11 @@ def build():
                    .faces(">Z").workplane().circle(8).extrude(21.4)
                    .union(cq.Workplane("XY").workplane(offset=OUT_Z[1] - SPIGOT_THREAD).center(SPIGOT_X, 0)
                           .circle(4.9).extrude(SPIGOT_THREAD)), "oeillet"),
-        # Cartes : volumes indicatifs, collées au dos de la cloison
-        "carte_reseau": (box(-17, -1, -40, 36, 22, 50), "carte"),
-        "driver_moteur": (box(-9, -1, -48, -22, -15, 11), "carte"),
-        "alimentation_poe": (box(-13, -1, -38, 32, -62, -34), "carte"),
+        # Cartes, aux cotes relevées sur les fiches, collées au dos de la cloison
+        "carte_esp32": (box(-17, -1, -40, 40, 22, 50), "carte"),            # Olimex ESP32-POE, 80 x 28
+        "commande_moteur": (box(-9, -1, -50, -24, -12, 9), "carte"),        # SimpleFOC Mini, 26 x 21
+        "module_poe": (box(-19, -1, -12, 26, -64, -26), "carte"),           # séparateur PoE 12 V, 38 x 38 x 18
+        "convertisseur_5v": (box(-9, -1, -40, -18, -50, -33), "carte"),     # 12 V vers 5 V, 22 x 17
     }
 
 
