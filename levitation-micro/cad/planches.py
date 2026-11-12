@@ -20,14 +20,15 @@ NOTES = {
         ("Passage des fils du moteur", f"2 trous Ø 8 au rayon {t.WIRES_R} mm, autour de {t.WIRES_DEG:.0f}°"),
         ("Colonnes de vissage", f"4 avant-trous Ø {t.M3_PILOT} traversants, dans les angles"),
         ("Logement de l'œillet", f"Ø {t.EYELET_OD + t.FIT:.1f} dans le fond, à {t.EYE_Y:.1f} mm de l'axe"),
-        ("Pattes d'accroche", "2 pattes de 16 × 12 × 12 mm, trou Ø 5,2"),
+        ("Accroche", f"bossage avec écrou M10 prisonnier (17 sur plats), trou Ø 10,5 dans la paroi du haut, à {t.SPIGOT_X:.0f} mm de la cloison"),
+        ("Élingue de sécurité", "1 patte de 16 × 12 × 12 mm, trou Ø 5,2"),
         ("Parois", f"{t.WALL} mm"),
     ],
     "capot_arriere": [
         ("Encombrement", "{y:.0f} × {z:.0f} × {x:.1f} mm"),
         ("Profondeur utile pour les cartes", f"{-t.X_REAR:.0f} mm"),
         ("Fixation sur le corps", f"4 trous Ø {t.M3_CLEAR} dans les colonnes d'angle (vis M3 × 30)"),
-        ("Passage du câble réseau", f"encoche de {t.CABLE_Y[1] - t.CABLE_Y[0]:.0f} × 14 mm dans la paroi du haut"),
+        ("Passage du câble réseau", f"encoche de {t.CABLE_Z[1] - t.CABLE_Z[0]:.0f} × 14 mm dans une paroi latérale"),
         ("Parois et fond", f"{t.WALL} mm"),
     ],
     "couvercle_avant": [

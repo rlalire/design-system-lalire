@@ -8,7 +8,7 @@ KV100 avec encodeur, en prise directe : la bobine est une cloche vissée sur la 
 tournante du moteur et l'entoure. Le fil sort par un œillet céramique fixe.
 
 Quatre pièces à imprimer, toutes posées à plat et sans supports :
-  corps            cloison porte-moteur + chambre du fil + pattes d'accroche
+  corps            cloison porte-moteur + chambre du fil + bossage du spigot M10
   capot_arriere    bac qui ferme la chambre de l'électronique
   couvercle_avant  plaque qui ferme la chambre du fil
   bobine           cloche à gorge (à imprimer en résine pour une surface lisse)
@@ -63,8 +63,14 @@ EYE_Y = DRUM_D / 2 + LINE_D / 2                    # le fil descend à la vertic
 FLEET_DEG = math.degrees(math.atan((SLOT_W / 2) / abs(IN_Z[0])))
 COL_D = 9.0                                        # colonnes de vissage dans les quatre angles
 CORNERS = [(y, z) for y in (IN_Y[0] + 4.5, IN_Y[1] - 4.5) for z in (IN_Z[0] + 4.5, IN_Z[1] - 4.5)]
-LUGS_Y = (IN_Y[0] + 12, IN_Y[1] - 12)              # pattes d'accroche
-CABLE_Y = (-8.0, 9.0)                              # passage du câble réseau dans le capot
+# Accroche : un spigot de 16 mm à filetage M10 (pour pince type Super Clamp) se visse dans un
+# écrou M10 prisonnier, logé dans un bossage sous la paroi du haut, au-dessus du moteur.
+SPIGOT_X = 27.0                                    # à l'aplomb du moteur, pour que le bloc pende droit
+NUT_AF, NUT_H = 17.0, 8.0                          # écrou M10 : 17 sur plats, 8 d'épaisseur
+SPIGOT_THREAD = 20.0                               # longueur du filetage M10 du spigot
+BOSS_HALF_W, BOSS_H = 13.0, 12.0
+SAFETY_Y = IN_Y[0] + 12                            # patte pour l'élingue de sécurité
+CABLE_Z = (18.0, 36.0)                             # passage du câble réseau, sur le côté du capot
 
 COLORS = {"boitier": (0.20, 0.20, 0.22), "capot": (0.26, 0.26, 0.29), "bobine": (0.85, 0.65, 0.15),
           "moteur": (0.12, 0.12, 0.13), "carte": (0.18, 0.55, 0.34), "oeillet": (0.95, 0.95, 0.92)}
@@ -104,9 +110,16 @@ def corps():
     eye = (cq.Workplane("XY").workplane(offset=OUT_Z[0]).center(X_LINE, EYE_Y)
            .circle((EYELET_OD + FIT) / 2).extrude(WALL))                 # logement de l'œillet
     b = b.cut(eye)
-    for y in LUGS_Y:                                                     # pattes d'accroche, trou de 5,2
-        b = b.union(box(0, 12, y - 8, y + 8, OUT_Z[1], OUT_Z[1] + 12))
-        b = b.cut(cyl_x(5.2, 12, 0, (y, OUT_Z[1] + 6)))
+    # Bossage du spigot : il pend sous la paroi du haut, au-dessus de la cloche de la bobine
+    b = b.union(box(16, X_FRONT, -BOSS_HALF_W, BOSS_HALF_W, IN_Z[1] - BOSS_H, IN_Z[1]))
+    nut_z0 = IN_Z[1] - BOSS_H + 2.0                                      # 2 mm de matière sous l'écrou
+    back = SPIGOT_X - NUT_AF / math.sqrt(3) - 0.3                        # fond de la glissière (pointe de l'écrou)
+    b = b.cut(box(back, X_FRONT, -(NUT_AF + 0.4) / 2, (NUT_AF + 0.4) / 2, nut_z0, nut_z0 + NUT_H + 0.6))
+    b = b.cut(cq.Workplane("XY").workplane(offset=IN_Z[1] - BOSS_H).center(SPIGOT_X, 0)
+              .circle(5.25).extrude(BOSS_H + WALL))                      # passage du filetage M10
+    # Patte pour l'élingue de sécurité, trou de 5,2
+    b = b.union(box(0, 12, SAFETY_Y - 8, SAFETY_Y + 8, OUT_Z[1], OUT_Z[1] + 12))
+    b = b.cut(cyl_x(5.2, 12, 0, (SAFETY_Y, OUT_Z[1] + 6)))
     return b
 
 
@@ -117,7 +130,7 @@ def capot_arriere():
         b = b.union(cyl_x(COL_D, -X_REAR, X_REAR, c).intersect(shell(X_REAR, 0)))
     for c in CORNERS:
         b = b.cut(cyl_x(M3_CLEAR, WALL - X_REAR, X_REAR - WALL, c))      # 4 vis M3 x 30 vers le corps
-    b = b.cut(box(X_REAR + 4, 0, CABLE_Y[0], CABLE_Y[1], IN_Z[1], OUT_Z[1]))   # passage du câble réseau
+    b = b.cut(box(X_REAR + 4, 0, IN_Y[1], OUT_Y[1], CABLE_Z[0], CABLE_Z[1]))   # passage du câble réseau, sur le côté
     return b
 
 
@@ -170,6 +183,12 @@ def build():
         "moteur": (motor_shape(), "moteur"),
         "bobine": (bobine().translate((X_REEL, 0, 0)), "bobine"),
         "oeillet": (eye, "oeillet"),
+        "ecrou_m10": (cq.Workplane("XY").workplane(offset=IN_Z[1] - BOSS_H + 2.2).center(SPIGOT_X, 0)
+                      .polygon(6, NUT_AF * 2 / math.sqrt(3)).circle(5).extrude(NUT_H), "oeillet"),
+        "spigot": (cq.Workplane("XY").workplane(offset=OUT_Z[1]).center(SPIGOT_X, 0).circle(11).extrude(4)
+                   .faces(">Z").workplane().circle(8).extrude(21.4)
+                   .union(cq.Workplane("XY").workplane(offset=OUT_Z[1] - SPIGOT_THREAD).center(SPIGOT_X, 0)
+                          .circle(4.9).extrude(SPIGOT_THREAD)), "oeillet"),
         # Cartes : volumes indicatifs, collées au dos de la cloison
         "carte_reseau": (box(-17, -1, -40, 36, 22, 50), "carte"),
         "driver_moteur": (box(-9, -1, -48, -22, -15, 11), "carte"),
@@ -199,7 +218,10 @@ if __name__ == "__main__":
     print(f"Rangs de fil dans la gorge : {TURNS * LINE_D / SLOT_W:.1f} ; angle du fil vers l'oeillet {FLEET_DEG:.2f} degrés")
     depth = (X_FRONT + WALL) - (X_REAR - WALL)
     print(f"Boîtier fermé : {OUT_Y[1] - OUT_Y[0]:.0f} x {OUT_Z[1] - OUT_Z[0]:.0f} x {depth:.1f} mm "
-          f"(+ 12 mm de pattes d'accroche en hauteur)")
+          f"(+ 25 mm de spigot au-dessus)")
+    tip = OUT_Z[1] - SPIGOT_THREAD                                       # bas du filetage M10 dans le boîtier
+    print(f"Spigot : le filetage traverse tout l'écrou et s'arrête à {tip - (BORE_D + 6) / 2:.1f} mm "
+          f"de la cloche tournante")
     for name in PRINTED:
         s = (parts[name][0] if name != "bobine" else bobine()).val()
         bb = s.BoundingBox()
@@ -209,7 +231,7 @@ if __name__ == "__main__":
     inertia = cq.Shape.matrixOfInertia(r)[0][0] * 1.2e-12                # autour de l'axe X, kg·m²
     print(f"Inertie de la bobine : {inertia:.1e} kg.m2 (réglage INERTIA_KGM2 du firmware : bobine + rotor)")
     names = list(parts)
-    ok_pairs = {("corps", "oeillet")}                                    # l'œillet est serti dans le fond
+    ok_pairs = {("corps", "oeillet"), ("ecrou_m10", "spigot")}           # œillet serti, filetage dans l'écrou
     clash = [(a, b) for i, a in enumerate(names) for b in names[i + 1:]
              if (a, b) not in ok_pairs and parts[a][0].intersect(parts[b][0]).val().Volume() > 1e-2]
     print("Interférences :", clash or "aucune")

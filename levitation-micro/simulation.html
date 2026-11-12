@@ -238,7 +238,11 @@
   block.add(box(B.x0, B.x0 + WALL, B.y0, B.y1, B.z0, B.z1, mat.shell));
   block.add(box(0, 3, B.y0, B.y1, B.z0, B.z1, mat.shell));
   block.add(box(B.x1 - WALL, B.x1, B.y0, B.y1, B.z0, B.z1, mat.glass));
-  [-40, 43].forEach(function (z) { block.add(box(-6, 6, B.y1, B.y1 + 12, z - 8, z + 8, mat.shell)); });
+  // Accroche : spigot de 16 mm vissé sur le dessus, pris dans une pince serrée sur un tube
+  var spigot = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 25.4, 32), mat.ring); spigot.position.set(27, B.y1 + 12.7, 0); block.add(spigot);
+  var collar = new THREE.Mesh(new THREE.CylinderGeometry(11, 11, 4, 32), mat.ring); collar.position.set(27, B.y1 + 2, 0); block.add(collar);
+  block.add(box(2, 52, B.y1 + 8, B.y1 + 62, -30, 30, mat.dark));
+  var pipe = new THREE.Mesh(new THREE.CylinderGeometry(24, 24, 3000, 32), mat.metal); pipe.rotation.x = Math.PI / 2; pipe.position.set(27, B.y1 + 86, 0); block.add(pipe);
   // Moteur de gimbal vissé sur la cloison ; encodeur et cartes dans la chambre arrière
   block.add(cylX(41.8, 33.5, 3, 0, 0, mat.dark));                                 // moteur GL35 avec son encodeur
   block.add(box(-12, -2, 22, 50, -40, 36, mat.board));
@@ -267,7 +271,6 @@
 
   // La salle : plafond, sol, silhouette de 1,75 m
   var room = new THREE.Group(); scene.add(room);
-  room.add(box(-1500, 1500, B.y1 + 12, B.y1 + 40, -1500, 1500, mat.ghost));
   var floor = new THREE.Mesh(new THREE.PlaneGeometry(6000, 6000), mat.ghost);
   floor.rotation.x = -Math.PI / 2; floor.position.y = -CEILING; room.add(floor);
   var grid = new THREE.GridHelper(6000, 12); grid.position.y = -CEILING + 1; room.add(grid);
@@ -302,7 +305,7 @@
   // ---------- Points de vue ----------
   var ringPos = new THREE.Vector3(X_LINE, B.y0 - HANG_MIN - RING_R, R_LINE), follow = false;
   var views = {
-    bloc: { pos: [270, 20, 200], target: [8, -25, 5] },
+    bloc: { pos: [290, 40, 220], target: [10, -10, 5] },
     salle: { pos: [3600, -900, 5200], target: [0, -1900, 200] }
   };
   function setView(name) {
