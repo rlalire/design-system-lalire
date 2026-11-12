@@ -139,13 +139,41 @@ en main. Pour 3 m/s, le passage en 16 V demandera une autre alimentation.
 
 ## Câblage
 
-| Carte ESP32 | Vers |
+| Carte ESP32 (Olimex ESP32-POE) | Vers |
 |---|---|
-| Broches 4, 5, 13 | les trois entrées de la carte de commande du moteur |
-| Broche 14 | activation de la carte de commande |
-| Broches 15, 35, 2, 16 | encodeur (horloge, données entrantes, données sortantes, sélection) |
-| Broche 33 | boucle d'arrêt d'urgence, ou pont vers le 3,3 V si elle n'est pas câblée |
-| Broche 36 | capteur d'origine, facultatif |
+| Broches 4, 5, 13 | `IN1`, `IN2`, `IN3` de la carte de commande du moteur |
+| Broche 14 | `EN` de la carte de commande |
+| Broche 15 | horloge de l'encodeur (SCK / CLK) |
+| Broche 36 | données venant de l'encodeur (MISO / DO) |
+| Broche 2 | données vers l'encodeur (MOSI / DI) |
+| Broche 16 | sélection de l'encodeur (CS / CSn) |
+| `3.3V` | alimentation de l'encodeur. **Pas le 5 V** : ses signaux reviendraient en 5 V sur la carte |
+| `GND` | masse de l'encodeur, de la carte de commande et du 12 V, toutes reliées |
+| `+5V` | sortie du convertisseur 5 V |
+| Broche 33 | pont vers `3.3V`, tant qu'aucune boucle d'arrêt d'urgence n'est câblée. Sans ce pont, le bloc reste en défaut |
+
+Le 12 V va sur la carte de commande du moteur et sur l'entrée du convertisseur 5 V. Les
+trois fils de phase du moteur vont sur les trois sorties de la carte de commande, dans
+n'importe quel ordre.
+
+### Trois précautions
+
+1. **Ne jamais brancher la carte Olimex directement sur un port PoE du switch tant qu'elle
+   est aussi alimentée autrement** (câble USB ou convertisseur 5 V). Cette carte sait prendre
+   son courant sur le câble réseau, et Olimex prévient que la version non isolée ne doit pas
+   être reliée en même temps au PoE et à un ordinateur par USB. Pour les essais sur table,
+   utiliser un port non PoE (ports 5 à 8 du TL-SG1008P). En service, le séparateur PoE est
+   entre le switch et la carte : la sortie réseau du séparateur ne porte plus de courant.
+2. **Vérifier le 12 V au multimètre**, polarité comprise, avant de le relier aux cartes.
+3. **Régler l'adresse réseau de l'ordinateur** sur `192.168.10.2`, masque `255.255.255.0`.
+   Les blocs sont en `192.168.10.11` à `.14` et ne répondent pas sur un autre réseau.
+
+### Soudure
+
+Les cartes sont livrées avec leurs barrettes de broches à part. Il faut les souder sur la
+carte Olimex (deux rangées de 10), sur la carte de commande et sur le convertisseur 5 V.
+Les fils du moteur et de l'encodeur peuvent aussi demander une soudure ou un connecteur,
+selon la façon dont le moteur est livré.
 
 ## Accroche du bloc
 

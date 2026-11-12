@@ -36,7 +36,7 @@ une adaptation.
 | Switch PoE : TP-Link TL-SG1008P (8 ports, dont **4 en PoE**) | 1 | [LDLC](https://www.ldlc.com/fr-be/fiche/PB00266981.html) · [Fnac](https://www.fnac.com/Commutateur-Reseau-de-Bureau-TP-Link-TL-SG1008P-8-ports-Gigabit-avec-4-ports-PoE-Gris/a15732133/w-4) · [Grosbill](https://www.grosbill.com/index.php/tp-link-8-ports-10-100-1000mbps-tl-sg1008p-4-poe-46031) | 43 à 47 € |
 | Câbles réseau cat. 5e ou 6, à la longueur voulue | 1 par bloc + 1 | magasin d'informatique | |
 | Bloc secteur 12 V, 2 A, pour les essais sur table | 1 | magasin d'électronique | 10 € |
-| Câble micro-USB, pour programmer la carte ESP32 | 1 | | |
+| Câble USB pour programmer la carte ESP32 : micro-USB ou USB-C selon la révision, à vérifier sur la carte reçue | 1 | | |
 
 Le TL-SG1008P n'a que quatre ports PoE : il suffit pour quatre blocs, pas pour un cinquième.
 
@@ -81,6 +81,22 @@ Un coffret d'assortiment de vis M3 inox couvre toutes ces longueurs.
 | Bobine | `cad/export/bobine.step` | résine (SLA) |
 
 Service en ligne : [JLC3DP](https://jlc3dp.com/capabilities/3d-printing-service). Je n'ai pas de devis.
+
+## Outillage et petit matériel (une seule fois)
+
+| Article | Pourquoi |
+|---|---|
+| Kit de soudure : fer, étain fin, support, tresse à dessouder | les barrettes de broches des trois cartes arrivent non soudées |
+| Multimètre basique | vérifier le 12 V et sa polarité, les continuités |
+| Bornes à levier (type Wago 221), 3 entrées | répartir le 12 V et les masses sans soudure |
+| Jeu de clés Allen (2 et 2,5 mm) | vis M3 |
+| Rondelles M3 | sous les têtes de vis de la bobine en résine |
+| Petites perles souples | butée d'origine sur le fil, plus grosse que le trou de la bague |
+| Gaine thermorétractable, colliers fins | isoler et tenir les fils |
+| Ordinateur avec VS Code et PlatformIO (gratuits) | envoyer le firmware dans la carte |
+
+Vis de la bobine : préférer des vis M3 × 5 à **tête bombée**, plus basses. Il n'y a que
+3,6 mm entre le fond de la bobine et le couvercle avant.
 
 ## Dans quel ordre commander
 

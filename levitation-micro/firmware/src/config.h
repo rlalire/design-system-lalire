@@ -71,11 +71,11 @@
 #define PIN_PWM_B        5
 #define PIN_PWM_C       13
 #define PIN_DRV_EN      14
-#define PIN_ENC_CS      16            // encodeur AS5048A en SPI, 14 bits : SCK 15, MISO 35, MOSI 2
+#define PIN_ENC_CS      16            // encodeur AS5048A en SPI, 14 bits : SCK 15, MISO 36, MOSI 2
 #define PIN_ENC_SCK     15
-#define PIN_ENC_MISO    35
+#define PIN_ENC_MISO    36            // entrée libre ; 34, 35 et 39 servent déjà sur la carte Olimex
 #define PIN_ENC_MOSI     2
-#define PIN_HOME        36            // capteur d'origine facultatif (entrée seule, tirage externe)
+#define PIN_HOME        35            // capteur d'origine facultatif, désactivé par défaut
 #define PIN_ESTOP       33
 
 #define HOME_SENSOR_ENABLED 0
