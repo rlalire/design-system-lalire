@@ -1,6 +1,6 @@
 # Lévitation — bloc treuil micro
 
-Un boîtier fermé de **112 × 135 × 60 mm** pour faire voler des objets de quelques grammes
+Un boîtier fermé de **112 × 135 × 59 mm** pour faire voler des objets de quelques grammes
 (bague, pliage de papier, carton) au bout d'un fil très fin. Le fil sort par un seul œillet.
 
 **État : conception v0.3, rien n'est encore construit.** Le firmware passe 31 vérifications
@@ -14,7 +14,7 @@ dans une simulation sur PC qui reproduit le moteur, la bobine et un objet suspen
 ## Le moteur
 
 Un moteur de gimbal **CubeMars G35 KV100**, en prise directe. C'est le GL35 dans un carter
-fermé, avec l'encodeur à l'intérieur (159 g, 49,8 mm de diamètre, 31,6 mm de long).
+fermé, avec l'encodeur à l'intérieur (159 g, 49,8 mm de diamètre, 31,1 mm de long).
 
 - **Il est silencieux** : il tourne en continu, sans pas.
 - **Son carter est fixe et fermé** : il se visse sur la cloison, et seul un petit moyeu
@@ -57,7 +57,7 @@ origine connue, défaut, tension estimée (g). L'état 9 est le test de rupture.
 | Vitesse en montée | jusqu'à 3 m/s (717 tr/min), **à confirmer sur le prototype** |
 | Vitesse en descente | limitée à 1,5 m/s, réglable par objet |
 | Accélération | 4 m/s² |
-| Boîtier | 112 × 135 × 60 mm, moteur et électronique compris |
+| Boîtier | 112 × 135 × 59 mm, moteur et électronique compris |
 
 En simulation, avec un objet de 5 g : arrivée à moins de 0,3 mm de la cible, écart de suivi
 de 1,6 mm à 0,9 m/s et de 5 mm à 3 m/s, retard d'environ 8 ms sur une consigne envoyée en
@@ -114,17 +114,24 @@ Il faut un switch réseau PoE pour alimenter les blocs. Le moteur est donné pou
 
 ## Fixation du moteur
 
-D'après le plan coté du G35 :
+Relevé sur le fichier 3D fourni par CubeMars (`cad/fabricant/G35_sans_driver.stp`), qui est
+repris tel quel dans l'assemblage :
 
-| Côté | Sur le plan | Sur la maquette |
+| Côté | Sur le fichier du fabricant | Sur la maquette |
 |---|---|---|
-| Arrière (sortie du câble) | bossage de 32 mm, 3 × M3 sur un cercle de 40 mm et 4 × M3 sur 25 mm, profondeur 4 mm | le bossage se centre dans la cloison, fixation par les 3 × M3 |
-| Avant | moyeu avec 4 × M3 sur un cercle de 15 mm, profondeur 6 mm, arbre creux de 6,5 mm | la bobine s'y visse, par 4 vis M3 × 8 |
+| Arrière : face plate de 48,8 mm, d'où sortent les fils | 4 × M3 sur un cercle de 25 mm, profondeur 4 mm ; trou central de 10 mm ; trois sorties de fils à 135° | vissée à plat sur la cloison par 4 vis M3 × 6, avec un passage pour les fils |
+| Avant : petit moyeu de 20 mm, en saillie de 1 mm sur un épaulement de 32 mm | 4 × M3 sur un cercle de 15 mm, profondeur 6 mm, arbre creux de 6,5 mm | la bobine s'y pose et s'y visse par 4 vis M3 × 8 |
 
-J'ai lu le plan ainsi : le carter à ailettes est fixe, et c'est le petit moyeu avant qui
-tourne. **C'est à faire confirmer par CubeMars avant de commander les pièces**, car tout le
-montage en dépend. L'orientation des 3 vis arrière par rapport à la sortie du câble est
-aussi à vérifier sur leur fichier 3D.
+Le moteur mesure 49,8 mm de diamètre et 31,1 mm de long. La bobine ne touche que la face du
+moyeu de 20 mm ; elle reste à 1 mm de l'épaulement et à 3 mm du carter.
+
+Deux réserves :
+
+- Le plan coté mentionne aussi 3 vis M3 sur un cercle de 40 mm à l'arrière. Elles ne
+  figurent pas dans le fichier 3D ; je ne m'en sers pas.
+- Le fichier est un seul bloc : il ne dit pas quelle partie tourne. J'ai supposé que le
+  moyeu avant tourne et que le carter est fixe, ce qui est cohérent avec les fils qui
+  sortent à l'arrière. **À faire confirmer par CubeMars.**
 
 ## Avant de commander
 
@@ -136,9 +143,9 @@ estimation.
 À confirmer auprès de CubeMars :
 
 1. Quelle partie tourne (voir ci-dessus).
-2. Le modèle d'encodeur, sa liaison, sa tension d'alimentation et le brochage du câble. Le
-   firmware suppose un AS5048A en SPI.
-3. Le fichier 3D (STEP) du G35.
+2. Le modèle d'encodeur, sa liaison, sa tension d'alimentation et le brochage des fils. Le
+   firmware suppose un AS5048A en SPI. Le fichier ne montre que trois sorties de fils : il
+   faut savoir par où sortent ceux de l'encodeur.
 
 **Vitesse en 12 V.** Avec 82,5 tr/min par volt, le moteur plafonne vers 990 tr/min à vide
 en 12 V, pour 717 nécessaires à 3 m/s. La marge est faible : prévoir une alimentation 16 V
