@@ -4,7 +4,7 @@ Un boîtier fermé de **112 × 123 × 70 mm**, accroché par un spigot de 16 mm 
 (bague, pliage de papier, carton) au bout d'un fil très fin. Le fil sort par un seul œillet.
 
 **État : conception v1.0, pièces du prototype dessinées pour l'impression 3D, rien n'est encore construit.** Le firmware **compile pour
-la carte Olimex ESP32-POE** et passe 36 vérifications dans une simulation sur PC qui reproduit
+la carte Olimex ESP32-POE** et passe 40 vérifications dans une simulation sur PC qui reproduit
 le moteur, la bobine et un objet suspendu. Il n'a pas encore tourné sur une vraie carte ni
 sur un moteur.
 
@@ -37,6 +37,8 @@ SimpleFOC.
 | Test de rupture | `/levi/N/breaktest` | Fil attaché à un point fixe : le moteur tire de plus en plus fort et renvoie la tension à laquelle le fil a cassé (`/levi/N/break grammes cassé`) |
 | Prise d'origine douce | `/levi/N/home` | L'objet remonte lentement jusqu'à buter sous l'œillet, avec une force plafonnée (`/levi/N/hometension`, 15 g par défaut) |
 | Tension lue | dans `/levi/N/state` | La tension estimée du fil est renvoyée 20 fois par seconde |
+| Hauteur | `/levi/N/home` | À la fin de la prise d'origine, le bloc renvoie la distance qu'il a remontée (`/levi/N/homed mm`). Objet posé au sol au départ, c'est la hauteur du bloc |
+| Mesure de longueur | `/levi/N/measure 10` | Le bloc remonte doucement, à la tension donnée en grammes, jusqu'à ce que le fil se tende ; il renvoie la longueur (`/levi/N/measured`), puis rend 20 mm de mou. L'origine n'est pas modifiée |
 | Arrêt de groupe | automatique | Un bloc en défaut prévient les autres, qui s'arrêtent en douceur sans attendre le logiciel |
 
 **Arrêt de groupe.** Les blocs sont tous identiques et aucun ne commande les autres. Mais dès
@@ -47,6 +49,15 @@ tant qu'il y reste. Les autres blocs s'arrêtent en douceur, tiennent leur objet
 reste permis pour dégager un fil. Tant que le bloc fautif n'est pas sorti de son défaut, il
 continue de prévenir et le groupe reste à l'arrêt. Le dernier argument de `/levi/N/state`
 donne le numéro du bloc qui a déclenché l'arrêt, ou 0.
+
+**Calibrer un montage.** Pour chaque bloc : poser un petit objet au sol au bout du fil, puis
+`home` ; la distance renvoyée par `/levi/N/homed` est la hauteur de la bague au-dessus de
+l'objet posé. Pour chaque paire de blocs : accrocher le bout du fil du bloc A à la bague du
+bloc B, puis `/levi/A/measure` avec une tension faible ; la position renvoyée est la
+longueur de fil entre les deux bagues, au décalage de l'accroche près. Le fil s'allonge sous
+la tension : mesurer à deux tensions (par exemple 5 et 10 g) permet au logiciel de ramener
+la longueur à tension nulle. Ces mesures dépendent du comportement réel du fil, que je ne
+connais pas.
 
 **Régler un fil inconnu.** Faire le test de rupture sur un bout de fil, puis régler la
 tension maximale au tiers de la valeur obtenue. Le test coûte quelques centimètres de fil.
@@ -60,7 +71,7 @@ Les autres commandes (`arm`, `goto`, `pos`, `jog`, `stop`, `zero`, `limits`, `re
 celles des autres versions : voir [`../levitation/README.md`](../levitation/README.md),
 section 6. Le retour d'état a deux valeurs de plus : `/levi/N/state` position, vitesse, état,
 origine connue, défaut, tension estimée (g), bloc à l'origine d'un arrêt de groupe. L'état 9
-est le test de rupture.
+est le test de rupture, l'état 10 la mesure de longueur.
 
 ## Ce que fait le bloc
 

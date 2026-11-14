@@ -60,6 +60,7 @@
 #define HOME_TENSION_DEFAULT_G  15.0f // tension pendant la prise d'origine (> poids de l'objet)
 #define HOME_SPEED_MM_S         60.0f
 #define HOME_BACKOFF_MM         20.0f
+#define MEASURE_SLACK_MM        20.0f // mou rendu après une mesure de longueur
 #define SNAG_ERROR_MM           30.0f // écart au-delà duquel on considère le fil accroché
 #define SNAG_TIME_MS            150
 #define BREAKTEST_RATE_G_S      10.0f // montée en tension pendant le test de rupture

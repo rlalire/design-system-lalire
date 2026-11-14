@@ -26,6 +26,7 @@ enum State : uint8_t {
   ST_STOPPING  = 7,  // décélération jusqu'à l'arrêt
   ST_FAULT     = 8,  // défaut : il faut /reset
   ST_BREAKTEST = 9,  // mesure de la charge de rupture du fil
+  ST_MEASURE   = 10, // mesure d'une longueur : remontée douce jusqu'à ce que le fil se tende
 };
 enum Fault : uint8_t { F_NONE = 0, F_ESTOP = 1, F_SNAG = 3 };
 
@@ -60,6 +61,8 @@ static uint32_t jogLastMs;
 static uint32_t idleSinceMs;
 static uint32_t snagSinceMs, stallSinceMs;
 static float breakG;                      // tension en cours pendant le test de rupture
+static float seekStartPos;                // position au départ d'une prise d'origine ou d'une mesure
+static float measureTensionG;             // tension plafond pendant une mesure de longueur
 
 static IPAddress peer(255, 255, 255, 255);
 static bool hasPeer = false;
@@ -156,7 +159,7 @@ static void disarm() {
 
 static bool readyToMove() {
   if (state == ST_FAULT || state == ST_DISARMED) { warn(1); return false; }
-  if (state == ST_HOMING || state == ST_BREAKTEST) { warn(5); return false; }
+  if (state == ST_HOMING || state == ST_BREAKTEST || state == ST_MEASURE) { warn(5); return false; }
   return true;
 }
 
@@ -217,14 +220,26 @@ static void cmdJog(float v) {
 
 static void cmdStop() {
   if (state == ST_GOTO || state == ST_STREAM || state == ST_JOG) state = ST_STOPPING;
-  else if (state == ST_HOMING || state == ST_BREAKTEST) { holdHere(); state = ST_HOLD; }
+  else if (state == ST_HOMING || state == ST_BREAKTEST || state == ST_MEASURE) { holdHere(); state = ST_HOLD; }
 }
 
 static void cmdHome() {
   if (state != ST_HOLD) { warn(state == ST_DISARMED || state == ST_FAULT ? 1 : 5); return; }
   homed = false;
   stallSinceMs = 0;
+  seekStartPos = pos;
   state = ST_HOMING;
+}
+
+// Mesure d'une longueur sans toucher à l'origine : le bloc remonte doucement, avec une
+// force plafonnée, jusqu'à ce que le fil se tende (bout attaché à un point fixe, par exemple
+// la bague d'un autre bloc). Il renvoie la position atteinte, puis rend un peu de mou.
+static void cmdMeasure(float tensionG) {
+  if (state != ST_HOLD) { warn(state == ST_DISARMED || state == ST_FAULT ? 1 : 5); return; }
+  measureTensionG = tensionG > 0 ? min(tensionG, tensionMaxG) : min(homeTensionG, tensionMaxG);
+  stallSinceMs = 0;
+  seekStartPos = pos;
+  state = ST_MEASURE;
 }
 
 static void cmdZero() {                     // la position actuelle devient l'origine
@@ -285,6 +300,7 @@ static void handleOsc(const OscMsg& m) {
     }
   }
   else if (!strcmp(cmd, "breaktest") && !all) cmdBreakTest();
+  else if (!strcmp(cmd, "measure") && !all) cmdMeasure(m.n >= 1 ? m.arg[0] : 0);
   else if (!strcmp(cmd, "tension") && !all && m.n >= 1 && m.arg[0] > 0 && m.arg[0] <= BREAKTEST_MAX_G) {
     tensionMaxG = m.arg[0]; prefs.putFloat("tmax", tensionMaxG);
   } else if (!strcmp(cmd, "hometension") && !all && m.n >= 1 && m.arg[0] > 0 && m.arg[0] <= BREAKTEST_MAX_G) {
@@ -356,16 +372,28 @@ static void controlTick(float dt) {
       break;
     }
 
-    case ST_HOMING: {
+    case ST_HOMING:
+    case ST_MEASURE: {
       // On remonte doucement, avec une force plafonnée, jusqu'à ce que l'objet (ou une perle
       // sur le fil) bute contre l'œillet : le moteur n'avance plus, c'est l'origine.
       approach(vRef, -HOME_SPEED_MM_S, AMAX_MM_S2 * dt);
       pRef += vRef * dt;
       if (pRef < pos - 8.0f) pRef = pos - 8.0f;           // la consigne n'a pas à s'éloigner de l'objet
-      bool atSensor = HOME_SENSOR_ENABLED && inActive(PIN_HOME, HOME_ACTIVE);
+      bool atSensor = state == ST_HOMING && HOME_SENSOR_ENABLED && inActive(PIN_HOME, HOME_ACTIVE);
       bool blocked = (pRef < pos - 5.0f) && fabsf(vel) < 5.0f;
       if (!blocked) stallSinceMs = now;
-      if (atSensor || now - stallSinceMs > 300) {
+      if (state == ST_MEASURE && now - stallSinceMs > 300) {
+        // Fil tendu : on renvoie la position, la distance parcourue et la tension appliquée,
+        // puis on rend du mou. L'origine n'est pas modifiée.
+        float r[3] = { pos, seekStartPos - pos, measureTensionG };
+        sendOsc("measured", "fff", r);
+        pRef = pos; vRef = 0;
+        gotoP0 = pos; gotoP1 = pos + MEASURE_SLACK_MM; gotoT = 1.0f; gotoStartMs = now;
+        state = ST_GOTO;
+      } else if (atSensor || now - stallSinceMs > 300) {
+        // Distance remontée depuis le départ : objet posé au sol au départ, c'est la hauteur.
+        float travel = seekStartPos - pos;
+        sendOsc("homed", "f", &travel);
         setPosition(0);
         homed = true;
         iInt = 0;
@@ -407,7 +435,8 @@ static void controlTick(float dt) {
 
   // Asservissement : proportionnel sur l'écart, amortissement sur la vitesse, intégral pour
   // porter le poids, plus l'anticipation de l'accélération demandée.
-  float windMax = (state == ST_HOMING ? min(homeTensionG, tensionMaxG) : tensionMaxG) * AMP_PER_GRAM;
+  float capG = state == ST_HOMING ? min(homeTensionG, tensionMaxG) : (state == ST_MEASURE ? measureTensionG : tensionMaxG);
+  float windMax = capG * AMP_PER_GRAM;
   float aRef = (vRef - vRefPrev) / dt;
   vRefPrev = vRef;
   float err = pRef - pos;
@@ -417,7 +446,7 @@ static void controlTick(float dt) {
   tensionEstG += 0.02f * (-iCmd / AMP_PER_GRAM - tensionEstG);
 
   // Fil accroché, ou objet trop lourd pour la tension autorisée : l'écart ne se résorbe pas.
-  if (state != ST_HOMING && state != ST_FAULT) {
+  if (state != ST_HOMING && state != ST_MEASURE && state != ST_FAULT) {
     if (fabsf(err) < SNAG_ERROR_MM) snagSinceMs = now;
     else if (now - snagSinceMs > SNAG_TIME_MS) enterFault(F_SNAG);
   }

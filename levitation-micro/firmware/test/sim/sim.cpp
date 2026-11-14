@@ -51,7 +51,11 @@ int main() {
   CHECK(state == ST_HOLD, "commande adressee au bloc 2 ignoree");
 
   plant.peakWindG = 0;
+  double physAtHomeStart = plant.phys();
   send("/levi/1/home"); run(12);
+  { OscMsg hm{}; bool gotH = false;
+    for (auto& p : simTx) { OscMsg t; if (oscParseMessage(p.data(), p.size(), t) && !strcmp(t.addr, "/levi/1/homed")) { hm = t; gotH = true; } }
+    CHECK(gotH && fabs(hm.arg[0] - physAtHomeStart) < 1.5, "prise d'origine : distance remontee renvoyee, %.1f mm (reelle %.1f)", hm.arg[0], physAtHomeStart); }
   CHECK(homed && state == ST_HOLD && fabs(plant.phys() - HOME_BACKOFF_MM) < 0.5, "prise d'origine en butee douce : objet a %.2f mm sous la butee (vise %.0f)", plant.phys(), HOME_BACKOFF_MM);
   CHECK(plant.peakWindG < HOME_TENSION_DEFAULT_G * 1.1, "  traction maximale pendant la prise d'origine : %.1f g (plafond %.0f g)", plant.peakWindG, HOME_TENSION_DEFAULT_G);
 
@@ -109,6 +113,16 @@ int main() {
   send("/levi/all/reset"); run(0.1);
   send("/levi/1/goto", {pHeld + 300, 1.5f}); run(2.0);
   CHECK(groupHoldFrom == 0 && fabs(plant.phys() - pHeld - 300) < 0.5, "  reset : les mouvements reprennent");
+  // Mesure d'une longueur : le fil se tend 400 mm plus haut, sans changer l'origine
+  { double pStart = plant.phys(); plant.stopP = pStart - 400; plant.peakWindG = 0;
+    send("/levi/1/measure", {10}); run(10);
+    OscMsg ms{}; bool gotM = false;
+    for (auto& p : simTx) { OscMsg t; if (oscParseMessage(p.data(), p.size(), t) && !strcmp(t.addr, "/levi/1/measured")) { ms = t; gotM = true; } }
+    CHECK(gotM && fabs(ms.arg[0] - (pStart - 400)) < 1.5 && fabs(ms.arg[1] - 400) < 1.5, "mesure de longueur : fil tendu a %.1f mm (reel %.1f), parcours %.1f mm", ms.arg[0], pStart - 400, ms.arg[1]);
+    CHECK(plant.peakWindG < 10 * 1.1, "  traction maximale pendant la mesure : %.1f g (plafond 10 g)", plant.peakWindG);
+    CHECK(state == ST_HOLD && homed && fabs(plant.phys() - (pStart - 400 + MEASURE_SLACK_MM)) < 0.5 && fabsf(pos - (float)plant.phys()) < 0.5f, "  mou rendu (%.0f mm), origine inchangee", MEASURE_SLACK_MM);
+    plant.stopP = 0; }
+
   int nGs = 0; for (auto& p : simTx) { OscMsg t; if (oscParseMessage(p.data(), p.size(), t) && !strcmp(t.addr, "/levi/all/groupstop") && t.arg[0] == WINCH_ID) nGs++; }
   CHECK(nGs >= 4, "ce bloc a prevenu les autres pendant ses propres defauts (%d messages emis)", nGs);
 

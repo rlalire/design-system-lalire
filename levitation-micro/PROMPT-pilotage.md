@@ -91,6 +91,7 @@ il laisse l'objet redescendre et perd son origine.
 | `/levi/N/tension` | grammes | Tension maximale que le moteur exerce sur le fil. Mémorisée. De 0 à 300, 30 par défaut. Par bloc uniquement. |
 | `/levi/N/hometension` | grammes | Tension pendant la prise d'origine. Doit dépasser le poids porté par ce fil. 15 par défaut. Par bloc uniquement. |
 | `/levi/N/limits` | min, max | Butées logicielles en mm. Mémorisées. Par bloc uniquement. |
+| `/levi/N/measure` | grammes (facultatif) | Mesure de longueur : remonte à 60 mm/s avec la tension donnée (celle de prise d'origine par défaut) jusqu'à ce que le fil se tende, renvoie la position, puis rend 20 mm de mou. Ne change pas l'origine. Accepté seulement armé et à l'arrêt. Par bloc uniquement. |
 | `/levi/N/breaktest` | aucun | Test de rupture : fil attaché à un point fixe, le moteur tire de plus en plus fort (10 g/s, 300 g au plus) et renvoie la tension à laquelle le fil a cassé. Par bloc uniquement. |
 
 ### Limites à respecter côté logiciel
@@ -131,11 +132,18 @@ Sur le port 9001, vers le dernier émetteur.
 | 7 | i | arrêt de groupe : numéro du bloc en défaut qui l'a déclenché, 0 sinon |
 
 États : 0 désarmé · 2 armé à l'arrêt · 3 `goto` en cours · 4 flux · 5 `jog` · 6 prise
-d'origine · 7 arrêt en cours · 8 défaut · 9 test de rupture.
+d'origine · 7 arrêt en cours · 8 défaut · 9 test de rupture · 10 mesure de longueur.
 
 `/levi/N/warn` avec un entier, quand une commande est refusée ou modifiée : 1 bloc non armé,
 2 origine non faite, 3 durée allongée, 4 consigne hors course ramenée à la butée, 5 commande
 refusée pendant un mouvement, 6 mouvement refusé parce qu'un arrêt de groupe est en cours.
+
+`/levi/N/homed` avec un flottant, à la fin de chaque prise d'origine : la distance remontée
+entre le départ et la butée, en mm.
+
+`/levi/N/measured` avec trois flottants, à la fin d'une mesure de longueur : la position où
+le fil s'est tendu (mm, dans le repère courant du bloc), la distance parcourue (mm) et la
+tension appliquée (g).
 
 `/levi/N/break` avec la tension en grammes et un entier (1 = le fil a cassé, 0 = maximum
 atteint sans casser), à la fin d'un test de rupture.
@@ -168,6 +176,27 @@ Conséquences pour le logiciel :
 - Défaut 3 (fil accroché) : le bloc s'arrête et tient en place sans forcer. `reset` le
   remet armé à l'arrêt, origine conservée.
 - Défaut 1 (arrêt d'urgence) : moteur coupé. `reset` le remet désarmé, origine perdue.
+
+## Calibration du montage
+
+Je calibre aujourd'hui mon installation ainsi, et je veux garder ce déroulé :
+
+1. **Hauteur et zéro de chaque bloc.** Un petit objet est accroché au fil et posé au sol.
+   J'envoie `home` : le bloc remonte jusqu'à la butée et renvoie `/levi/N/homed` avec la
+   distance remontée. C'est la hauteur de la bague au-dessus de l'objet posé, et le bloc a
+   son zéro.
+2. **Distance entre blocs, paire par paire.** Le bout du fil du bloc A est accroché à la
+   bague du bloc B. J'envoie `/levi/A/measure` : la position renvoyée par `/levi/A/measured`
+   est la longueur de fil entre les deux bagues, au décalage de l'accroche près. Trois
+   paires pour trois blocs, six pour quatre.
+3. **Reconstruction.** Les hauteurs et les distances donnent la position des blocs.
+   `CableCalibration.swift` reconstruit déjà la géométrie à partir des distances, mais
+   suppose les blocs à la même hauteur : il faut l'étendre pour prendre les hauteurs
+   mesurées.
+
+Le fil est très fin et s'allonge sous la tension. Prévoir de faire chaque mesure à deux
+tensions (par exemple 5 et 10 g) et d'extrapoler la longueur à tension nulle, et laisser la
+possibilité de saisir une distance à la main, mesurée au télémètre laser.
 
 ## Du logiciel aux treuils : les conversions
 
