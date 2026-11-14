@@ -1,0 +1,174 @@
+# Prompt à donner à Claude Code — pilotage des treuils « Lévitation micro »
+
+Copier tout ce qui suit la ligne dans une session Claude Code ouverte sur le logiciel de
+pilotage (Orchestrapp ou L'envol Sim).
+
+---
+
+Je veux que ce logiciel pilote mes treuils « Lévitation micro » en OSC. Voici leur protocole
+exact, tel qu'il est écrit dans leur firmware. Lis d'abord le code existant d'envoi et de
+réception OSC de ce dépôt, puis propose-moi un plan avant de modifier quoi que ce soit.
+
+## Le matériel
+
+Chaque treuil est un bloc autonome : un moteur de gimbal avec encodeur entraîne une bobine
+de 80 mm, et un fil très fin sort par une bague céramique sous le boîtier. Un bloc porte un
+objet de 1 à 50 g. Jusqu'à 4 blocs, numérotés de 1 à 4, tiennent un même objet par 2, 3 ou
+4 fils.
+
+Le moteur est piloté en force : il ne tient l'objet que s'il est alimenté et armé. Coupé,
+il laisse l'objet redescendre et perd son origine.
+
+## Réseau
+
+- Ethernet filaire, UDP, OSC 1.0. Messages simples ou bundles, les deux sont acceptés.
+- Adresse du bloc N : `192.168.10.(10 + N)`, soit `.11` à `.14`. Masque `255.255.255.0`.
+- Les blocs écoutent sur le port **9000**, en direct et en diffusion (`192.168.10.255`).
+- Chaque bloc répond à l'adresse IP du dernier émetteur qu'il a entendu, sur le port
+  **9001**. Le logiciel doit donc écouter en UDP sur 9001.
+- Arguments numériques : `f` (float32) ou `i` (int32), indifféremment. `d`, `T` et `F` sont
+  aussi lus. Les chaînes ne sont pas acceptées.
+
+## Unités et repère
+
+- **Position = longueur de fil déroulée, en millimètres.** 0 = origine haute, valeur
+  positive = l'objet descend.
+- Course par défaut : 0 à 10 000 mm, bornée par des butées logicielles.
+- Vitesses en mm/s, durées en secondes, tensions de fil en grammes.
+
+## Commandes
+
+`N` est le numéro du bloc (1 à 4). `all` adresse tous les blocs à la fois.
+
+| Adresse | Arguments | Effet |
+|---|---|---|
+| `/levi/N/arm` ou `/levi/all/arm` | aucun | Met le moteur sous tension ; il tient l'objet là où il est. Obligatoire avant tout mouvement. |
+| `/levi/N/disarm` ou `/levi/all/disarm` | aucun | Coupe le moteur. L'objet redescend, l'origine est perdue. Accepté seulement à l'arrêt. |
+| `/levi/N/home` ou `/levi/all/home` | aucun | Prise d'origine : remonte à 60 mm/s avec une force plafonnée jusqu'à ce qu'une perle nouée sur le fil bute sous la bague, met la position à 0, puis redescend à 20 mm. Accepté seulement armé et à l'arrêt. |
+| `/levi/N/zero` ou `/levi/all/zero` | aucun | La position actuelle devient 0. Accepté seulement armé et à l'arrêt. |
+| `/levi/N/goto` | position, durée (facultative) | Va à la position en courbe douce (polynôme de degré 5, départ et arrivée à vitesse nulle) dans la durée donnée. Durée absente ou trop courte : le bloc prend la durée minimale que ses limites permettent. |
+| `/levi/all/goto` | p1, p2, p3, p4, durée | Un seul paquet pour les 4 blocs : chacun prend la position de son rang. Les **5 arguments sont obligatoires**, même avec moins de 4 blocs. |
+| `/levi/N/pos` | position | Consigne en flux continu. À envoyer de 50 à 100 fois par seconde. |
+| `/levi/all/pos` | p1, p2, p3, p4 | Le flux pour les 4 blocs en un paquet. |
+| `/levi/N/jog` | vitesse | Déplacement manuel en vitesse. S'arrête seul si le message n'est pas renvoyé toutes les 300 ms. Limité à ±200 mm/s tant que l'origine n'est pas faite. |
+| `/levi/N/stop` ou `/levi/all/stop` | aucun | Arrêt en douceur, à 4000 mm/s². Ce n'est pas un arrêt d'urgence. |
+| `/levi/N/reset` ou `/levi/all/reset` | aucun | Acquitte un défaut, une fois sa cause disparue. |
+| `/levi/N/tension` | grammes | Tension maximale que le moteur exerce sur le fil. Mémorisée. De 0 à 300, 30 par défaut. Par bloc uniquement. |
+| `/levi/N/hometension` | grammes | Tension pendant la prise d'origine. Doit dépasser le poids porté par ce fil. 15 par défaut. Par bloc uniquement. |
+| `/levi/N/limits` | min, max | Butées logicielles en mm. Mémorisées. Par bloc uniquement. |
+| `/levi/N/breaktest` | aucun | Test de rupture : fil attaché à un point fixe, le moteur tire de plus en plus fort (10 g/s, 300 g au plus) et renvoie la tension à laquelle le fil a cassé. Par bloc uniquement. |
+
+### Limites à respecter côté logiciel
+
+| | Valeur |
+|---|---|
+| Vitesse en montée (position qui diminue) | 3000 mm/s au plus. En 12 V, viser 2500 |
+| Vitesse en descente (position qui augmente) | 1500 mm/s au plus, à baisser pour un objet qui plane |
+| Accélération | 4000 mm/s² |
+
+Si une consigne les dépasse, le bloc ne la suit pas : en `goto` il allonge la durée, en flux
+il prend du retard. **Les autres blocs ne s'alignent pas d'eux-mêmes.** Le logiciel doit donc
+vérifier ces limites sur chaque fil avant d'envoyer une trajectoire, et la ralentir en
+entier si un seul fil les dépasse.
+
+### Comportement du flux
+
+- Le bloc estime la vitesse de la consigne d'un paquet au suivant et prolonge le mouvement
+  entre deux paquets. Il suit avec environ 8 ms de retard, identique sur tous les blocs.
+- Sans nouveau paquet pendant plus de deux intervalles, il vise la dernière consigne reçue
+  et s'y arrête.
+- Un `goto` reçu pendant un mouvement est rejoint en douceur, sans respecter sa durée.
+
+## Retours
+
+Sur le port 9001, vers le dernier émetteur.
+
+`/levi/N/state`, 20 fois par seconde, 6 arguments :
+
+| Rang | Type | Sens |
+|---|---|---|
+| 1 | f | position mesurée, mm |
+| 2 | f | vitesse mesurée, mm/s |
+| 3 | i | état (voir ci-dessous) |
+| 4 | i | 1 si l'origine est connue, 0 sinon |
+| 5 | i | défaut : 0 aucun, 1 arrêt d'urgence, 3 fil accroché ou objet trop lourd |
+| 6 | f | tension estimée du fil, en grammes (approximative) |
+
+États : 0 désarmé · 2 armé à l'arrêt · 3 `goto` en cours · 4 flux · 5 `jog` · 6 prise
+d'origine · 7 arrêt en cours · 8 défaut · 9 test de rupture.
+
+`/levi/N/warn` avec un entier, quand une commande est refusée ou modifiée : 1 bloc non armé,
+2 origine non faite, 3 durée allongée, 4 consigne hors course ramenée à la butée, 5 commande
+refusée pendant un mouvement.
+
+`/levi/N/break` avec la tension en grammes et un entier (1 = le fil a cassé, 0 = maximum
+atteint sans casser), à la fin d'un test de rupture.
+
+### Règles d'état
+
+- `goto` et `pos` sont refusés tant que le bloc n'est pas armé (avertissement 1) ou que
+  l'origine n'est pas faite (avertissement 2).
+- Après une coupure de courant, un désarmement ou un arrêt d'urgence, l'origine est perdue :
+  il faut armer puis refaire `home`.
+- Défaut 3 (fil accroché) : le bloc s'arrête et tient en place sans forcer. `reset` le
+  remet armé à l'arrêt, origine conservée.
+- Défaut 1 (arrêt d'urgence) : moteur coupé. `reset` le remet désarmé, origine perdue.
+
+## Du logiciel aux treuils : les conversions
+
+Le logiciel calcule pour chaque fil une longueur L, en mètres, entre le point de sortie du
+treuil et le point d'accroche sur l'objet. Le treuil attend une position p en millimètres :
+
+```
+p_mm = L_m × 1000 − décalage_mm
+```
+
+`décalage_mm` est la longueur de fil entre la bague céramique et le point d'accroche quand
+le bloc est à la position 0, c'est-à-dire perle en butée. Il dépend de l'endroit où la perle
+est nouée et se mesure une fois par fil. Il doit être un réglage par fil, enregistré avec le
+projet.
+
+Le point de sortie du fil est la bague céramique sous le boîtier. Il est fixe : il ne se
+déplace pas quand la bobine tourne.
+
+Les blocs sont numérotés à partir de **1**. Si le logiciel numérote ses fils à partir de 0,
+prévoir une table de correspondance fil → bloc plutôt qu'un simple décalage, car je peux
+brancher les blocs dans un autre ordre que les fils.
+
+## Ce que je veux dans le logiciel
+
+1. **Une sortie « Treuils Lévitation »**, à côté des sorties OSC existantes, qui envoie à
+   chaque image `/levi/all/pos p1 p2 p3 p4` avec les conversions ci-dessus. Envoyer ce même
+   paquet à l'adresse de chaque bloc actif, l'un après l'autre sans attente, plutôt qu'en
+   diffusion : la diffusion UDP n'est pas toujours autorisée par le système. Mettre 0 pour
+   un rang sans bloc.
+2. **Un panneau par bloc** : état, origine connue ou non, défaut en clair, position, vitesse,
+   tension estimée, et les avertissements reçus. Un bloc qui ne répond plus depuis une
+   seconde doit apparaître hors ligne.
+3. **Les commandes de mise en route** : armer, désarmer, prise d'origine (pour un bloc ou
+   pour tous), zéro, acquittement, réglage de la tension maximale et de la tension d'origine.
+4. **Un déplacement manuel** par bloc avec `jog`, renvoyé tant que le bouton est maintenu.
+5. **Des garde-fous** : ne pas démarrer l'envoi d'une trajectoire si un bloc actif n'est pas
+   armé, n'a pas son origine ou est en défaut ; arrêter l'envoi et envoyer `/levi/all/stop`
+   si un bloc passe en défaut pendant la lecture ; refuser ou ralentir une trajectoire qui
+   dépasse les limites de vitesse et d'accélération sur un fil.
+6. **Une arrivée en douceur** : avant de lancer un flux, amener chaque bloc à sa position de
+   départ par un `/levi/all/goto` avec une durée calculée, et n'enchaîner le flux qu'une fois
+   tous les blocs revenus à l'état 2.
+
+## Ce qu'il ne faut pas supposer
+
+- Le firmware compile et passe ses tests en simulation, mais n'a pas encore tourné sur un
+  vrai moteur. Prévoir que les limites et les décalages restent des réglages modifiables,
+  pas des constantes.
+- La tension renvoyée en grammes est une estimation à quelques grammes près, sans capteur.
+  L'afficher, ne pas s'en servir pour asservir.
+- Le bouton d'arrêt du logiciel n'est pas un arrêt d'urgence : il envoie un arrêt en
+  douceur. L'arrêt d'urgence est une boucle câblée sur les blocs.
+
+## Pour tester sans matériel
+
+Écris un faux bloc qui tourne sur la même machine : il écoute sur le port 9000, applique les
+règles d'état ci-dessus, suit les consignes avec les limites de vitesse et d'accélération,
+et renvoie `/levi/N/state` sur le port 9001. Il servira aux tests automatiques et à la mise
+au point de l'interface.
