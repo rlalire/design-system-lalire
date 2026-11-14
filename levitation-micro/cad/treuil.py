@@ -42,7 +42,7 @@ WIRES_R, WIRES_DEG = 16.5, 135.0                   # sortie des fils sur la face
 # ---------- Jeux et visserie ----------
 M3_CLEAR, M3_PILOT = 3.4, 2.6                      # trou de passage / avant-trou où la vis M3 forme son filet
 FIT = 0.2                                          # jeu d'emboîtement des pièces imprimées
-EYELET_OD = 6.0                                    # œillet céramique (à ajuster à la pièce achetée)
+EYELET_OD = 5.8                                    # corps de la bague céramique à collerette (mesuré 5,74 à 5,83)
 
 # ---------- Cotes dérivées ----------
 LINE_PER_TURN = math.pi * (DRUM_D + LINE_D)

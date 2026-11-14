@@ -277,7 +277,8 @@ vis M3 × 6 s'engage de 3 mm. Côté bobine, voir l'avertissement plus haut : M3
 
 ### Montage
 
-1. Sertir ou coller l'œillet céramique dans le trou du fond du corps. Glisser les deux écrous
+1. Enfiler la bague céramique par l'intérieur dans le trou du fond du corps, collerette en
+   appui sur le fond, et la coller. Glisser les deux écrous
    M10 dans leurs logements par l'avant, puis visser le spigot à l'emplacement voulu.
 2. Poser le moteur dans le corps, fils vers la cloison, et le visser par l'arrière (4 × M3 × 6).
    Passer ses fils par les deux trous prévus.
@@ -292,8 +293,10 @@ vis M3 × 6 s'engage de 3 mm. Côté bobine, voir l'avertissement plus haut : M3
 - **Les cartes électroniques** n'ont pas de support dédié : je n'ai pas leurs cotes
   vérifiées. Le capot offre 22 mm de profondeur, pour le module PoE et les prises réseau.
   À contrôler sur les cartes achetées avant de lancer l'impression du capot.
-- **L'œillet** : le logement fait 6,2 mm, pour un œillet de 6 mm de diamètre extérieur.
-  À ajuster à l'œillet acheté (`EYELET_OD` dans `cad/treuil.py`).
+- **La bague céramique** : le logement fait 6,0 mm, pour une bague à collerette dont le
+  corps mesure 5,8 mm (modèles vendus comme « OD6 »). Elle s'enfile par l'intérieur, la
+  collerette en appui sur le fond, et dépasse sous le boîtier. À ajuster à la bague reçue
+  (`EYELET_OD` dans `cad/treuil.py`).
 - **Les jeux** (0,2 mm) conviennent au nylon MJF et à la résine. En dépôt de fil, les trous
   sortent souvent plus petits : repasser un foret de 3,5 mm dans les trous de passage.
 

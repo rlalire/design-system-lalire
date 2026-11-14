@@ -67,7 +67,7 @@ Un coffret d'assortiment de vis M3 inox couvre toutes ces longueurs.
 
 | Article | Qté | Où |
 |---|---|---|
-| Bague céramique, diamètre extérieur 6 mm, trou de 2 à 3 mm | 1 | assortiment d'anneaux de canne à pêche, ou fabricant de guide-fils textiles ([MOBAC](https://www.usinenouvelle.com/expo/illets-ceramique-p98019.html), [Texera](https://www.expometals.net/en-gb/product-detail-texera-srl/ceramic-wire-guides)). Pas de référence exacte trouvée |
+| Bague céramique à collerette, corps de 6 mm (« OD6 »), trou de 3 mm de préférence | 1 | assortiment d'anneaux de canne à pêche, ou fabricant de guide-fils textiles ([MOBAC](https://www.usinenouvelle.com/expo/illets-ceramique-p98019.html), [Texera](https://www.expometals.net/en-gb/product-detail-texera-srl/ceramic-wire-guides)). Pas de référence exacte trouvée |
 | Mousse adhésive double face | 1 rouleau | pour coller les cartes |
 | Colle cyanoacrylate | 1 tube | pour la bague céramique |
 
