@@ -1,13 +1,48 @@
 # Prompt à donner à Claude Code — pilotage des treuils « Lévitation micro »
 
-Copier tout ce qui suit la ligne dans une session Claude Code ouverte sur le logiciel de
-pilotage (Orchestrapp ou L'envol Sim).
+Copier tout ce qui suit la ligne dans une session Claude Code ouverte sur le dépôt
+`rlalire/orchestr-ios` (Orchestr, cible macOS, module Kinetic). La section « Où brancher
+dans ce dépôt » est propre à Orchestr ; le reste du protocole vaut pour tout logiciel.
 
 ---
 
-Je veux que ce logiciel pilote mes treuils « Lévitation micro » en OSC. Voici leur protocole
-exact, tel qu'il est écrit dans leur firmware. Lis d'abord le code existant d'envoi et de
-réception OSC de ce dépôt, puis propose-moi un plan avant de modifier quoi que ce soit.
+Je veux qu'Orchestr pilote mes treuils « Lévitation micro » en OSC, depuis le module
+Kinetic. Voici leur protocole exact, tel qu'il est écrit dans leur firmware. Lis d'abord le
+code indiqué ci-dessous, puis propose-moi un plan avant de modifier quoi que ce soit.
+
+## Où brancher dans ce dépôt
+
+Le module Kinetic (`Orchestr macOS/Kinetic/`) attend déjà des treuils réels :
+
+- `WinchBackend.swift` définit le protocole `WinchBackend` (`send(target:maxSpeed:maxAcceleration:to:)`,
+  `home`, `emergencyStop`, `onStatus`) et son seul backend actuel, `SimulationOnlyBackend`.
+  Le commentaire d'en-tête prévoit les backends réels « chacun dans son fichier, sans toucher
+  au moteur ». C'est ce qu'il faut écrire : un `LevitationWinchBackend`.
+- `KineticModels.swift` définit `WinchOutput` (`.simulationOnly`, `.dmx`, `.osc(host:port:addressPattern:)`)
+  avec un décodage résilient : un type inconnu retombe sur `.simulationOnly`. Ajoute un cas
+  dédié à ces treuils en gardant cette règle, pour que les anciens fichiers s'ouvrent toujours.
+- `KineticEngine.swift` fait tourner la simulation à 120 Hz et détient le `backend`. Regarde
+  où et à quelle cadence il l'appelle avant de décider quoi envoyer.
+- `Winch` (dans `KineticModels.swift`) porte déjà `anchorPosition`, `softLimitMin`,
+  `softLimitMax`, `maxSpeed`, `maxAcceleration`. Il lui manque le numéro de bloc, l'adresse
+  réseau, le décalage du zéro et la tension maximale du fil.
+- `CableKinematics.swift` et `CableCalibration.swift` calculent les longueurs de câble en
+  mètres, repère Y vers le haut. Les treuils attendent des millimètres déroulés depuis leur
+  zéro : voir « Les conversions ».
+- `Scripts/test-kinetic.sh` compile et lance les tests des modules purs, sans Xcode. Mets la
+  logique de conversion et de suivi d'état dans un module pur et ajoute-le à ce script.
+
+Correspondance avec le protocole `WinchBackend` :
+
+| Méthode | Message vers le bloc |
+|---|---|
+| `send(target:…)` | longueur en mètres → position en millimètres, envoyée en flux par `/levi/all/pos`. Le bloc n'accepte ni vitesse ni accélération par commande : il applique ses propres limites. La simulation d'Orchestr doit donc rester en dessous |
+| `home(_:)` | `/levi/N/arm` si le bloc est désarmé, attendre l'état 2, puis `/levi/N/home` |
+| `emergencyStop(_:)` | `/levi/all/stop` : arrêt en douceur, le moteur continue de tenir l'objet. Ne pas envoyer `disarm`, qui lâcherait l'objet |
+| `onStatus` | alimenté par `/levi/N/state` : longueur = (position + décalage) / 1000, `homed` = 4ᵉ argument, `moving` = état 3 à 7 |
+
+Le moteur de simulation tourne à 120 Hz. N'envoie pas plus de 100 paquets par seconde aux
+blocs ; 60 suffisent.
 
 ## Le matériel
 
