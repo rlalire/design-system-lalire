@@ -96,6 +96,22 @@ int main() {
   CHECK(fault == F_SNAG && plant.peakWindG < 12 * 1.1, "tension reglee a 12 g par OSC : traction maximale %.1f g", plant.peakWindG);
   plant.stopP = 0; send("/levi/1/reset"); send("/levi/1/tension", {30}); run(0.5);
 
+  // Arret de groupe : un autre bloc (le 2) se met en defaut pendant un vol
+  send("/levi/1/goto", {plant.phys() > 1500 ? 800.0f : 2200.0f, 4}); run(1.5);
+  double vBefore = fabs(plant.omega * plant.r * 1000.0);
+  send("/levi/all/groupstop", {2, 3}); run(1.0);
+  CHECK(vBefore > 100 && state == ST_HOLD && fabs(plant.omega) < 0.05 && groupHoldFrom == 2, "arret de groupe recu du bloc 2 : arret en douceur (vitesse avant %.0f mm/s)", vBefore);
+  double pHeld = plant.phys();
+  send("/levi/1/goto", {pHeld + 300, 1}); send("/levi/all/pos", {(float)pHeld + 300, 0, 0, 0}); run(0.6);
+  CHECK(fabs(plant.phys() - pHeld) < 0.5, "  mouvements refuses tant que l'arret de groupe n'est pas acquitte");
+  send("/levi/all/groupstop", {1, 3}); run(0.1);
+  CHECK(groupHoldFrom == 2, "  message portant son propre numero ignore");
+  send("/levi/all/reset"); run(0.1);
+  send("/levi/1/goto", {pHeld + 300, 1.5f}); run(2.0);
+  CHECK(groupHoldFrom == 0 && fabs(plant.phys() - pHeld - 300) < 0.5, "  reset : les mouvements reprennent");
+  int nGs = 0; for (auto& p : simTx) { OscMsg t; if (oscParseMessage(p.data(), p.size(), t) && !strcmp(t.addr, "/levi/all/groupstop") && t.arg[0] == WINCH_ID) nGs++; }
+  CHECK(nGs >= 4, "ce bloc a prevenu les autres pendant ses propres defauts (%d messages emis)", nGs);
+
   // Arret d'urgence : moteur coupe, l'objet n'est plus retenu
   estopOk = false; run(0.05);
   CHECK(state == ST_FAULT && !plant.enabled && !homed, "arret d'urgence : moteur coupe, origine invalidee");
@@ -122,7 +138,7 @@ int main() {
   send("/levi/1/disarm"); run(0.3);
   OscMsg m{}; bool got = false;
   for (auto& p : simTx) { OscMsg t; if (oscParseMessage(p.data(), p.size(), t) && !strcmp(t.addr, "/levi/1/state")) { m = t; got = true; } }
-  CHECK(got && m.n == 6 && m.arg[2] == ST_DISARMED, "retour d'etat OSC lisible, avec la tension du fil (%zu paquets emis)", simTx.size());
+  CHECK(got && m.n == 7 && m.arg[2] == ST_DISARMED, "retour d'etat OSC lisible, avec la tension du fil (%zu paquets emis)", simTx.size());
   uint8_t bundle[128] = "#bundle"; uint8_t msg[64];
   float one = 1; size_t n = oscBuild(msg, sizeof(msg), "/levi/1/arm", "", &one);
   bundle[16 + 3] = (uint8_t)n; memcpy(bundle + 20, msg, n);

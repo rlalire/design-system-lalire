@@ -118,7 +118,7 @@ entier si un seul fil les dépasse.
 
 Sur le port 9001, vers le dernier émetteur.
 
-`/levi/N/state`, 20 fois par seconde, 6 arguments :
+`/levi/N/state`, 20 fois par seconde, 7 arguments :
 
 | Rang | Type | Sens |
 |---|---|---|
@@ -128,16 +128,36 @@ Sur le port 9001, vers le dernier émetteur.
 | 4 | i | 1 si l'origine est connue, 0 sinon |
 | 5 | i | défaut : 0 aucun, 1 arrêt d'urgence, 3 fil accroché ou objet trop lourd |
 | 6 | f | tension estimée du fil, en grammes (approximative) |
+| 7 | i | arrêt de groupe : numéro du bloc en défaut qui l'a déclenché, 0 sinon |
 
 États : 0 désarmé · 2 armé à l'arrêt · 3 `goto` en cours · 4 flux · 5 `jog` · 6 prise
 d'origine · 7 arrêt en cours · 8 défaut · 9 test de rupture.
 
 `/levi/N/warn` avec un entier, quand une commande est refusée ou modifiée : 1 bloc non armé,
 2 origine non faite, 3 durée allongée, 4 consigne hors course ramenée à la butée, 5 commande
-refusée pendant un mouvement.
+refusée pendant un mouvement, 6 mouvement refusé parce qu'un arrêt de groupe est en cours.
 
 `/levi/N/break` avec la tension en grammes et un entier (1 = le fil a cassé, 0 = maximum
 atteint sans casser), à la fin d'un test de rupture.
+
+### Arrêt de groupe
+
+Les blocs sont tous identiques, sans maître. Mais un bloc qui passe en défaut prévient
+lui-même les autres : il diffuse `/levi/all/groupstop` (numéro du bloc, défaut) sur
+`192.168.10.255:9000`, et le répète 5 fois par seconde tant qu'il reste en défaut. Chaque
+autre bloc s'arrête alors en douceur, tient son objet, et refuse `goto` et `pos`
+(avertissement 6) jusqu'à recevoir un `reset`. `jog` et `home` restent acceptés.
+
+Conséquences pour le logiciel :
+
+- Il n'a pas à envoyer lui-même l'arrêt aux autres blocs, mais il doit **cesser d'envoyer le
+  flux** dès qu'un bloc est en défaut ou que le 7ᵉ argument de l'état est non nul.
+- Pour repartir : faire disparaître la cause, envoyer `/levi/all/reset`, vérifier que tous
+  les blocs sont revenus à l'état 2 avec le 7ᵉ argument à 0, puis ramener l'ensemble en
+  douceur avant de reprendre.
+- Si le bloc fautif est encore en défaut après le `reset`, il continue de prévenir et les
+  autres se remettent à l'arrêt : c'est voulu.
+- Le logiciel ne doit pas envoyer `groupstop` lui-même ; pour arrêter, il envoie `stop`.
 
 ### Règles d'état
 
@@ -184,8 +204,8 @@ brancher les blocs dans un autre ordre que les fils.
    pour tous), zéro, acquittement, réglage de la tension maximale et de la tension d'origine.
 4. **Un déplacement manuel** par bloc avec `jog`, renvoyé tant que le bouton est maintenu.
 5. **Des garde-fous** : ne pas démarrer l'envoi d'une trajectoire si un bloc actif n'est pas
-   armé, n'a pas son origine ou est en défaut ; arrêter l'envoi et envoyer `/levi/all/stop`
-   si un bloc passe en défaut pendant la lecture ; refuser ou ralentir une trajectoire qui
+   armé, n'a pas son origine, est en défaut ou en arrêt de groupe ; arrêter l'envoi si un
+   bloc passe en défaut pendant la lecture (les blocs s'arrêtent déjà entre eux) ; refuser ou ralentir une trajectoire qui
    dépasse les limites de vitesse et d'accélération sur un fil.
 6. **Une arrivée en douceur** : avant de lancer un flux, amener chaque bloc à sa position de
    départ par un `/levi/all/goto` avec une durée calculée, et n'enchaîner le flux qu'une fois

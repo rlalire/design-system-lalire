@@ -4,7 +4,7 @@ Un boîtier fermé de **112 × 123 × 70 mm**, accroché par un spigot de 16 mm 
 (bague, pliage de papier, carton) au bout d'un fil très fin. Le fil sort par un seul œillet.
 
 **État : conception v1.0, pièces du prototype dessinées pour l'impression 3D, rien n'est encore construit.** Le firmware **compile pour
-la carte Olimex ESP32-POE** et passe 31 vérifications dans une simulation sur PC qui reproduit
+la carte Olimex ESP32-POE** et passe 36 vérifications dans une simulation sur PC qui reproduit
 le moteur, la bobine et un objet suspendu. Il n'a pas encore tourné sur une vraie carte ni
 sur un moteur.
 
@@ -37,6 +37,16 @@ SimpleFOC.
 | Test de rupture | `/levi/N/breaktest` | Fil attaché à un point fixe : le moteur tire de plus en plus fort et renvoie la tension à laquelle le fil a cassé (`/levi/N/break grammes cassé`) |
 | Prise d'origine douce | `/levi/N/home` | L'objet remonte lentement jusqu'à buter sous l'œillet, avec une force plafonnée (`/levi/N/hometension`, 15 g par défaut) |
 | Tension lue | dans `/levi/N/state` | La tension estimée du fil est renvoyée 20 fois par seconde |
+| Arrêt de groupe | automatique | Un bloc en défaut prévient les autres, qui s'arrêtent en douceur sans attendre le logiciel |
+
+**Arrêt de groupe.** Les blocs sont tous identiques et aucun ne commande les autres. Mais dès
+qu'un bloc passe en défaut (fil accroché, arrêt d'urgence), il diffuse sur le réseau le
+message `/levi/all/groupstop` avec son numéro et son défaut, et le répète 5 fois par seconde
+tant qu'il y reste. Les autres blocs s'arrêtent en douceur, tiennent leur objet et refusent
+`goto` et `pos` (avertissement 6) jusqu'à un `/levi/all/reset`. Le déplacement manuel `jog`
+reste permis pour dégager un fil. Tant que le bloc fautif n'est pas sorti de son défaut, il
+continue de prévenir et le groupe reste à l'arrêt. Le dernier argument de `/levi/N/state`
+donne le numéro du bloc qui a déclenché l'arrêt, ou 0.
 
 **Régler un fil inconnu.** Faire le test de rupture sur un bout de fil, puis régler la
 tension maximale au tiers de la valeur obtenue. Le test coûte quelques centimètres de fil.
@@ -48,8 +58,9 @@ commande avec mesure de courant ferait mieux.
 
 Les autres commandes (`arm`, `goto`, `pos`, `jog`, `stop`, `zero`, `limits`, `reset`) sont
 celles des autres versions : voir [`../levitation/README.md`](../levitation/README.md),
-section 6. Le retour d'état a une valeur de plus : `/levi/N/state` position, vitesse, état,
-origine connue, défaut, tension estimée (g). L'état 9 est le test de rupture.
+section 6. Le retour d'état a deux valeurs de plus : `/levi/N/state` position, vitesse, état,
+origine connue, défaut, tension estimée (g), bloc à l'origine d'un arrêt de groupe. L'état 9
+est le test de rupture.
 
 ## Ce que fait le bloc
 

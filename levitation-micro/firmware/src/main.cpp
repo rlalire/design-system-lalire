@@ -64,6 +64,12 @@ static float breakG;                      // tension en cours pendant le test de
 static IPAddress peer(255, 255, 255, 255);
 static bool hasPeer = false;
 
+// Arrêt de groupe : un bloc en défaut prévient les autres, qui s'arrêtent et refusent tout
+// nouveau mouvement jusqu'à un /reset. Aucun bloc ne commande les autres pour autant.
+static uint8_t groupHoldFrom = 0;         // numéro du bloc qui a déclenché l'arrêt, 0 = aucun
+static uint32_t lastGroupStopMs = 0;
+static bool msgFromBlock = false;         // le dernier message venait d'un bloc, pas du logiciel
+
 // ---------------------------------------------------------------- utilitaires
 
 static inline bool inActive(uint8_t pin, bool activeHigh) { return digitalRead(pin) == (activeHigh ? HIGH : LOW); }
@@ -96,7 +102,21 @@ static void warn(int code) {
   Serial.printf("avertissement %d\n", code);
 }
 // Codes : 1 = pas armé, 2 = origine non faite, 3 = durée allongée (limites),
-//         4 = consigne hors course (écrêtée), 5 = commande refusée en mouvement
+//         4 = consigne hors course (écrêtée), 5 = commande refusée en mouvement,
+//         6 = arrêt de groupe en cours (un autre bloc est en défaut)
+
+// Prévient les autres blocs, en diffusion sur le réseau, que celui-ci est en défaut.
+static void sendGroupStop() {
+  lastGroupStopMs = millis();
+  if (!ethUp) return;
+  float v[2] = { (float)WINCH_ID, (float)fault };
+  uint8_t buf[64];
+  size_t n = oscBuild(buf, sizeof(buf), "/levi/all/groupstop", "ii", v);
+  if (!n) return;
+  udp.beginPacket(IPAddress(NET_IP_BASE, 255), OSC_IN_PORT);
+  udp.write(buf, n);
+  udp.endPacket();
+}
 
 static void holdHere() {
   pRef = pos; vRef = 0; vRefPrev = 0;
@@ -115,6 +135,7 @@ static void enterFault(Fault f) {
   holdHere();                               // fil accroché : on tient en place, sans forcer
   fault = f;
   state = ST_FAULT;
+  sendGroupStop();                          // les autres blocs s'arrêtent sans attendre le logiciel
   Serial.printf("DEFAUT %d\n", (int)f);
 }
 
@@ -149,6 +170,7 @@ static float clampTarget(float p) {
 
 static void cmdGoto(float target, float dur) {
   if (!readyToMove()) return;
+  if (groupHoldFrom) { warn(6); return; }
   if (!homed) { warn(2); return; }
   target = clampTarget(target);
   if (fabsf(vRef) > 1.0f) {                 // déjà en mouvement : on raccorde en suivi
@@ -168,6 +190,7 @@ static void cmdGoto(float target, float dur) {
 
 static void cmdStream(float target) {
   if (!readyToMove()) return;
+  if (groupHoldFrom) { warn(6); return; }
   if (!homed) { warn(2); return; }
   target = clampTarget(target);
   uint32_t nowUs = micros();
@@ -219,6 +242,7 @@ static void cmdBreakTest() {
 }
 
 static void cmdReset() {
+  groupHoldFrom = 0;                        // lève aussi l'arrêt de groupe
   if (state != ST_FAULT) return;
   if (inActive(PIN_ESTOP, ESTOP_ACTIVE)) return;
   bool wasEstop = fault == F_ESTOP;
@@ -252,6 +276,14 @@ static void handleOsc(const OscMsg& m) {
   else if (!strcmp(cmd, "home")) cmdHome();
   else if (!strcmp(cmd, "zero")) cmdZero();
   else if (!strcmp(cmd, "reset")) cmdReset();
+  else if (!strcmp(cmd, "groupstop")) {
+    // Envoyé par un bloc en défaut. On s'arrête en douceur et on attend un /reset.
+    msgFromBlock = true;
+    if (m.n >= 1 && (int)m.arg[0] != WINCH_ID) {
+      groupHoldFrom = (uint8_t)m.arg[0];
+      cmdStop();
+    }
+  }
   else if (!strcmp(cmd, "breaktest") && !all) cmdBreakTest();
   else if (!strcmp(cmd, "tension") && !all && m.n >= 1 && m.arg[0] > 0 && m.arg[0] <= BREAKTEST_MAX_G) {
     tensionMaxG = m.arg[0]; prefs.putFloat("tmax", tensionMaxG);
@@ -392,8 +424,8 @@ static void controlTick(float dt) {
 }
 
 static void sendFeedback() {
-  float v[6] = { pos, vel, (float)state, homed ? 1.0f : 0.0f, (float)fault, tensionEstG };
-  sendOsc("state", "ffiiif", v);
+  float v[7] = { pos, vel, (float)state, homed ? 1.0f : 0.0f, (float)fault, tensionEstG, (float)groupHoldFrom };
+  sendOsc("state", "ffiiifi", v);
 }
 
 // ---------------------------------------------------------------- démarrage
@@ -459,14 +491,19 @@ void loop() {
       IPAddress from = udp.remoteIP();
       int n = udp.read(buf, sizeof(buf));
       if (n > 0) {
-        peer = from; hasPeer = true;
+        msgFromBlock = false;
         oscDispatch(buf, (size_t)n, handleOsc);
+        if (!msgFromBlock) { peer = from; hasPeer = true; }   // l'état repart vers le logiciel, pas vers un bloc
       }
     }
 
     controlTick(dt);
     motor.move(DIR_SIGN * iCmd);            // en mode couple, la consigne est un courant (A)
   }
+
+  // Tant que ce bloc est en défaut, il le répète : un bloc qui aurait manqué le message,
+  // ou qu'on aurait acquitté trop tôt, reste à l'arrêt.
+  if (state == ST_FAULT && millis() - lastGroupStopMs >= 200) sendGroupStop();
 
   static uint32_t lastFbMs = 0;
   if (millis() - lastFbMs >= FEEDBACK_PERIOD_MS) {
