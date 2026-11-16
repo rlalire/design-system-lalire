@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>La magie sort de l'écran — romain lalire</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  /* Jetons repris du Système de Design romain lalire v1 */
+  :root {
+    --black:  #000000;
+    --white:  #ffffff;
+    --text:   #f0eded;
+    --muted:  #908888;
+    --border: #504b4b;
+    --font:   'Inter', sans-serif;
+    --marge:  56px;
+  }
+  @page { size: 1920px 1080px; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--black); }
+  body { font-family: var(--font); color: var(--text); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  .page {
+    position: relative;
+    width: 1920px; height: 1080px;
+    overflow: hidden;
+    background: var(--black);
+    page-break-after: always; break-after: page;
+  }
+  .page:last-child { page-break-after: auto; break-after: auto; }
+
+  /* ── Le Cadre : ligne fine, l'idéogramme termine la composition dans un coin ── */
+  .cadre {
+    position: absolute; inset: var(--marge);
+    border: 1px solid rgba(240,237,237,.55);
+    pointer-events: none; z-index: 5;
+  }
+  .cadre .ideo {
+    position: absolute; right: -1px; bottom: -1px;
+    width: 92px; padding: 18px 0 0 20px;   /* zone de protection ≈ hauteur du « l » */
+    background: var(--black);
+    color: var(--text);
+    transform: translate(0, 0);
+  }
+  .cadre .ideo svg { display: block; width: 100%; height: auto; }
+
+  /* ── Éléments typographiques ── */
+  .surtitre {
+    font-size: 15px; font-weight: 700;
+    letter-spacing: 4px; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .titre {
+    font-weight: 300;
+    font-size: 104px; line-height: .98;
+    letter-spacing: -0.035em;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .titre b { font-weight: 900; letter-spacing: -0.045em; }
+  .filet { height: 1px; background: var(--text); }
+  .corps {
+    font-size: 21px; font-weight: 300; line-height: 1.6;
+    color: var(--muted);
+  }
+  .corps strong { color: var(--text); font-weight: 400; }
+  .lien-filet {
+    display: inline-block;
+    font-size: 14px; font-weight: 400;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: var(--text); text-decoration: none;
+    padding-bottom: 6px; border-bottom: 1px solid var(--text);
+  }
+  .badge {
+    display: inline-block;
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 2.5px; text-transform: uppercase;
+    padding: 7px 14px;
+    border: 1px solid var(--text); color: var(--text);
+  }
+  .badge.muted { border-color: var(--muted); color: var(--muted); }
+  .num { font-size: 13px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); }
+
+  .zone { position: absolute; inset: var(--marge); overflow: hidden; }
+  .zone img { position: absolute; top: 0; height: 100%; width: auto; }
+
+  /* ═══ PAGE 1 — Couverture ═══ */
+  .p1 .photo {
+    left: -240px;
+    -webkit-mask-image: linear-gradient(to right, #000 76%, transparent 100%);
+            mask-image: linear-gradient(to right, #000 76%, transparent 100%);
+  }
+  .p1 .bloc {
+    position: absolute; left: 1250px; top: 50%;
+    transform: translateY(-50%);
+    width: 540px;
+  }
+  .p1 .surtitre { margin-bottom: 40px; }
+  .p1 .titre { font-size: 86px; margin-bottom: 36px; }
+  .p1 .filet { width: 72px; margin-bottom: 36px; }
+  .p1 .corps { margin-bottom: 52px; }
+  .p1 .tags { display: flex; gap: 10px; margin-bottom: 56px; }
+
+  /* ═══ PAGE 2 — Le geste ═══ */
+  .p2 .photo {
+    right: -120px;
+    -webkit-mask-image: linear-gradient(to left, #000 72%, transparent 100%);
+            mask-image: linear-gradient(to left, #000 72%, transparent 100%);
+  }
+  .p2 .bloc {
+    position: absolute; left: 140px; top: 50%;
+    transform: translateY(-50%);
+    width: 500px;
+  }
+  .p2 .num { margin-bottom: 28px; }
+  .p2 .titre { font-size: 88px; margin-bottom: 36px; }
+  .p2 .filet { width: 72px; margin-bottom: 36px; }
+  .p2 .corps + .corps { margin-top: 22px; }
+
+  /* ═══ PAGE 3 — L'offre ═══ */
+  .p3 .bloc {
+    position: absolute; left: 140px; top: 150px; right: 140px;
+  }
+  .p3 .num { margin-bottom: 28px; }
+  .p3 .titre { font-size: 88px; margin-bottom: 36px; max-width: 1100px; }
+  .p3 .filet { width: 72px; margin-bottom: 72px; }
+  .p3 .grille {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 56px;
+  }
+  .p3 .item .filet-haut { height: 1px; background: var(--border); margin-bottom: 28px; }
+  .p3 .item .chiffre { font-size: 13px; font-weight: 700; letter-spacing: 3px; color: var(--muted); margin-bottom: 18px; }
+  .p3 .item h3 { font-size: 32px; font-weight: 400; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 18px; color: var(--text); }
+  .p3 .item .corps { font-size: 19px; }
+  .p3 .signature {
+    position: absolute; left: 140px; bottom: 140px;
+    display: flex; align-items: flex-end; gap: 48px;
+  }
+  .p3 .signature .logo { width: 300px; color: var(--text); }
+  .p3 .signature .logo svg { display: block; width: 100%; height: auto; }
+  .p3 .signature .meta { font-size: 13px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); line-height: 1.9; padding-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<!-- ═══ 1 · COUVERTURE ═══ -->
+<section class="page p1">
+  <div class="zone"><img class="photo" src="04-meduse-fond-noir-16x9.png" alt="Une méduse de fumée lumineuse naît du stylo et s'échappe de l'écran d'une tablette"></div>
+  <div class="bloc">
+    <div class="surtitre">Magie numérique · Déambulation</div>
+    <h1 class="titre">la magie sort<br><b>de l'écran.</b></h1>
+    <div class="filet"></div>
+    <p class="corps">Des tours de magie sur iPad, au plus près de vos invités&nbsp;: les images s'animent, s'échappent de l'écran et deviennent réelles.</p>
+    <div class="tags">
+      <span class="badge">Artiste visuel</span>
+      <span class="badge muted">Magie iPad</span>
+      <span class="badge muted">Sur mesure</span>
+    </div>
+    <a class="lien-filet" href="#">Voir le numéro</a>
+  </div>
+  <div class="cadre"><div class="ideo">{{IDEO}}</div></div>
+</section>
+
+<!-- ═══ 2 · LE GESTE ═══ -->
+<section class="page p2">
+  <div class="zone"><img class="photo" src="03-carte-onde-fond-noir-16x9.png" alt="Une main retire un as de cœur de l'écran d'une tablette, la vitre ondule autour de la carte"></div>
+  <div class="bloc">
+    <div class="num">01 — Le geste</div>
+    <h2 class="titre">l'image<br>devient <b>objet.</b></h2>
+    <div class="filet"></div>
+    <p class="corps">Une carte apparaît à l'écran. Un instant plus tard, elle est entre les doigts de votre invité, <strong>bien réelle</strong>.</p>
+    <p class="corps">Des cartes, des pièces, de la lumière&nbsp;: tout ce qui naît sur la tablette peut en sortir.</p>
+  </div>
+  <div class="cadre"><div class="ideo">{{IDEO}}</div></div>
+</section>
+
+<!-- ═══ 3 · L'OFFRE ═══ -->
+<section class="page p3">
+  <div class="bloc">
+    <div class="num">02 — Pour votre événement</div>
+    <h2 class="titre">une magie qui vient<br><b>à vos invités.</b></h2>
+    <div class="filet"></div>
+    <div class="grille">
+      <div class="item">
+        <div class="filet-haut"></div>
+        <div class="chiffre">A</div>
+        <h3>en déambulation</h3>
+        <p class="corps">Au cœur de vos soirées, cocktails et salons, de groupe en groupe, au plus près des regards.</p>
+      </div>
+      <div class="item">
+        <div class="filet-haut"></div>
+        <div class="chiffre">B</div>
+        <h3>sur mesure</h3>
+        <p class="corps">Chaque numéro peut être créé aux couleurs de votre événement&nbsp;: votre thème, vos images, votre message.</p>
+      </div>
+      <div class="item">
+        <div class="filet-haut"></div>
+        <div class="chiffre">C</div>
+        <h3>pour tous les publics</h3>
+        <p class="corps">Une magie silencieuse et visuelle, qui se passe de mots et touche chacun.</p>
+      </div>
+    </div>
+  </div>
+  <div class="signature">
+    <div class="logo">{{LOGO}}</div>
+    <div class="meta">Artiste visuel<br>Magie numérique</div>
+  </div>
+  <div class="cadre"></div>
+</section>
+
+</body>
+</html>
