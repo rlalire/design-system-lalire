@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Magie sur iPad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --noir: #010101;
+    --ivoire: #f3efe6;
+    --gris: #a7a39b;
+    --gris-fin: #6b6862;
+    --lune: #b9cfe8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--noir); }
+  body {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Inter", system-ui, sans-serif;
+    color: var(--ivoire);
+  }
+
+  /* Bannière web 2560 × 1080 (format hero ~ 21:9) */
+  .banniere {
+    position: relative;
+    width: 2560px; height: 1080px;
+    background: var(--noir);
+    overflow: hidden;
+  }
+  .photo {
+    position: absolute; left: 0; top: 0;
+    height: 100%; width: auto;
+    /* fondu doux vers le noir sur le bord droit */
+    -webkit-mask-image: linear-gradient(to right, #000 78%, transparent 100%);
+            mask-image: linear-gradient(to right, #000 78%, transparent 100%);
+  }
+  /* halo très léger qui prolonge la lumière de la méduse vers le texte */
+  .halo {
+    position: absolute; left: 1250px; top: 120px;
+    width: 900px; height: 700px;
+    background: radial-gradient(closest-side, rgba(185,207,232,.07), transparent);
+    pointer-events: none;
+  }
+
+  .texte {
+    position: absolute;
+    left: 1790px; top: 50%;
+    transform: translateY(-50%);
+    width: 640px;
+  }
+  .surtitre {
+    font-size: 17px; font-weight: 500;
+    letter-spacing: .32em; text-transform: uppercase;
+    color: var(--lune);
+    margin-bottom: 44px;
+  }
+  .surtitre span { color: var(--gris-fin); margin: 0 .5em; }
+  h1 {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-weight: 300;
+    font-size: 104px; line-height: 1.02;
+    letter-spacing: -.01em;
+    margin-bottom: 48px;
+  }
+  h1 em { font-style: italic; color: var(--lune); }
+  .filet {
+    width: 56px; height: 1px; background: var(--gris-fin);
+    margin-bottom: 40px;
+  }
+  p {
+    font-size: 22px; font-weight: 300; line-height: 1.65;
+    color: var(--gris);
+    max-width: 560px;
+  }
+  p + p { margin-top: 18px; }
+
+  .cta {
+    display: inline-flex; align-items: center; gap: 22px;
+    margin-top: 64px;
+    font-size: 16px; font-weight: 500;
+    letter-spacing: .26em; text-transform: uppercase;
+    color: var(--ivoire); text-decoration: none;
+  }
+  .cta .rond {
+    width: 64px; height: 64px; border-radius: 50%;
+    border: 1px solid rgba(243,239,230,.45);
+    display: grid; place-items: center;
+  }
+  .cta .rond::after {
+    content: ""; margin-left: 4px;
+    border-left: 12px solid var(--ivoire);
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+  }
+</style>
+</head>
+<body>
+  <section class="banniere">
+    <img class="photo" src="04-meduse-fond-noir-16x9.png" alt="Une méduse de fumée lumineuse naît du stylo et s'échappe de l'écran d'une tablette">
+    <div class="halo"></div>
+
+    <div class="texte">
+      <div class="surtitre">Magie numérique<span>·</span>Déambulation</div>
+      <h1>La magie<br>sort <em>de l'écran.</em></h1>
+      <div class="filet"></div>
+      <p>Des tours de magie sur iPad, au plus près de vos invités&nbsp;: les images s'animent, s'échappent de l'écran et deviennent réelles.</p>
+      <p>Chaque numéro peut être créé sur mesure, aux couleurs de votre événement.</p>
+      <a class="cta" href="#"><span class="rond"></span>Voir le numéro</a>
+    </div>
+  </section>
+</body>
+</html>
