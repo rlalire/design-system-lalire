@@ -1,0 +1,774 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lévitation — Fiche technique</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   LÉVITATION — FICHE TECHNIQUE · V1
+   Système de design Romain Lalire : Inter · noir / blanc · vert #00f8c1
+   ------------------------------------------------------------
+   BROUILLON : les valeurs entourées de <span class="v">…</span>
+   sont des estimations à confirmer. Pour la version finale,
+   retirer la classe "draft" de la balise <body>.
+   ============================================================ */
+@page { size: A4; margin: 0; }
+:root {
+  --green: #00f8c1;
+  --green-ink: #00a07c;
+  --black: #000;
+  --white: #fff;
+  --ink: #111;
+  --muted: #6f6969;
+  --line: #d9d5d5;
+  --soft: #f4f3f3;
+  --dark: #282425;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: #8a8585; }
+body {
+  font-family: 'Inter', sans-serif;
+  color: var(--ink);
+  font-size: 8.6pt;
+  line-height: 1.45;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.page {
+  width: 210mm; height: 297mm;
+  margin: 10mm auto;
+  background: var(--white);
+  position: relative;
+  overflow: hidden;
+  padding: 22mm 16mm 20mm;
+  page-break-after: always; break-after: page;
+  box-shadow: 0 4px 30px rgba(0,0,0,.25);
+}
+@media print { html { background: none; } .page { margin: 0; box-shadow: none; } }
+
+/* ---------- valeurs à confirmer ---------- */
+body.draft .v { background: rgba(0,248,193,.28); box-shadow: inset 0 -1px 0 var(--green-ink); padding: 0 1px; }
+.draft-note { display: none; }
+body.draft .draft-note {
+  display: flex; gap: 8px; align-items: center;
+  position: absolute; top: 9mm; right: 16mm;
+  font-size: 6.5pt; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted);
+}
+body.draft .draft-note i { width: 18px; height: 9px; background: rgba(0,248,193,.28); box-shadow: inset 0 -1px 0 var(--green-ink); }
+
+/* ---------- en-tête / pied ---------- */
+.runhead {
+  position: absolute; top: 9mm; left: 16mm; right: 16mm;
+  display: flex; justify-content: space-between;
+  font-size: 6.5pt; letter-spacing: 2px; text-transform: uppercase; color: var(--muted);
+}
+body.draft .runhead .rh-right { display: none; }
+.runfoot {
+  position: absolute; bottom: 9mm; left: 16mm; right: 16mm;
+  display: flex; justify-content: space-between; align-items: flex-end;
+  font-size: 6.5pt; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted);
+  border-top: 1px solid var(--line); padding-top: 3mm;
+}
+.runfoot svg { height: 4.2mm; fill: var(--black); }
+.folio { font-weight: 700; color: var(--ink); }
+
+/* ---------- titres ---------- */
+.kicker {
+  font-size: 7pt; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 3mm;
+}
+h1 {
+  font-size: 34pt; font-weight: 900; letter-spacing: -0.035em; line-height: .95;
+}
+h1 + .filet, .filet { display: block; width: 22mm; height: 1px; background: var(--ink); margin: 5mm 0 6mm; }
+h2 {
+  font-size: 12.5pt; font-weight: 700; letter-spacing: -0.01em; line-height: 1.15; margin-bottom: 2.5mm;
+}
+h3 {
+  font-size: 7pt; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase;
+  padding-bottom: 2mm; border-bottom: 1px solid var(--ink); margin-bottom: 3mm;
+}
+.lead { font-size: 11pt; line-height: 1.4; font-weight: 300; max-width: 150mm; }
+.lead b { font-weight: 700; }
+p + p { margin-top: 2mm; }
+.muted { color: var(--muted); }
+.small { font-size: 7.2pt; line-height: 1.45; }
+
+/* ---------- badges A/B/1/2 ---------- */
+.code {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 9mm; height: 9mm; font-weight: 900; font-size: 13pt;
+  background: var(--black); color: var(--green); flex-shrink: 0;
+}
+.code.sm { width: 6mm; height: 6mm; font-size: 8.5pt; }
+.code.out { background: none; color: var(--ink); border: 1.5px solid var(--ink); }
+.titled { display: flex; gap: 4mm; align-items: center; }
+
+/* ---------- grilles ---------- */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; }
+.g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6mm; }
+.g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4mm; }
+.mt4 { margin-top: 4mm; } .mt6 { margin-top: 6mm; } .mt8 { margin-top: 8mm; } .mt10 { margin-top: 10mm; }
+
+/* ---------- chiffres clés ---------- */
+.stat { border-top: 1px solid var(--ink); padding-top: 2.5mm; }
+.stat .n { font-size: 17pt; font-weight: 900; letter-spacing: -0.03em; line-height: 1.05; }
+.stat .n small { font-size: 9pt; font-weight: 700; letter-spacing: 0; }
+.stat .l { font-size: 7pt; color: var(--muted); margin-top: 1mm; line-height: 1.35; }
+
+/* ---------- tableaux de specs ---------- */
+table.spec { width: 100%; border-collapse: collapse; }
+table.spec td { padding: 1.6mm 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.spec td:first-child { color: var(--muted); width: 46%; padding-right: 3mm; }
+table.spec td:last-child { font-weight: 700; }
+table.spec tr:last-child td { border-bottom: none; }
+
+/* ---------- listes ---------- */
+ul.dash { list-style: none; }
+ul.dash li { position: relative; padding-left: 4.5mm; margin-bottom: 1.6mm; }
+ul.dash li::before { content: ''; position: absolute; left: 0; top: .72em; width: 2.5mm; height: 1px; background: var(--ink); }
+
+ul.check { list-style: none; }
+ul.check li { position: relative; padding-left: 6.5mm; margin-bottom: 2mm; min-height: 4mm; }
+ul.check li::before { content: ''; position: absolute; left: 0; top: .15em; width: 3.2mm; height: 3.2mm; border: 1px solid var(--ink); }
+
+/* ---------- cadre (élément du système) ---------- */
+.cadre { border: 1px solid var(--ink); padding: 5mm; position: relative; }
+.cadre.thick { border-width: 1.5px; }
+.cadre .corner { position: absolute; right: 3.5mm; bottom: 3.5mm; height: 4mm; fill: var(--ink); }
+.cadre.inv ul.dash li::before { background: #fff; }
+.box-soft { background: var(--soft); padding: 5mm; }
+.alert { display: flex; gap: 3mm; align-items: flex-start; border-left: 2px solid var(--black); padding: 1mm 0 1mm 4mm; }
+.alert b { white-space: nowrap; }
+
+/* ---------- figures ---------- */
+figure { position: relative; }
+figure img { display: block; width: 100%; }
+figcaption { font-size: 6.8pt; color: var(--muted); margin-top: 1.8mm; letter-spacing: .2px; }
+svg.diagram { display: block; width: 100%; height: auto; }
+.diagram text { font-family: 'Inter', sans-serif; }
+
+/* ---------- couverture ---------- */
+.cover { background: var(--black); color: var(--white); padding: 0; }
+.cover .frame { position: absolute; inset: 14mm; border: 1px solid rgba(255,255,255,.85); }
+.cover svg.art { position: absolute; inset: 14mm; width: calc(100% - 28mm); height: calc(100% - 28mm); }
+.cover .title { position: absolute; left: 26mm; bottom: 44mm; right: 26mm; }
+.cover h1 { font-size: 58pt; color: var(--white); letter-spacing: -0.045em; }
+.cover .filet { background: var(--green); width: 30mm; margin: 6mm 0 5mm; }
+.cover .sub { font-size: 11pt; font-weight: 300; line-height: 1.35; }
+.cover .sub b { font-weight: 700; }
+.cover .meta { position: absolute; left: 26mm; bottom: 24mm; font-size: 6.5pt; letter-spacing: 2px; text-transform: uppercase; color: #9a9393; }
+.cover .logo { position: absolute; right: 18mm; bottom: 18mm; height: 11mm; fill: var(--white); }
+.cover .draft-note { color: #9a9393; top: 6mm; right: 14mm; }
+
+/* ---------- étapes ---------- */
+.steps { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--ink); }
+.step { padding: 3mm 3mm 0 0; position: relative; }
+.step::before { content: ''; position: absolute; top: -1.6mm; left: 0; width: 3mm; height: 3mm; border-radius: 50%; background: var(--white); border: 1.5px solid var(--ink); }
+.step.on::before { background: var(--green); }
+.step .t { font-size: 6.5pt; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-top: 1.5mm; }
+.step .d { font-weight: 700; font-size: 8pt; line-height: 1.3; margin-top: 1mm; }
+.step .s { font-size: 7pt; color: var(--muted); margin-top: 1mm; line-height: 1.35; }
+
+/* ---------- matrice ---------- */
+.matrix { display: grid; grid-template-columns: 34mm 1fr 1fr; border-top: 1.5px solid var(--ink); }
+.matrix > div { padding: 3mm; border-bottom: 1px solid var(--line); }
+.matrix .hd { font-size: 7pt; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; display: flex; gap: 2.5mm; align-items: center; }
+.matrix .cell b { display: block; margin-bottom: 1mm; }
+.matrix .cell .tag { display: inline-block; font-size: 6.2pt; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; padding: .6mm 2mm; margin-bottom: 1.5mm; border: 1px solid var(--ink); }
+.matrix .cell .tag.g { background: var(--green); border-color: var(--green); }
+</style>
+</head>
+<body class="draft">
+
+<!-- =========================================================
+     01 · COUVERTURE
+     ========================================================= -->
+<section class="page cover">
+  <div class="draft-note"><i></i>V1 · valeurs surlignées à confirmer</div>
+  <div class="frame"></div>
+  <svg class="art" viewBox="0 0 182 269" preserveAspectRatio="none" aria-hidden="true">
+    <!-- 4 fils depuis les angles hauts du cadre vers l'objet -->
+    <g stroke="#fff" stroke-width=".18" opacity=".75">
+      <line x1="0" y1="0" x2="112" y2="92"/>
+      <line x1="182" y1="0" x2="112" y2="92"/>
+      <line x1="0" y1="150" x2="112" y2="92" opacity=".45"/>
+      <line x1="182" y1="150" x2="112" y2="92" opacity=".45"/>
+    </g>
+  </svg>
+  <svg class="art" viewBox="0 0 182 269" aria-hidden="true">
+    <defs>
+      <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="#00f8c1" stop-opacity=".35"/>
+        <stop offset="1" stop-color="#00f8c1" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <circle cx="112" cy="92" r="22" fill="url(#glow)"/>
+    <circle cx="112" cy="92" r="6.2" fill="#00f8c1"/>
+  </svg>
+  <div class="title">
+    <div class="kicker" style="color:#9a9393">Fiche technique · Installations</div>
+    <h1>Lévi&shy;tation</h1>
+    <span class="filet"></span>
+    <p class="sub"><b>Faire voler un objet dans l'espace d'exposition.</b><br>
+    Un système de vol qui s'adapte au lieu : dans sa propre structure ou accroché au bâtiment, avec ou sans coupure de courant la nuit.</p>
+  </div>
+  <div class="meta">Version 1 · Novembre 2026</div>
+  <svg class="logo" viewBox="0 0 342.642 101.607" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0,51.647)"><path fill-rule="nonzero" d="M163.59,3.082L158.216,3.082L158.216,47.563L163.59,47.563L163.59,3.082ZM181.445,48.34C187.086,48.34 190.221,45.384 191.355,43.026L191.714,43.026L191.714,47.564L196.998,47.564L196.998,25.562C196.998,15.144 188.967,13.77 184.489,13.77C179.324,13.77 173.593,15.621 171.026,21.681L176.19,23.383C177.235,21.054 179.832,18.487 184.639,18.487C189.266,18.487 191.624,20.875 191.624,25.024L191.624,25.204C191.624,27.681 188.997,27.502 183.056,28.249C176.877,29.025 170.071,30.428 170.071,38.071C170.071,44.638 175.116,48.34 181.445,48.34M182.37,43.593C178.369,43.593 175.474,41.802 175.474,38.339C175.474,34.548 178.907,33.294 182.817,32.786C184.877,32.518 190.729,31.921 191.624,30.876L191.624,35.503C191.624,39.593 188.31,43.593 182.37,43.593M210.692,3.082L205.318,3.082L205.318,47.563L210.692,47.563L210.692,3.082ZM219.123,47.564L224.497,47.564L224.497,14.189L219.123,14.189L219.123,47.564ZM221.839,8.725C223.899,8.725 225.601,7.143 225.601,5.173C225.601,3.202 223.899,1.62 221.839,1.62C219.81,1.62 218.108,3.202 218.108,5.173C218.108,7.143 219.81,8.725 221.839,8.725M232.909,47.564L238.283,47.564L238.283,26.667C238.283,22.159 241.806,18.905 246.612,18.905C248.044,18.905 249.507,19.144 249.836,19.203L249.836,13.8C249.209,13.77 247.895,13.711 247.119,13.711C243.148,13.711 239.685,15.949 238.462,19.323L238.103,19.323L238.103,14.188L232.909,14.188L232.909,47.564ZM268.202,48.28C275.039,48.28 280.024,44.847 281.576,39.802L276.382,38.369C275.128,41.772 272.173,43.503 268.232,43.503C262.321,43.503 258.261,39.682 257.992,32.697L282.114,32.697L282.114,30.458C282.114,18.129 274.65,13.77 267.575,13.77C258.47,13.77 252.559,20.905 252.559,31.144C252.559,41.414 258.529,48.28 268.202,48.28M258.022,28.159C258.35,23.055 261.843,18.546 267.575,18.546C273.068,18.546 276.143,22.487 276.651,28.159L258.022,28.159Z"/></g><g transform="translate(158.2164,1.6377)"><path fill-rule="nonzero" d="M0,45.168L5.374,45.168L5.374,24.271C5.374,19.763 8.896,16.509 13.703,16.509C15.136,16.509 16.598,16.748 16.927,16.808L16.927,11.404C16.3,11.374 14.986,11.315 14.21,11.315C10.24,11.315 6.777,13.554 5.553,16.927L5.195,16.927L5.195,11.793L0,11.793L0,45.168ZM34.845,45.885C43.95,45.885 50.1,38.989 50.1,28.689C50.1,18.241 43.95,11.374 34.845,11.374C25.77,11.374 19.65,18.241 19.65,28.689C19.65,38.989 25.77,45.885 34.845,45.885M34.845,41.078C28.188,41.078 25.113,35.257 25.113,28.689C25.113,22.032 28.188,16.181 34.845,16.181C41.592,16.181 44.667,22.062 44.667,28.689C44.667,35.257 41.592,41.078 34.845,41.078M56.864,45.168L62.237,45.168L62.237,24.151C62.237,18.837 65.79,16.091 69.7,16.091C73.462,16.091 76.239,18.569 76.239,22.271L76.239,45.168L81.612,45.168L81.612,23.375C81.612,19.166 84.358,16.091 88.867,16.091C92.449,16.091 95.583,18.002 95.583,22.808L95.583,45.168L100.987,45.168L100.987,22.659C100.987,14.927 96.27,11.195 90.479,11.195C85.642,11.195 81.552,13.792 79.97,18.002C78.776,13.882 75.85,11.195 71.462,11.195C67.522,11.195 63.76,13.404 62.118,17.912L62.088,11.793L56.864,11.793L56.864,45.168ZM118.609,45.944C124.251,45.944 127.385,42.989 128.52,40.63L128.878,40.63L128.878,45.168L134.162,45.168L134.162,23.167C134.162,12.748 126.132,11.374 121.654,11.374C116.489,11.374 110.758,13.225 108.19,19.285L113.354,20.987C114.4,18.658 116.997,16.091 121.803,16.091C126.43,16.091 128.789,18.479 128.789,22.629L128.789,22.808C128.789,25.286 126.161,25.107 120.221,25.853C114.042,26.63 107.235,28.032 107.235,35.675C107.235,42.242 112.28,45.944 118.609,45.944M119.534,41.198C115.534,41.198 112.638,39.406 112.638,35.944C112.638,32.152 116.071,30.899 119.982,30.391C122.042,30.122 127.893,29.525 128.789,28.48L128.789,33.108C128.789,37.197 125.475,41.198 119.534,41.198M142.343,45.168L147.717,45.168L147.717,11.793L142.343,11.793L142.343,45.168ZM145.059,6.329C147.119,6.329 148.821,4.747 148.821,2.777C148.821,0.806 147.119,-0.776 145.059,-0.776C143.029,-0.776 141.327,0.806 141.327,2.777C141.327,4.747 143.029,6.329 145.059,6.329M161.502,25.166C161.502,19.464 165.115,16.211 169.92,16.211C174.578,16.211 177.444,19.285 177.444,24.42L177.444,45.168L182.817,45.168L182.817,23.972C182.817,15.524 178.279,11.374 171.533,11.374C167.055,11.374 163.472,13.255 161.323,17.972L161.293,11.793L156.129,11.793L156.129,45.168L161.502,45.168L161.502,25.166Z"/></g><g transform="translate(146.3661,13.4975)"><path fill-rule="nonzero" d="M0,85.851L0,81.594L-15.396,81.434L-15.396,0L-144.757,0L-144.757,85.851L-97.538,85.851L-97.538,60.546C-96.333,60.556 -95.063,60.564 -94.119,60.564C-79.225,60.564 -66.898,71.545 -64.784,85.851L0,85.851ZM-66.022,30.203C-66.022,46.152 -78.952,59.081 -94.9,59.081C-95.633,59.081 -96.591,59.075 -97.538,59.067L-97.538,1.33C-96.591,1.327 -95.633,1.326 -94.9,1.326C-78.952,1.326 -66.022,14.255 -66.022,30.203"/></g></svg>
+</section>
+
+<!-- =========================================================
+     02 · PRINCIPE
+     ========================================================= -->
+<section class="page">
+  <div class="runhead"><span>Lévitation — Fiche technique</span><span class="rh-right">V1 · 2026</span></div>
+  <div class="draft-note"><i></i>Valeurs à confirmer</div>
+
+  <div class="kicker">01 — Principe</div>
+  <h1>Comment<br>l'objet vole</h1>
+  <span class="filet"></span>
+  <p class="lead">L'objet est tenu par <b>4 fils quasi invisibles</b>. Chaque fil part d'un treuil motorisé (<b>LeviPod</b>), passe par une <b>poulie placée en hauteur</b>, puis rejoint l'objet. En faisant varier la longueur des 4 fils en même temps, l'objet se déplace librement dans tout le volume, comme s'il flottait.</p>
+
+  <div class="g2 mt8" style="grid-template-columns: 1.25fr 1fr; align-items: start;">
+    <figure>
+      <svg class="diagram" viewBox="0 0 600 520" xmlns="http://www.w3.org/2000/svg">
+        <!-- sol -->
+        <polygon points="80,470 440,470 550,390 190,390" fill="#f4f3f3"/>
+        <!-- structure (arêtes arrière) -->
+        <g stroke="#b9b3b3" stroke-width="2" fill="none">
+          <line x1="190" y1="40" x2="190" y2="390"/>
+          <line x1="190" y1="390" x2="550" y2="390"/>
+          <line x1="190" y1="390" x2="80" y2="470"/>
+        </g>
+        <!-- structure (arêtes avant) -->
+        <g stroke="#111" stroke-width="2.4" fill="none" stroke-linejoin="round">
+          <polyline points="190,40 550,40 440,120 80,120 190,40"/>
+          <line x1="80" y1="120" x2="80" y2="470"/>
+          <line x1="440" y1="120" x2="440" y2="470"/>
+          <line x1="550" y1="40" x2="550" y2="390"/>
+          <line x1="80" y1="470" x2="440" y2="470"/>
+          <line x1="440" y1="470" x2="550" y2="390"/>
+        </g>
+        <!-- fils : treuil -> poulie (le long des montants) -->
+        <g stroke="#111" stroke-width="1" fill="none" stroke-dasharray="3 3">
+          <line x1="94" y1="452" x2="94" y2="132"/>
+          <line x1="426" y1="452" x2="426" y2="132"/>
+          <line x1="536" y1="372" x2="536" y2="52"/>
+          <line x1="204" y1="372" x2="204" y2="52"/>
+        </g>
+        <!-- fils : poulie -> objet -->
+        <g stroke="#111" stroke-width="1.1">
+          <line x1="94" y1="132" x2="318" y2="236"/>
+          <line x1="426" y1="132" x2="318" y2="236"/>
+          <line x1="536" y1="52" x2="318" y2="236"/>
+          <line x1="204" y1="52" x2="318" y2="236"/>
+        </g>
+        <!-- poulies -->
+        <g fill="#fff" stroke="#111" stroke-width="2">
+          <circle cx="94" cy="132" r="7"/><circle cx="426" cy="132" r="7"/>
+          <circle cx="536" cy="52" r="7"/><circle cx="204" cy="52" r="7"/>
+        </g>
+        <!-- LeviPods -->
+        <g fill="#111">
+          <rect x="84" y="446" width="26" height="18"/>
+          <rect x="410" y="446" width="26" height="18"/>
+          <rect x="520" y="366" width="26" height="18"/>
+          <rect x="194" y="366" width="26" height="18"/>
+        </g>
+        <!-- LeviHub + liaisons -->
+        <rect x="270" y="432" width="38" height="14" fill="#fff" stroke="#111" stroke-width="2"/>
+        <g stroke="#00a07c" stroke-width="1.4" fill="none" stroke-dasharray="1 4" stroke-linecap="round">
+          <polyline points="270,439 110,455"/>
+          <polyline points="308,439 410,455"/>
+          <polyline points="300,432 520,378"/>
+          <polyline points="280,432 220,378"/>
+        </g>
+        <!-- lidar -->
+        <rect x="433" y="200" width="14" height="10" fill="#111"/>
+        <path d="M433,205 L360,250 M433,205 L380,300" stroke="#111" stroke-width=".8" stroke-dasharray="2 3" fill="none"/>
+        <!-- objet -->
+        <circle cx="318" cy="236" r="26" fill="#00f8c1" opacity=".22"/>
+        <circle cx="318" cy="236" r="14" fill="#00f8c1" stroke="#111" stroke-width="1.5"/>
+        <!-- appels numérotés -->
+        <g font-size="15" font-weight="700" text-anchor="middle">
+          <g><circle cx="58" cy="455" r="12" fill="#111"/><text x="58" y="460" fill="#00f8c1">1</text></g>
+          <g><circle cx="56" cy="132" r="12" fill="#111"/><text x="56" y="137" fill="#00f8c1">2</text></g>
+          <g><circle cx="200" cy="180" r="12" fill="#111"/><text x="200" y="185" fill="#00f8c1">3</text></g>
+          <g><circle cx="352" cy="272" r="12" fill="#111"/><text x="352" y="277" fill="#00f8c1">4</text></g>
+          <g><circle cx="289" cy="490" r="12" fill="#111"/><text x="289" y="495" fill="#00f8c1">5</text></g>
+          <g><circle cx="475" cy="205" r="12" fill="#111"/><text x="475" y="210" fill="#00f8c1">6</text></g>
+        </g>
+        <line x1="289" y1="478" x2="289" y2="446" stroke="#111" stroke-width="1"/>
+        <line x1="70" y1="455" x2="84" y2="455" stroke="#111" stroke-width="1"/>
+        <line x1="463" y1="205" x2="447" y2="205" stroke="#111" stroke-width="1"/>
+      </svg>
+      <figcaption>Schéma de principe. Les 4 poulies peuvent être fixées sur une structure autonome (A) ou sur la structure du bâtiment (B).</figcaption>
+    </figure>
+
+    <div>
+      <h3>Les éléments</h3>
+      <table class="spec">
+        <tr><td><span class="code sm">1</span>&nbsp; LeviPod</td><td style="font-weight:400">Treuil motorisé, posé au sol. Enroule et déroule un fil. Batterie intégrée en version Autonome.</td></tr>
+        <tr><td><span class="code sm">2</span>&nbsp; Poulie de renvoi</td><td style="font-weight:400">Fixée en hauteur. C'est le seul élément qui change selon le lieu.</td></tr>
+        <tr><td><span class="code sm">3</span>&nbsp; Fil</td><td style="font-weight:400">Fibre haute résistance Ø <span class="v">0,3 mm</span>, quasi invisible à distance.</td></tr>
+        <tr><td><span class="code sm">4</span>&nbsp; Objet</td><td style="font-weight:400">Sphère ou objet sur mesure, jusqu'à <span class="v">500 g</span>.</td></tr>
+        <tr><td><span class="code sm">5</span>&nbsp; LeviHub</td><td style="font-weight:400">Le cerveau : pilote les 4 LeviPods, joue la chorégraphie, supervise.</td></tr>
+        <tr><td><span class="code sm">6</span>&nbsp; Lidar</td><td style="font-weight:400">Option : détecte le public pour une lévitation interactive.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="g4 mt10">
+    <div class="stat"><div class="n"><span class="v">2 à 6</span><small> m</small></div><div class="l">Côté du volume de vol, selon le lieu</div></div>
+    <div class="stat"><div class="n"><span class="v">500</span><small> g</small></div><div class="l">Poids maximal de l'objet</div></div>
+    <div class="stat"><div class="n"><span class="v">0,5</span><small> m/s</small></div><div class="l">Vitesse maximale de déplacement</div></div>
+    <div class="stat"><div class="n"><span class="v">35</span><small> dB</small></div><div class="l">Bruit à 2 m des LeviPods, en vol</div></div>
+  </div>
+
+  <div class="runfoot"><svg viewBox="0 0 342.642 203.215"><g transform="translate(342.642,0)"><path fill-rule="nonzero" d="M0,203.215L0,193.137L-36.441,192.754L-36.441,0L-342.642,0L-342.642,203.215L-230.874,203.215L-230.874,143.317C-228.02,143.34 -225.015,143.36 -222.782,143.36C-187.526,143.36 -158.348,169.348 -153.345,203.215L0,203.215ZM-156.275,71.496C-156.275,109.246 -186.878,139.848 -224.629,139.848C-226.364,139.848 -228.631,139.832 -230.874,139.817L-230.874,3.149C-228.631,3.145 -226.364,3.141 -224.629,3.141C-186.878,3.141 -156.275,33.742 -156.275,71.496"/></g></svg><span>Romain Lalire · Lévitation</span><span class="folio">02</span></div>
+</section>
+
+<!-- =========================================================
+     03 · DEUX FAÇONS D'INSTALLER
+     ========================================================= -->
+<section class="page">
+  <div class="runhead"><span>Lévitation — Fiche technique</span><span class="rh-right">V1 · 2026</span></div>
+  <div class="draft-note"><i></i>Valeurs à confirmer</div>
+
+  <div class="kicker">02 — Implantation</div>
+  <h1>Deux façons<br>d'installer</h1>
+  <span class="filet"></span>
+  <p class="lead">Le système a seulement besoin de <b>4 points d'accroche en hauteur</b> pour ses poulies. Nous les apportons avec notre propre structure, ou nous les fixons directement dans votre espace.</p>
+
+  <div class="g2 mt8">
+    <!-- A -->
+    <div>
+      <div class="titled"><span class="code">A</span><h2 style="margin:0">Structure autonome</h2></div>
+      <figure class="mt6">
+        <svg class="diagram" viewBox="0 0 300 260" xmlns="http://www.w3.org/2000/svg">
+          <line x1="0" y1="232" x2="300" y2="232" stroke="#111" stroke-width="1"/>
+          <!-- cube truss : double ligne -->
+          <g fill="none" stroke="#111" stroke-width="1.6">
+            <rect x="50" y="40" width="200" height="192"/>
+            <rect x="58" y="48" width="184" height="184" stroke-width=".8"/>
+          </g>
+          <g stroke="#111" stroke-width=".5">
+            <path d="M50,40 L58,48 M250,40 L242,48"/>
+            <path d="M50,60 L58,70 M50,90 L58,100 M50,120 L58,130 M50,150 L58,160 M50,180 L58,190 M50,210 L58,220"/>
+            <path d="M250,60 L242,70 M250,90 L242,100 M250,120 L242,130 M250,150 L242,160 M250,180 L242,190 M250,210 L242,220"/>
+            <path d="M70,40 L80,48 M100,40 L110,48 M130,40 L140,48 M160,40 L170,48 M190,40 L200,48 M220,40 L230,48"/>
+          </g>
+          <!-- poulies + fils -->
+          <g stroke="#111" stroke-width=".9"><line x1="62" y1="52" x2="168" y2="120"/><line x1="238" y1="52" x2="168" y2="120"/></g>
+          <g stroke="#111" stroke-width=".7" stroke-dasharray="2 2"><line x1="62" y1="52" x2="62" y2="222"/><line x1="238" y1="52" x2="238" y2="222"/></g>
+          <g fill="#fff" stroke="#111" stroke-width="1.5"><circle cx="62" cy="52" r="4"/><circle cx="238" cy="52" r="4"/></g>
+          <rect x="62" y="220" width="16" height="12" fill="#111"/><rect x="222" y="220" width="16" height="12" fill="#111"/>
+          <circle cx="168" cy="120" r="9" fill="#00f8c1" stroke="#111" stroke-width="1.2"/>
+          <!-- cotes -->
+          <g stroke="#111" stroke-width=".7" fill="none">
+            <line x1="30" y1="40" x2="30" y2="232"/><path d="M27,43 L30,40 L33,43 M27,229 L30,232 L33,229"/>
+            <line x1="50" y1="248" x2="250" y2="248"/><path d="M53,245 L50,248 L53,251 M247,245 L250,248 L247,251"/>
+          </g>
+          <g font-size="10" font-weight="700" fill="#111">
+            <text x="24" y="140" text-anchor="middle" transform="rotate(-90 24 140)">4,00 m</text>
+            <text x="150" y="259" text-anchor="middle">4,30 m</text>
+          </g>
+          <!-- silhouette échelle -->
+          <g fill="#c9c4c4"><circle cx="280" cy="187" r="5"/><rect x="275" y="193" width="10" height="39" rx="3"/></g>
+        </svg>
+      </figure>
+      <ul class="dash mt6">
+        <li>Un cube en truss aluminium, livré et monté par notre équipe.</li>
+        <li><b>Aucune fixation au bâtiment</b> : rien à percer, rien à suspendre.</li>
+        <li>La structure fait partie de l'œuvre (c'est le dispositif d'<i>Aetheris</i>).</li>
+        <li>Idéal pour les lieux classés ou les plafonds non porteurs.</li>
+      </ul>
+    </div>
+
+    <!-- B -->
+    <div>
+      <div class="titled"><span class="code">B</span><h2 style="margin:0">Accroche dans le lieu</h2></div>
+      <figure class="mt6">
+        <svg class="diagram" viewBox="0 0 300 260" xmlns="http://www.w3.org/2000/svg">
+          <!-- murs / plafond en coupe -->
+          <rect x="0" y="0" width="300" height="14" fill="#e6e3e3"/>
+          <line x1="0" y1="14" x2="300" y2="14" stroke="#111" stroke-width="1.6"/>
+          <line x1="0" y1="232" x2="300" y2="232" stroke="#111" stroke-width="1"/>
+          <g stroke="#111" stroke-width=".4" opacity=".6">
+            <path d="M10,0 L0,10 M30,0 L16,14 M50,0 L36,14 M70,0 L56,14 M90,0 L76,14 M110,0 L96,14 M130,0 L116,14 M150,0 L136,14 M170,0 L156,14 M190,0 L176,14 M210,0 L196,14 M230,0 L216,14 M250,0 L236,14 M270,0 L256,14 M290,0 L276,14 M300,4 L296,14"/>
+          </g>
+          <!-- élingues + poulies -->
+          <g stroke="#111" stroke-width="1.2"><line x1="40" y1="14" x2="40" y2="34"/><line x1="260" y1="14" x2="260" y2="34"/></g>
+          <g stroke="#111" stroke-width=".9"><line x1="40" y1="38" x2="150" y2="128"/><line x1="260" y1="38" x2="150" y2="128"/></g>
+          <g stroke="#111" stroke-width=".7" stroke-dasharray="2 2"><line x1="40" y1="38" x2="40" y2="222"/><line x1="260" y1="38" x2="260" y2="222"/></g>
+          <g fill="#fff" stroke="#111" stroke-width="1.5"><circle cx="40" cy="38" r="4"/><circle cx="260" cy="38" r="4"/></g>
+          <rect x="32" y="220" width="16" height="12" fill="#111"/><rect x="252" y="220" width="16" height="12" fill="#111"/>
+          <circle cx="150" cy="128" r="9" fill="#00f8c1" stroke="#111" stroke-width="1.2"/>
+          <!-- point d'accroche -->
+          <g fill="#111"><rect x="34" y="14" width="12" height="4"/><rect x="254" y="14" width="12" height="4"/></g>
+          <!-- cote hauteur -->
+          <g stroke="#111" stroke-width=".7" fill="none">
+            <line x1="290" y1="38" x2="290" y2="232"/><path d="M287,41 L290,38 L293,41 M287,229 L290,232 L293,229"/>
+          </g>
+          <text x="284" y="140" font-size="10" font-weight="700" text-anchor="middle" transform="rotate(-90 284 140)">4 à 8 m</text>
+          <g fill="#c9c4c4"><circle cx="205" cy="187" r="5"/><rect x="200" y="193" width="10" height="39" rx="3"/></g>
+        </svg>
+      </figure>
+      <ul class="dash mt6">
+        <li>Les 4 poulies sont fixées à la structure du bâtiment : plafond, grill technique, poutres, murs.</li>
+        <li><b>Seuls les LeviPods restent visibles</b> au sol, voire aucun s'ils sont cachés.</li>
+        <li>Le volume de vol peut épouser la salle et devenir plus grand.</li>
+        <li>Nécessite la validation des points d'accroche par le lieu.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="alert mt10"><b>Bon à savoir</b><span>Plus les poulies sont hautes et écartées, plus l'amplitude du vol est grande. Les deux modes d'accroche peuvent être combinés (par exemple, deux poulies au plafond et deux sur des mâts autoportants).</span></div>
+
+  <div class="runfoot"><svg viewBox="0 0 342.642 203.215"><g transform="translate(342.642,0)"><path fill-rule="nonzero" d="M0,203.215L0,193.137L-36.441,192.754L-36.441,0L-342.642,0L-342.642,203.215L-230.874,203.215L-230.874,143.317C-228.02,143.34 -225.015,143.36 -222.782,143.36C-187.526,143.36 -158.348,169.348 -153.345,203.215L0,203.215ZM-156.275,71.496C-156.275,109.246 -186.878,139.848 -224.629,139.848C-226.364,139.848 -228.631,139.832 -230.874,139.817L-230.874,3.149C-228.631,3.145 -226.364,3.141 -224.629,3.141C-186.878,3.141 -156.275,33.742 -156.275,71.496"/></g></svg><span>Romain Lalire · Lévitation</span><span class="folio">03</span></div>
+</section>
+
+<!-- =========================================================
+     04 · A — STRUCTURE AUTONOME
+     ========================================================= -->
+<section class="page">
+  <div class="runhead"><span>Lévitation — Fiche technique</span><span class="rh-right">V1 · 2026</span></div>
+  <div class="draft-note"><i></i>Valeurs à confirmer</div>
+
+  <div class="titled"><span class="code">A</span><div><div class="kicker" style="margin:0">03 — Implantation A</div><h2 style="font-size:20pt;font-weight:900;letter-spacing:-.03em;margin:1mm 0 0">Structure autonome</h2></div></div>
+  <span class="filet"></span>
+
+  <figure>
+    <img src="img/aetheris-implantation-musee.jpg" alt="Vue 3D du cube Aetheris implanté dans une salle d'exposition" style="height:78mm;object-fit:cover;">
+    <figcaption>Exemple : <i>Aetheris</i>, cube en truss implanté dans une salle d'exposition. Rendu 3D.</figcaption>
+  </figure>
+
+  <div class="g2 mt8">
+    <div>
+      <h3>La structure</h3>
+      <table class="spec">
+        <tr><td>Type</td><td>Truss aluminium carré <span class="v">30 cm</span></td></tr>
+        <tr><td>Dimensions extérieures</td><td><span class="v">4,30 × 4,30 m</span></td></tr>
+        <tr><td>Hauteur totale</td><td><span class="v">4,00 m</span></td></tr>
+        <tr><td>Hauteur sous plafond minimale</td><td><span class="v">4,30 m</span></td></tr>
+        <tr><td>Volume de vol</td><td><span class="v">3,5 × 3,5 × 3 m</span></td></tr>
+        <tr><td>Poids total (structure + équipement)</td><td><span class="v">≈ 450 kg</span></td></tr>
+        <tr><td>Charge au sol</td><td><span class="v">≈ 120 kg</span> par pied, sur platine</td></tr>
+        <tr><td>Emprise au sol + circulation</td><td><span class="v">6 × 6 m</span> recommandés</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>Équipements intégrés</h3>
+      <table class="spec">
+        <tr><td>LeviPods</td><td>4, au sol, sous les montants</td></tr>
+        <tr><td>Poulies</td><td>4, dans les angles hauts</td></tr>
+        <tr><td>Lidar</td><td>1, sur un montant</td></tr>
+        <tr><td>Lumière</td><td>StripLeds au sol et sur les montants, gradables</td></tr>
+        <tr><td>Régie</td><td>LeviHub + routeur, au pied de la structure</td></tr>
+      </table>
+      <div class="g2 mt6" style="gap:4mm">
+        <figure><img src="img/aetheris-perspective.jpg" alt="Perspective du cube Aetheris"><figcaption>Perspective</figcaption></figure>
+        <figure><img src="img/aetheris-vue-dessus.jpg" alt="Vue de dessus du cube Aetheris" style="aspect-ratio:808/706;object-fit:cover"><figcaption>Vue de dessus</figcaption></figure>
+      </div>
+    </div>
+  </div>
+
+  <div class="box-soft mt8 g2" style="gap:6mm">
+    <div><b>Montage</b> : <span class="v">1 journée</span>, <span class="v">3 techniciens</span>. Démontage : <span class="v">½ journée</span>.</div>
+    <div><b>Accès</b> : une porte de <span class="v">90 cm</span> minimum suffit, aucune pièce ne dépasse <span class="v">2 m</span>.</div>
+  </div>
+
+  <div class="runfoot"><svg viewBox="0 0 342.642 203.215"><g transform="translate(342.642,0)"><path fill-rule="nonzero" d="M0,203.215L0,193.137L-36.441,192.754L-36.441,0L-342.642,0L-342.642,203.215L-230.874,203.215L-230.874,143.317C-228.02,143.34 -225.015,143.36 -222.782,143.36C-187.526,143.36 -158.348,169.348 -153.345,203.215L0,203.215ZM-156.275,71.496C-156.275,109.246 -186.878,139.848 -224.629,139.848C-226.364,139.848 -228.631,139.832 -230.874,139.817L-230.874,3.149C-228.631,3.145 -226.364,3.141 -224.629,3.141C-186.878,3.141 -156.275,33.742 -156.275,71.496"/></g></svg><span>Romain Lalire · Lévitation</span><span class="folio">04</span></div>
+</section>
+
+<!-- =========================================================
+     05 · B — ACCROCHE DANS LE LIEU
+     ========================================================= -->
+<section class="page">
+  <div class="runhead"><span>Lévitation — Fiche technique</span><span class="rh-right">V1 · 2026</span></div>
+  <div class="draft-note"><i></i>Valeurs à confirmer</div>
+
+  <div class="titled"><span class="code">B</span><div><div class="kicker" style="margin:0">04 — Implantation B</div><h2 style="font-size:20pt;font-weight:900;letter-spacing:-.03em;margin:1mm 0 0">Accroche dans le lieu</h2></div></div>
+  <span class="filet"></span>
+
+  <figure>
+    <svg class="diagram" viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg">
+      <!-- salle en perspective -->
+      <polygon points="40,40 600,40 520,90 120,90" fill="#eeecec"/>
+      <polygon points="120,90 520,90 520,250 120,250" fill="#fafafa"/>
+      <polygon points="40,290 600,290 520,250 120,250" fill="#f1efef"/>
+      <g stroke="#111" stroke-width="1.6" fill="none">
+        <polyline points="40,40 120,90 120,250 40,290"/>
+        <polyline points="600,40 520,90 520,250 600,290"/>
+        <line x1="120" y1="90" x2="520" y2="90"/>
+        <line x1="120" y1="250" x2="520" y2="250"/>
+      </g>
+      <!-- poutres -->
+      <g stroke="#111" stroke-width="1" opacity=".35">
+        <line x1="85" y1="62" x2="555" y2="62"/><line x1="100" y1="72" x2="540" y2="72"/>
+      </g>
+      <!-- points d'accroche plafond -->
+      <g fill="#111">
+        <rect x="88" y="58" width="14" height="6"/><rect x="538" y="58" width="14" height="6"/>
+        <rect x="156" y="86" width="12" height="5"/><rect x="472" y="86" width="12" height="5"/>
+      </g>
+      <g stroke="#111" stroke-width="1.2">
+        <line x1="95" y1="64" x2="95" y2="78"/><line x1="545" y1="64" x2="545" y2="78"/>
+        <line x1="162" y1="91" x2="162" y2="102"/><line x1="478" y1="91" x2="478" y2="102"/>
+      </g>
+      <g fill="#fff" stroke="#111" stroke-width="1.8">
+        <circle cx="95" cy="82" r="5"/><circle cx="545" cy="82" r="5"/>
+        <circle cx="162" cy="105" r="4"/><circle cx="478" cy="105" r="4"/>
+      </g>
+      <!-- fils -->
+      <g stroke="#111" stroke-width="1">
+        <line x1="95" y1="82" x2="352" y2="160"/><line x1="545" y1="82" x2="352" y2="160"/>
+        <line x1="162" y1="105" x2="352" y2="160"/><line x1="478" y1="105" x2="352" y2="160"/>
+      </g>
+      <g stroke="#111" stroke-width=".8" stroke-dasharray="3 3">
+        <line x1="95" y1="82" x2="95" y2="262"/><line x1="545" y1="82" x2="545" y2="262"/>
+        <line x1="162" y1="105" x2="162" y2="246"/><line x1="478" y1="105" x2="478" y2="246"/>
+      </g>
+      <!-- LeviPods -->
+      <g fill="#111">
+        <rect x="83" y="260" width="24" height="16"/><rect x="533" y="260" width="24" height="16"/>
+        <rect x="152" y="242" width="20" height="13"/><rect x="468" y="242" width="20" height="13"/>
+      </g>
+      <!-- objet -->
+      <circle cx="352" cy="160" r="22" fill="#00f8c1" opacity=".22"/>
+      <circle cx="352" cy="160" r="11" fill="#00f8c1" stroke="#111" stroke-width="1.5"/>
+      <!-- personnes échelle -->
+      <g fill="#c9c4c4">
+        <circle cx="250" cy="226" r="6"/><rect x="244" y="233" width="12" height="44" rx="4"/>
+        <circle cx="420" cy="214" r="5"/><rect x="415" y="220" width="10" height="36" rx="3"/>
+      </g>
+      <!-- étiquettes -->
+      <g font-size="11" fill="#111">
+        <text x="636" y="30" font-weight="700" text-anchor="end">Point d'accroche</text>
+        <text x="636" y="44" fill="#6f6969" text-anchor="end">plafond, poutre, grill</text>
+        <line x1="557" y1="34" x2="548" y2="56" stroke="#111" stroke-width=".8"/>
+        <text x="372" y="138" font-weight="700">Objet</text>
+        <text x="20" y="283" font-weight="700" text-anchor="start">LeviPod</text>
+      </g>
+    </svg>
+    <figcaption>Exemple d'implantation dans une salle : poulies sur la charpente, LeviPods au sol le long des murs.</figcaption>
+  </figure>
+
+  <div class="g2 mt8">
+    <div>
+      <h3>Ce dont le système a besoin</h3>
+      <table class="spec">
+        <tr><td>Points d'accroche</td><td>4 (jusqu'à 6 pour les grands volumes)</td></tr>
+        <tr><td>Charge par point</td><td><span class="v">50 kg</span> (coefficient de sécurité inclus)</td></tr>
+        <tr><td>Hauteur des points</td><td><span class="v">4 à 8 m</span>, <span class="v">5 m</span> recommandés</td></tr>
+        <tr><td>Écart entre points</td><td><span class="v">3 à 12 m</span></td></tr>
+        <tr><td>Poids d'une poulie</td><td><span class="v">1,5 kg</span></td></tr>
+        <tr><td>LeviPods</td><td>Au sol, contre un mur ou dans un socle. Possibles au plafond sur étude.</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>Supports possibles</h3>
+      <ul class="dash">
+        <li><b>Grill technique ou lyre</b> : fixation par collier (clamp). Le cas le plus simple.</li>
+        <li><b>Poutre ou charpente</b> : élingue textile, sans perçage.</li>
+        <li><b>Dalle béton</b> : cheville chimique ou point existant, après accord du lieu.</li>
+        <li><b>Mur</b> : platine murale, si le plafond n'est pas accessible.</li>
+        <li><b>Aucun support possible</b> : mâts autoportants, ou retour à l'implantation A.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="alert mt8"><b>À la charge du lieu</b><span>Fournir les plans de la salle (hauteurs comprises) et confirmer que les points choisis supportent la charge indiquée, par le service technique ou un bureau de contrôle. Une nacelle ou un échafaudage est nécessaire pendant le montage.</span></div>
+
+  <div class="runfoot"><svg viewBox="0 0 342.642 203.215"><g transform="translate(342.642,0)"><path fill-rule="nonzero" d="M0,203.215L0,193.137L-36.441,192.754L-36.441,0L-342.642,0L-342.642,203.215L-230.874,203.215L-230.874,143.317C-228.02,143.34 -225.015,143.36 -222.782,143.36C-187.526,143.36 -158.348,169.348 -153.345,203.215L0,203.215ZM-156.275,71.496C-156.275,109.246 -186.878,139.848 -224.629,139.848C-226.364,139.848 -228.631,139.832 -230.874,139.817L-230.874,3.149C-228.631,3.145 -226.364,3.141 -224.629,3.141C-186.878,3.141 -156.275,33.742 -156.275,71.496"/></g></svg><span>Romain Lalire · Lévitation</span><span class="folio">05</span></div>
+</section>
+
+<!-- =========================================================
+     06 · ÉLECTRICITÉ
+     ========================================================= -->
+<section class="page">
+  <div class="runhead"><span>Lévitation — Fiche technique</span><span class="rh-right">V1 · 2026</span></div>
+  <div class="draft-note"><i></i>Valeurs à confirmer</div>
+
+  <div class="kicker">05 — Électricité</div>
+  <h1>Courant permanent<br>ou coupé la nuit</h1>
+  <span class="filet"></span>
+  <p class="lead">Certains lieux coupent tout le courant à la fermeture. Nous proposons donc <b>deux versions du système</b>. Elles se montent de la même façon, seule la gestion de l'énergie change.</p>
+
+  <div class="g2 mt8">
+    <div class="cadre thick">
+      <div class="titled"><span class="code out">1</span><h2 style="margin:0">Standard</h2></div>
+      <p class="mt4"><b>Pour les lieux où le courant reste disponible en permanence</b>, ou dont la coupure est pilotée par le personnel.</p>
+      <ul class="dash mt4">
+        <li>Le système est alimenté par le secteur, 24 h/24.</li>
+        <li>Mise en veille et réveil automatiques selon les horaires d'ouverture.</li>
+        <li>En cas de coupure imprévue, l'objet descend doucement et se pose. Une intervention est nécessaire pour relancer.</li>
+      </ul>
+    </div>
+    <div class="cadre thick inv" style="background:#000;color:#fff;border-color:#000">
+      <div class="titled"><span class="code" style="background:var(--green);color:#000">2</span><h2 style="margin:0">Autonome</h2></div>
+      <p class="mt4"><b>Pour les lieux qui coupent totalement le courant</b> à la fermeture.</p>
+      <ul class="dash mt4" style="--x:1">
+        <li style="color:#fff">Chaque LeviPod embarque une batterie.</li>
+        <li style="color:#fff">À la coupure, le système pose l'objet en position de repos, mémorise sa position et s'éteint.</li>
+        <li style="color:#fff">Au retour du courant, il se recalibre et <b>reprend le vol seul</b>, sans intervention.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="mt10">Une journée en version Autonome</h3>
+  <div class="steps mt4">
+    <div class="step on"><div class="t"><span class="v">10:00</span></div><div class="d">Ouverture</div><div class="s">L'objet vole, la chorégraphie tourne.</div></div>
+    <div class="step"><div class="t"><span class="v">18:00</span></div><div class="d">Coupure générale</div><div class="s">Bascule sur batterie, sans à-coup.</div></div>
+    <div class="step"><div class="t">+ <span class="v">2 min</span></div><div class="d">Mise au repos</div><div class="s">L'objet se pose, les fils sont détendus.</div></div>
+    <div class="step"><div class="t">Nuit</div><div class="d">Arrêt complet</div><div class="s">Aucune consommation, aucun bruit.</div></div>
+    <div class="step on"><div class="t"><span class="v">09:30</span></div><div class="d">Remise sous tension</div><div class="s">Recalibrage en <span class="v">5 min</span>, puis le vol reprend.</div></div>
+  </div>
+
+  <h3 class="mt10">Besoins électriques</h3>
+  <table class="spec">
+    <tr><td>Alimentation</td><td>230 V monophasé, prises 16 A standard</td></tr>
+    <tr><td>Nombre d'arrivées</td><td><span class="v">5</span> : une par LeviPod, une pour la régie (LeviHub, routeur, lumière)</td></tr>
+    <tr><td>Puissance en vol</td><td><span class="v">≈ 400 W</span> au total &nbsp;·&nbsp; pointe <span class="v">1 kW</span></td></tr>
+    <tr><td>Puissance en veille</td><td><span class="v">&lt; 20 W</span> (version 1) &nbsp;·&nbsp; 0 W une fois coupé (version 2)</td></tr>
+    <tr><td>Batteries (version 2)</td><td>Lithium fer phosphate (LiFePO4), recharge complète en <span class="v">3 h</span>, autonomie de sécurité <span class="v">30 min</span></td></tr>
+    <tr><td>Câblage entre éléments</td><td>Fourni par nos soins (Ethernet + alimentation). Longueurs à définir sur plan.</td></tr>
+  </table>
+
+  <div class="runfoot"><svg viewBox="0 0 342.642 203.215"><g transform="translate(342.642,0)"><path fill-rule="nonzero" d="M0,203.215L0,193.137L-36.441,192.754L-36.441,0L-342.642,0L-342.642,203.215L-230.874,203.215L-230.874,143.317C-228.02,143.34 -225.015,143.36 -222.782,143.36C-187.526,143.36 -158.348,169.348 -153.345,203.215L0,203.215ZM-156.275,71.496C-156.275,109.246 -186.878,139.848 -224.629,139.848C-226.364,139.848 -228.631,139.832 -230.874,139.817L-230.874,3.149C-228.631,3.145 -226.364,3.141 -224.629,3.141C-186.878,3.141 -156.275,33.742 -156.275,71.496"/></g></svg><span>Romain Lalire · Lévitation</span><span class="folio">06</span></div>
+</section>
+
+<!-- =========================================================
+     07 · LIEU & EXPLOITATION
+     ========================================================= -->
+<section class="page">
+  <div class="runhead"><span>Lévitation — Fiche technique</span><span class="rh-right">V1 · 2026</span></div>
+  <div class="draft-note"><i></i>Valeurs à confirmer</div>
+
+  <div class="kicker">06 — Lieu &amp; exploitation</div>
+  <h1>Les conditions<br>d'un bon vol</h1>
+  <span class="filet"></span>
+  <p class="lead">La lévitation est une illusion fragile : un courant d'air ou un fond trop chargé suffisent à la trahir. Voici ce qui compte pour que l'objet semble réellement flotter.</p>
+
+  <div class="g3 mt8">
+    <div>
+      <h3>Air</h3>
+      <ul class="dash">
+        <li>Pas de bouche de soufflage dirigée vers le volume de vol.</li>
+        <li>Flux d'air &lt; <span class="v">0,3 m/s</span> dans la zone de vol.</li>
+        <li>Température <span class="v">10 à 35 °C</span>, sans condensation.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Lumière</h3>
+      <ul class="dash">
+        <li>Un fond sombre et uniforme rend les fils invisibles.</li>
+        <li>Éviter les contre-jours et la lumière naturelle directe sur les fils.</li>
+        <li>L'objet peut être éclairé par un projecteur à découpe (fourni ou non, à définir).</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Public</h3>
+      <ul class="dash">
+        <li>Distance de <span class="v">1 m</span> minimum avec les fils : marquage au sol ou mise à distance.</li>
+        <li>LeviPods inaccessibles au public (socle, capot ou zone protégée).</li>
+        <li>Jauge libre, aucune restriction d'âge.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="g2 mt10">
+    <div>
+      <h3>Exploitation au quotidien</h3>
+      <table class="spec">
+        <tr><td>Démarrage / arrêt</td><td>Automatique, selon les horaires</td></tr>
+        <tr><td>Personnel du lieu</td><td>Aucune compétence technique requise</td></tr>
+        <tr><td>Supervision</td><td>À distance, alerte SMS en cas d'anomalie</td></tr>
+        <tr><td>Astreinte</td><td>Numéro dédié, 7 j/7 pendant l'exposition</td></tr>
+        <tr><td>Connexion</td><td>Routeur 4G fourni. Pas besoin du réseau du lieu.</td></tr>
+        <tr><td>Maintenance préventive</td><td>Contrôle des fils <span class="v">toutes les 4 semaines</span></td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>Sécurité</h3>
+      <ul class="dash">
+        <li>Fils dimensionnés à <span class="v">10 fois</span> le poids de l'objet.</li>
+        <li>Rupture d'un fil : les 3 autres retiennent l'objet, le système le pose et envoie une alerte.</li>
+        <li>Objet léger et sans arête : aucun risque en cas de chute.</li>
+        <li>Structure A : montage selon les règles du constructeur du truss, attestation fournie.</li>
+        <li>Matériaux : classement au feu <span class="v">M1</span> pour les éléments textiles.</li>
+      </ul>
+      <div class="alert mt6"><b>Important</b><span>Les LeviPods et les poulies ne doivent jamais être déplacés une fois calibrés.</span></div>
+    </div>
+  </div>
+
+  <div class="runfoot"><svg viewBox="0 0 342.642 203.215"><g transform="translate(342.642,0)"><path fill-rule="nonzero" d="M0,203.215L0,193.137L-36.441,192.754L-36.441,0L-342.642,0L-342.642,203.215L-230.874,203.215L-230.874,143.317C-228.02,143.34 -225.015,143.36 -222.782,143.36C-187.526,143.36 -158.348,169.348 -153.345,203.215L0,203.215ZM-156.275,71.496C-156.275,109.246 -186.878,139.848 -224.629,139.848C-226.364,139.848 -228.631,139.832 -230.874,139.817L-230.874,3.149C-228.631,3.145 -226.364,3.141 -224.629,3.141C-186.878,3.141 -156.275,33.742 -156.275,71.496"/></g></svg><span>Romain Lalire · Lévitation</span><span class="folio">07</span></div>
+</section>
+
+<!-- =========================================================
+     08 · RÉCAPITULATIF & BESOINS
+     ========================================================= -->
+<section class="page">
+  <div class="runhead"><span>Lévitation — Fiche technique</span><span class="rh-right">V1 · 2026</span></div>
+  <div class="draft-note"><i></i>Valeurs à confirmer</div>
+
+  <div class="kicker">07 — En résumé</div>
+  <h1>Quelle configuration<br>pour votre lieu&nbsp;?</h1>
+  <span class="filet"></span>
+
+  <div class="matrix mt4">
+    <div></div>
+    <div class="hd"><span class="code sm out">1</span>Standard · courant permanent</div>
+    <div class="hd"><span class="code sm">2</span>Autonome · coupure la nuit</div>
+
+    <div class="hd"><span class="code sm">A</span>Structure</div>
+    <div class="cell"><span class="tag g">Le plus simple</span><b>A1</b>Rien à fixer, 5 prises. Montage en <span class="v">1 jour</span>.</div>
+    <div class="cell"><span class="tag">Lieu sans courant la nuit</span><b>A2</b>Rien à fixer, aucune intervention à la réouverture.</div>
+
+    <div class="hd"><span class="code sm">B</span>Accroche</div>
+    <div class="cell"><span class="tag">Grand volume</span><b>B1</b>Vol intégré à la salle. Points d'accroche à valider. Montage en <span class="v">1 à 2 jours</span>.</div>
+    <div class="cell"><span class="tag">Sur mesure</span><b>B2</b>Intégration complète, autonome en énergie. Visite technique conseillée.</div>
+  </div>
+
+  <div class="g2 mt10" style="grid-template-columns: 1.2fr 1fr;">
+    <div>
+      <h3>Ce dont nous avons besoin de votre part</h3>
+      <ul class="check">
+        <li>Plans de la salle avec hauteurs sous plafond (PDF ou DWG)</li>
+        <li>Photos de la salle et du plafond</li>
+        <li>Coupure du courant la nuit : oui / non, horaires</li>
+        <li>Nature du plafond et points d'accroche existants (implantation B)</li>
+        <li>Charge admissible au sol (implantation A)</li>
+        <li>Emplacement des bouches de ventilation</li>
+        <li>Accès livraison : dimensions des portes, monte-charge</li>
+        <li>Nacelle ou échafaudage disponible sur place</li>
+        <li>Dates de montage, d'exposition et de démontage</li>
+        <li>Un interlocuteur technique dans le lieu</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Ce que nous apportons</h3>
+      <ul class="dash">
+        <li>Le système de vol complet : LeviPods, poulies, fils, objet, LeviHub</li>
+        <li>La structure truss (implantation A)</li>
+        <li>Le câblage, les rallonges et le routeur 4G</li>
+        <li>L'équipe de montage, le calibrage et la formation du personnel</li>
+        <li>La supervision à distance et l'astreinte</li>
+      </ul>
+
+      <div class="cadre mt8" style="padding-bottom:9mm">
+        <div class="kicker" style="margin-bottom:2mm">Contact technique</div>
+        <p><b><span class="v">[Prénom Nom]</span></b><br>
+        <span class="v">[+33 6 00 00 00 00]</span><br>
+        <span class="v">[adresse e-mail]</span></p>
+        <svg class="corner" viewBox="0 0 342.642 203.215"><g transform="translate(342.642,0)"><path fill-rule="nonzero" d="M0,203.215L0,193.137L-36.441,192.754L-36.441,0L-342.642,0L-342.642,203.215L-230.874,203.215L-230.874,143.317C-228.02,143.34 -225.015,143.36 -222.782,143.36C-187.526,143.36 -158.348,169.348 -153.345,203.215L0,203.215ZM-156.275,71.496C-156.275,109.246 -186.878,139.848 -224.629,139.848C-226.364,139.848 -228.631,139.832 -230.874,139.817L-230.874,3.149C-228.631,3.145 -226.364,3.141 -224.629,3.141C-186.878,3.141 -156.275,33.742 -156.275,71.496"/></g></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="runfoot"><svg viewBox="0 0 342.642 203.215"><g transform="translate(342.642,0)"><path fill-rule="nonzero" d="M0,203.215L0,193.137L-36.441,192.754L-36.441,0L-342.642,0L-342.642,203.215L-230.874,203.215L-230.874,143.317C-228.02,143.34 -225.015,143.36 -222.782,143.36C-187.526,143.36 -158.348,169.348 -153.345,203.215L0,203.215ZM-156.275,71.496C-156.275,109.246 -186.878,139.848 -224.629,139.848C-226.364,139.848 -228.631,139.832 -230.874,139.817L-230.874,3.149C-228.631,3.145 -226.364,3.141 -224.629,3.141C-186.878,3.141 -156.275,33.742 -156.275,71.496"/></g></svg><span>Romain Lalire · Lévitation</span><span class="folio">08</span></div>
+</section>
+
+</body>
+</html>
