@@ -216,6 +216,7 @@ table.spec td:last-child { font-weight: 500; }
 .cover .c-meta b { color: #fff; font-weight: 400; text-transform: none; letter-spacing: .04em; font-size: 8pt; }
 .cover .rl { height: 7mm; fill: #fff; opacity: .85; margin-top: 3mm; }
 .matrix.tight > div { padding: 2mm 3mm; }
+table.spec.dense td { padding: 1.1mm 0; }
 </style>
 </head>
 <body class="draft">
@@ -245,7 +246,7 @@ table.spec td:last-child { font-weight: 500; }
   <div class="kicker">01 — Principe</div>
   <h1>Comment<br>l'objet vole</h1>
   <span class="filet"></span>
-  <p class="lead">Avec L'Envol, l'objet est tenu par <b>2, 3 ou 4 fils quasi invisibles</b>. Chaque fil part d'un treuil motorisé (<b>LeviPod</b>), passe par une <b>poulie placée en hauteur</b>, puis rejoint l'objet. En faisant varier la longueur des fils en même temps, l'objet se déplace librement dans tout le volume, comme s'il flottait.</p>
+  <p class="lead">Avec L'Envol, l'objet est tenu par <b>2, 3 ou 4 fils quasi invisibles</b>. Chaque fil part d'un treuil motorisé, le <b>LeviPod</b>. Accroché en hauteur, il descend le fil directement vers l'objet. Posé au sol, il le renvoie par une <b>poulie placée en hauteur</b>. En faisant varier la longueur des fils en même temps, l'objet se déplace librement dans tout le volume, comme s'il flottait.</p>
 
   <div class="g2 mt8" style="grid-template-columns: 1.25fr 1fr; align-items: start;">
     <figure>
@@ -319,27 +320,28 @@ table.spec td:last-child { font-weight: 500; }
         <line x1="70" y1="455" x2="84" y2="455" stroke="#1A1A1A" stroke-width="1"/>
         <line x1="463" y1="205" x2="447" y2="205" stroke="#1A1A1A" stroke-width="1"/>
       </svg>
-      <figcaption>Schéma de principe, ici avec 4 LeviPods. Les poulies peuvent être fixées sur une structure autonome (A) ou sur la structure du bâtiment (B).</figcaption>
+      <figcaption>Schéma de principe, ici avec 4 LeviPods au sol et leurs poulies en hauteur. Les LeviPods peuvent aussi être accrochés directement en hauteur, sans poulie.</figcaption>
     </figure>
 
     <div>
       <h3>Les éléments</h3>
       <table class="spec">
-        <tr><td><span class="code sm">1</span>&nbsp; LeviPod</td><td style="font-weight:400">Treuil motorisé, posé au sol. Enroule et déroule un fil. Batterie intégrée en version Autonome.</td></tr>
-        <tr><td><span class="code sm">2</span>&nbsp; Poulie de renvoi</td><td style="font-weight:400">Fixée en hauteur. C'est le seul élément qui change selon le lieu.</td></tr>
+        <tr><td><span class="code sm">1</span>&nbsp; LeviPod</td><td style="font-weight:400">Treuil motorisé, au sol ou accroché en hauteur. Enroule et déroule un fil. 6 kg, 23 × 23 × 25 cm. Batterie intégrée en version Autonome.</td></tr>
+        <tr><td><span class="code sm">2</span>&nbsp; Poulie de renvoi</td><td style="font-weight:400">Quelques grammes. Fixée en hauteur quand le LeviPod est au sol, elle renvoie le fil vers l'objet.</td></tr>
         <tr><td><span class="code sm">3</span>&nbsp; Fil</td><td style="font-weight:400">Fibre haute résistance Ø <span class="v">0,3 mm</span>, quasi invisible à distance.</td></tr>
         <tr><td><span class="code sm">4</span>&nbsp; Objet</td><td style="font-weight:400">Sphère ou objet sur mesure, jusqu'à <span class="v">500 g</span>.</td></tr>
-        <tr><td><span class="code sm">5</span>&nbsp; LeviHub</td><td style="font-weight:400">Le cerveau : pilote les LeviPods, joue la chorégraphie, supervise.</td></tr>
+        <tr><td><span class="code sm">5</span>&nbsp; LeviHub</td><td style="font-weight:400">Le cerveau : pilote les LeviPods, joue la chorégraphie, supervise. Les LeviPods sont reliés entre eux par câbles Ethernet.</td></tr>
         <tr><td><span class="code sm">6</span>&nbsp; Lidar</td><td style="font-weight:400">Option : détecte le public pour une lévitation interactive.</td></tr>
       </table>
     </div>
   </div>
 
-  <div class="g4 mt10">
-    <div class="stat"><div class="n"><span class="v">2 à 6</span><small> m</small></div><div class="l">Côté du volume de vol, selon le lieu</div></div>
-    <div class="stat"><div class="n"><span class="v">500</span><small> g</small></div><div class="l">Poids maximal de l'objet</div></div>
-    <div class="stat"><div class="n"><span class="v">0,5</span><small> m/s</small></div><div class="l">Vitesse maximale de déplacement</div></div>
-    <div class="stat"><div class="n"><span class="v">35</span><small> dB</small></div><div class="l">Bruit à 2 m des LeviPods, en vol</div></div>
+  <div class="kicker mt10" style="margin-bottom:2mm">Un LeviPod</div>
+  <div class="g4">
+    <div class="stat"><div class="n">6<small> kg</small></div><div class="l">Poids</div></div>
+    <div class="stat"><div class="n">23×23×25<small> cm</small></div><div class="l">Dimensions (H × L × P)</div></div>
+    <div class="stat"><div class="n">400<small> W</small></div><div class="l">Consommation</div></div>
+    <div class="stat"><div class="n">2<small> min</small></div><div class="l">Réinitialisation au retour du courant</div></div>
   </div>
 
   <div class="runfoot"><svg class="signe" viewBox="0 0 140 140"  aria-label="L'Envol"><circle cx="70" cy="44" r="22" fill="#1A1A1A"/><line x1="22" y1="108" x2="118" y2="108" stroke="#1A1A1A" stroke-width="9"/></svg><span><span class="wm">Lenvol</span> &nbsp;·&nbsp; <span class="url">lenvol.xyz</span></span><span class="folio">02</span></div>
@@ -422,7 +424,7 @@ table.spec td:last-child { font-weight: 500; }
   <div class="kicker">03 — Implantation</div>
   <h1>Deux façons<br>d'installer</h1>
   <span class="filet"></span>
-  <p class="lead">Le système a seulement besoin de <b>2 à 4 points d'accroche en hauteur</b>, un par LeviPod. Nous les apportons avec notre propre structure, ou nous les fixons directement dans votre espace.</p>
+  <p class="lead">Le système a seulement besoin de <b>2 à 4 points d'accroche en hauteur</b>, un par LeviPod : pour le LeviPod lui-même ou pour sa poulie. Nous les apportons avec notre propre structure, ou nous les fixons directement dans votre espace.</p>
 
   <div class="g2 mt8">
     <!-- A -->
@@ -499,15 +501,15 @@ table.spec td:last-child { font-weight: 500; }
         </svg>
       </figure>
       <ul class="dash mt6">
-        <li>Les poulies sont fixées à la structure du bâtiment : plafond, grill technique, poutres, murs.</li>
-        <li><b>Seuls les LeviPods restent visibles</b> au sol, voire aucun s'ils sont cachés.</li>
+        <li>Les LeviPods ou leurs poulies sont fixés à la structure du bâtiment : plafond, grill technique, poutres, murs.</li>
+        <li><b>LeviPods au sol ou en hauteur</b> : accrochés en hauteur, il n'y a plus rien au sol.</li>
         <li>Le volume de vol peut épouser la salle et devenir plus grand.</li>
         <li>Nécessite la validation des points d'accroche par le lieu.</li>
       </ul>
     </div>
   </div>
 
-  <div class="alert mt10"><b>Bon à savoir</b><span>Plus les poulies sont hautes et écartées, plus l'amplitude du vol est grande. Les deux modes d'accroche peuvent être combinés (par exemple, deux poulies au plafond et deux sur des mâts autoportants).</span></div>
+  <div class="alert mt10"><b>Bon à savoir</b><span>Plus les points d'accroche sont hauts et écartés, plus l'amplitude du vol est grande. Les deux modes d'accroche peuvent être combinés (par exemple, deux points au plafond et deux sur des mâts autoportants).</span></div>
 
   <div class="runfoot"><svg class="signe" viewBox="0 0 140 140"  aria-label="L'Envol"><circle cx="70" cy="44" r="22" fill="#1A1A1A"/><line x1="22" y1="108" x2="118" y2="108" stroke="#1A1A1A" stroke-width="9"/></svg><span><span class="wm">Lenvol</span> &nbsp;·&nbsp; <span class="url">lenvol.xyz</span></span><span class="folio">04</span></div>
 </section>
@@ -634,7 +636,7 @@ table.spec td:last-child { font-weight: 500; }
         <text x="20" y="283" font-weight="700" text-anchor="start">LeviPod</text>
       </g>
     </svg>
-    <figcaption>Exemple d'implantation dans une salle : poulies sur la charpente, LeviPods au sol le long des murs.</figcaption>
+    <figcaption>Exemple d'implantation dans une salle : poulies sur la charpente, LeviPods au sol le long des murs. Variante : LeviPods accrochés directement à la charpente.</figcaption>
   </figure>
 
   <div class="g2 mt8">
@@ -642,11 +644,11 @@ table.spec td:last-child { font-weight: 500; }
       <h3>Ce dont le système a besoin</h3>
       <table class="spec">
         <tr><td>Points d'accroche</td><td>2, 3 ou 4 : un par LeviPod</td></tr>
-        <tr><td>Charge par point</td><td><span class="v">50 kg</span> (coefficient de sécurité inclus)</td></tr>
+        <tr><td>Charge par point</td><td>LeviPod accroché : 6 kg · poulie : quelques grammes, plus la tension du fil</td></tr>
+        <tr><td>Dimensionnement conseillé</td><td><span class="v">50 kg</span> par point (sécurité incluse)</td></tr>
         <tr><td>Hauteur des points</td><td><span class="v">4 à 8 m</span>, <span class="v">5 m</span> recommandés</td></tr>
         <tr><td>Écart entre points</td><td><span class="v">3 à 12 m</span></td></tr>
-        <tr><td>Poids d'une poulie</td><td><span class="v">1,5 kg</span></td></tr>
-        <tr><td>LeviPods</td><td>Au sol, contre un mur ou dans un socle. Possibles au plafond sur étude.</td></tr>
+                <tr><td>LeviPods</td><td>Au sol (fil renvoyé par une poulie en hauteur) ou accrochés directement en hauteur</td></tr>
       </table>
     </div>
     <div>
@@ -678,7 +680,7 @@ table.spec td:last-child { font-weight: 500; }
   <span class="filet"></span>
   <p class="lead">Certains lieux coupent tout le courant à la fermeture. Nous proposons donc <b>deux versions du système</b>. Elles se montent de la même façon, seule la gestion de l'énergie change.</p>
 
-  <div class="g2 mt8">
+  <div class="g2 mt6">
     <div class="cadre thick">
       <div class="titled"><span class="code out">1</span><h2 style="margin:0">Standard</h2></div>
       <p class="mt4"><b>Pour les lieux où le courant reste disponible en permanence</b>, ou dont la coupure est pilotée par le personnel.</p>
@@ -694,28 +696,29 @@ table.spec td:last-child { font-weight: 500; }
       <ul class="dash mt4" style="--x:1">
         <li style="color:#fff">Chaque LeviPod embarque une batterie.</li>
         <li style="color:#fff">À la coupure, le système pose l'objet en position de repos, mémorise sa position et s'éteint.</li>
-        <li style="color:#fff">Au retour du courant, il se recalibre et <b>reprend le vol seul</b>, sans intervention.</li>
+        <li style="color:#fff">Au retour du courant, il se réinitialise en 2 minutes et <b>reprend le vol seul</b>, sans intervention.</li>
       </ul>
     </div>
   </div>
 
-  <h3 class="mt10">Une journée en version Autonome</h3>
+  <h3 class="mt6">Une journée en version Autonome</h3>
   <div class="steps mt4">
     <div class="step on"><div class="t"><span class="v">10:00</span></div><div class="d">Ouverture</div><div class="s">L'objet vole, la chorégraphie tourne.</div></div>
     <div class="step"><div class="t"><span class="v">18:00</span></div><div class="d">Coupure générale</div><div class="s">Bascule sur batterie, sans à-coup.</div></div>
     <div class="step"><div class="t">+ <span class="v">2 min</span></div><div class="d">Mise au repos</div><div class="s">L'objet se pose, les fils sont détendus.</div></div>
     <div class="step"><div class="t">Nuit</div><div class="d">Arrêt complet</div><div class="s">Aucune consommation, aucun bruit.</div></div>
-    <div class="step on"><div class="t"><span class="v">09:30</span></div><div class="d">Remise sous tension</div><div class="s">Recalibrage en <span class="v">5 min</span>, puis le vol reprend.</div></div>
+    <div class="step on"><div class="t"><span class="v">09:30</span></div><div class="d">Remise sous tension</div><div class="s">Réinitialisation en 2 min, puis le vol reprend.</div></div>
   </div>
 
-  <h3 class="mt10">Besoins électriques</h3>
-  <table class="spec">
+  <h3 class="mt6">Besoins électriques</h3>
+  <table class="spec dense">
     <tr><td>Alimentation</td><td>230 V monophasé, prises 16 A standard</td></tr>
     <tr><td>Nombre d'arrivées</td><td><span class="v">3 à 5</span> : une par LeviPod (2 à 4), plus une pour la régie (LeviHub, routeur, lumière)</td></tr>
-    <tr><td>Puissance en vol</td><td><span class="v">≈ 400 W</span> au total &nbsp;·&nbsp; pointe <span class="v">1 kW</span></td></tr>
+    <tr><td>Puissance par LeviPod</td><td>400 W</td></tr>
+    <tr><td>Puissance totale</td><td>800 W (2 LeviPods) à 1,6 kW (4 LeviPods), plus la régie <span class="v">≈ 100 W</span></td></tr>
     <tr><td>Puissance en veille</td><td><span class="v">&lt; 20 W</span> (version 1) &nbsp;·&nbsp; 0 W une fois coupé (version 2)</td></tr>
     <tr><td>Batteries (version 2)</td><td>Lithium fer phosphate (LiFePO4), recharge complète en <span class="v">3 h</span>, autonomie de sécurité <span class="v">30 min</span></td></tr>
-    <tr><td>Câblage entre éléments</td><td>Fourni par nos soins (Ethernet + alimentation). Longueurs à définir sur plan.</td></tr>
+    <tr><td>Câblage entre éléments</td><td>LeviPods reliés entre eux par câbles Ethernet, fournis par nos soins. Longueurs à définir sur plan.</td></tr>
   </table>
 
   <div class="runfoot"><svg class="signe" viewBox="0 0 140 140"  aria-label="L'Envol"><circle cx="70" cy="44" r="22" fill="#1A1A1A"/><line x1="22" y1="108" x2="118" y2="108" stroke="#1A1A1A" stroke-width="9"/></svg><span><span class="wm">Lenvol</span> &nbsp;·&nbsp; <span class="url">lenvol.xyz</span></span><span class="folio">07</span></div>
@@ -754,7 +757,7 @@ table.spec td:last-child { font-weight: 500; }
       <h3>Public</h3>
       <ul class="dash">
         <li>Distance de <span class="v">1 m</span> minimum avec les fils : marquage au sol ou mise à distance.</li>
-        <li>LeviPods inaccessibles au public (socle, capot ou zone protégée).</li>
+        <li>LeviPods au sol inaccessibles au public (socle, capot ou zone protégée).</li>
         <li>Jauge libre, aucune restriction d'âge.</li>
       </ul>
     </div>
