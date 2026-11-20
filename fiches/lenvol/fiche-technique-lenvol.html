@@ -215,6 +215,7 @@ table.spec td:last-child { font-weight: 500; }
 .cover .c-meta { text-align: right; font-size: 6.5pt; letter-spacing: .18em; text-transform: uppercase; color: #9A9A9A; line-height: 1.9; }
 .cover .c-meta b { color: #fff; font-weight: 400; text-transform: none; letter-spacing: .04em; font-size: 8pt; }
 .cover .rl { height: 7mm; fill: #fff; opacity: .85; margin-top: 3mm; }
+.matrix.tight > div { padding: 2mm 3mm; }
 </style>
 </head>
 <body class="draft">
@@ -244,7 +245,7 @@ table.spec td:last-child { font-weight: 500; }
   <div class="kicker">01 — Principe</div>
   <h1>Comment<br>l'objet vole</h1>
   <span class="filet"></span>
-  <p class="lead">Avec L'Envol, l'objet est tenu par <b>4 fils quasi invisibles</b>. Chaque fil part d'un treuil motorisé (<b>LeviPod</b>), passe par une <b>poulie placée en hauteur</b>, puis rejoint l'objet. En faisant varier la longueur des 4 fils en même temps, l'objet se déplace librement dans tout le volume, comme s'il flottait.</p>
+  <p class="lead">Avec L'Envol, l'objet est tenu par <b>2, 3 ou 4 fils quasi invisibles</b>. Chaque fil part d'un treuil motorisé (<b>LeviPod</b>), passe par une <b>poulie placée en hauteur</b>, puis rejoint l'objet. En faisant varier la longueur des fils en même temps, l'objet se déplace librement dans tout le volume, comme s'il flottait.</p>
 
   <div class="g2 mt8" style="grid-template-columns: 1.25fr 1fr; align-items: start;">
     <figure>
@@ -318,7 +319,7 @@ table.spec td:last-child { font-weight: 500; }
         <line x1="70" y1="455" x2="84" y2="455" stroke="#1A1A1A" stroke-width="1"/>
         <line x1="463" y1="205" x2="447" y2="205" stroke="#1A1A1A" stroke-width="1"/>
       </svg>
-      <figcaption>Schéma de principe. Les 4 poulies peuvent être fixées sur une structure autonome (A) ou sur la structure du bâtiment (B).</figcaption>
+      <figcaption>Schéma de principe, ici avec 4 LeviPods. Les poulies peuvent être fixées sur une structure autonome (A) ou sur la structure du bâtiment (B).</figcaption>
     </figure>
 
     <div>
@@ -328,7 +329,7 @@ table.spec td:last-child { font-weight: 500; }
         <tr><td><span class="code sm">2</span>&nbsp; Poulie de renvoi</td><td style="font-weight:400">Fixée en hauteur. C'est le seul élément qui change selon le lieu.</td></tr>
         <tr><td><span class="code sm">3</span>&nbsp; Fil</td><td style="font-weight:400">Fibre haute résistance Ø <span class="v">0,3 mm</span>, quasi invisible à distance.</td></tr>
         <tr><td><span class="code sm">4</span>&nbsp; Objet</td><td style="font-weight:400">Sphère ou objet sur mesure, jusqu'à <span class="v">500 g</span>.</td></tr>
-        <tr><td><span class="code sm">5</span>&nbsp; LeviHub</td><td style="font-weight:400">Le cerveau : pilote les 4 LeviPods, joue la chorégraphie, supervise.</td></tr>
+        <tr><td><span class="code sm">5</span>&nbsp; LeviHub</td><td style="font-weight:400">Le cerveau : pilote les LeviPods, joue la chorégraphie, supervise.</td></tr>
         <tr><td><span class="code sm">6</span>&nbsp; Lidar</td><td style="font-weight:400">Option : détecte le public pour une lévitation interactive.</td></tr>
       </table>
     </div>
@@ -345,16 +346,83 @@ table.spec td:last-child { font-weight: 500; }
 </section>
 
 <!-- =========================================================
+     03 · 2, 3 OU 4 LEVIPODS
+     ========================================================= -->
+<section class="page">
+  <div class="runhead"><span><span class="wm" style="letter-spacing:.3em">Lenvol</span> — Fiche technique</span><span class="rh-right">V1 · 2026</span></div>
+  <div class="draft-note"><i></i>Valeurs à confirmer</div>
+
+  <div class="kicker">02 — Configuration</div>
+  <h1>2, 3 ou 4<br>LeviPods</h1>
+  <span class="filet"></span>
+  <p class="lead">Chaque LeviPod tient un fil. Leur nombre se choisit <b>pour chaque projet</b>, selon le mouvement voulu et les possibilités du lieu. Plus il y a de LeviPods, plus l'objet gagne en liberté et en stabilité.</p>
+
+  <div class="g3 mt6">
+    <div>
+      <figure><svg class="diagram" viewBox="0 6 200 166" xmlns="http://www.w3.org/2000/svg"><polygon points="35,40 165,40 165,150 35,150" fill="#1A1A1A" opacity=".06"/><line x1="23" y1="150" x2="177" y2="150" stroke="#1A1A1A" stroke-width=".8"/><line x1="35" y1="150" x2="35" y2="40" stroke="#C8C8C8" stroke-width="1.2"/><line x1="38" y1="43" x2="38" y2="144" stroke="#1A1A1A" stroke-width=".6" stroke-dasharray="2 2"/><line x1="35" y1="40" x2="100" y2="88" stroke="#1A1A1A" stroke-width=".9"/><line x1="165" y1="150" x2="165" y2="40" stroke="#C8C8C8" stroke-width="1.2"/><line x1="168" y1="43" x2="168" y2="144" stroke="#1A1A1A" stroke-width=".6" stroke-dasharray="2 2"/><line x1="165" y1="40" x2="100" y2="88" stroke="#1A1A1A" stroke-width=".9"/><circle cx="35" cy="40" r="3.2" fill="#fff" stroke="#1A1A1A" stroke-width="1.2"/><rect x="32" y="143" width="13" height="8" fill="#1A1A1A"/><circle cx="165" cy="40" r="3.2" fill="#fff" stroke="#1A1A1A" stroke-width="1.2"/><rect x="162" y="143" width="13" height="8" fill="#1A1A1A"/><circle cx="100" cy="88" r="7" fill="#1A1A1A"/></svg></figure>
+      <div class="titled mt4"><span class="code">2</span><h2 style="margin:0">Vol dans un plan</h2></div>
+      <p class="mt4">L'objet se déplace entre deux points : il monte, descend et glisse d'un côté à l'autre, comme sur une feuille verticale.</p>
+    </div>
+    <div>
+      <figure><svg class="diagram" viewBox="0 6 200 166" xmlns="http://www.w3.org/2000/svg"><polygon points="30,165 150,158 112,122" fill="#1A1A1A" opacity=".07"/><polygon points="30,53 150,46 112,10" fill="none" stroke="#1A1A1A" stroke-width=".6" stroke-dasharray="2 2" opacity=".5"/><polygon points="30,165 150,158 112,122" fill="none" stroke="#1A1A1A" stroke-width=".6" opacity=".5"/><line x1="30" y1="165" x2="30" y2="53" stroke="#C8C8C8" stroke-width="1.2"/><line x1="33" y1="56" x2="33" y2="159" stroke="#1A1A1A" stroke-width=".6" stroke-dasharray="2 2"/><line x1="30" y1="53" x2="100" y2="78" stroke="#1A1A1A" stroke-width=".9"/><line x1="150" y1="158" x2="150" y2="46" stroke="#C8C8C8" stroke-width="1.2"/><line x1="153" y1="49" x2="153" y2="152" stroke="#1A1A1A" stroke-width=".6" stroke-dasharray="2 2"/><line x1="150" y1="46" x2="100" y2="78" stroke="#1A1A1A" stroke-width=".9"/><line x1="112" y1="122" x2="112" y2="10" stroke="#C8C8C8" stroke-width="1.2"/><line x1="115" y1="13" x2="115" y2="116" stroke="#1A1A1A" stroke-width=".6" stroke-dasharray="2 2"/><line x1="112" y1="10" x2="100" y2="78" stroke="#1A1A1A" stroke-width=".9"/><circle cx="30" cy="53" r="3.2" fill="#fff" stroke="#1A1A1A" stroke-width="1.2"/><rect x="27" y="158" width="13" height="8" fill="#1A1A1A"/><circle cx="150" cy="46" r="3.2" fill="#fff" stroke="#1A1A1A" stroke-width="1.2"/><rect x="147" y="151" width="13" height="8" fill="#1A1A1A"/><circle cx="112" cy="10" r="3.2" fill="#fff" stroke="#1A1A1A" stroke-width="1.2"/><rect x="109" y="115" width="13" height="8" fill="#1A1A1A"/><circle cx="100" cy="78" r="7" fill="#1A1A1A"/></svg></figure>
+      <div class="titled mt4"><span class="code">3</span><h2 style="margin:0">Vol dans un volume</h2></div>
+      <p class="mt4">Trois points en triangle : l'objet va où il veut dans l'espace qu'ils délimitent. Le bon compromis entre liberté et simplicité.</p>
+    </div>
+    <div>
+      <figure><svg class="diagram" viewBox="0 6 200 166" xmlns="http://www.w3.org/2000/svg"><polygon points="28,165 128,165 172,132 72,132" fill="#1A1A1A" opacity=".07"/><polygon points="28,55 128,55 172,22 72,22" fill="none" stroke="#1A1A1A" stroke-width=".6" stroke-dasharray="2 2" opacity=".5"/><polygon points="28,165 128,165 172,132 72,132" fill="none" stroke="#1A1A1A" stroke-width=".6" opacity=".5"/><line x1="28" y1="165" x2="28" y2="55" stroke="#C8C8C8" stroke-width="1.2"/><line x1="31" y1="58" x2="31" y2="159" stroke="#1A1A1A" stroke-width=".6" stroke-dasharray="2 2"/><line x1="28" y1="55" x2="100" y2="82" stroke="#1A1A1A" stroke-width=".9"/><line x1="128" y1="165" x2="128" y2="55" stroke="#C8C8C8" stroke-width="1.2"/><line x1="131" y1="58" x2="131" y2="159" stroke="#1A1A1A" stroke-width=".6" stroke-dasharray="2 2"/><line x1="128" y1="55" x2="100" y2="82" stroke="#1A1A1A" stroke-width=".9"/><line x1="172" y1="132" x2="172" y2="22" stroke="#C8C8C8" stroke-width="1.2"/><line x1="175" y1="25" x2="175" y2="126" stroke="#1A1A1A" stroke-width=".6" stroke-dasharray="2 2"/><line x1="172" y1="22" x2="100" y2="82" stroke="#1A1A1A" stroke-width=".9"/><line x1="72" y1="132" x2="72" y2="22" stroke="#C8C8C8" stroke-width="1.2"/><line x1="75" y1="25" x2="75" y2="126" stroke="#1A1A1A" stroke-width=".6" stroke-dasharray="2 2"/><line x1="72" y1="22" x2="100" y2="82" stroke="#1A1A1A" stroke-width=".9"/><circle cx="28" cy="55" r="3.2" fill="#fff" stroke="#1A1A1A" stroke-width="1.2"/><rect x="25" y="158" width="13" height="8" fill="#1A1A1A"/><circle cx="128" cy="55" r="3.2" fill="#fff" stroke="#1A1A1A" stroke-width="1.2"/><rect x="125" y="158" width="13" height="8" fill="#1A1A1A"/><circle cx="172" cy="22" r="3.2" fill="#fff" stroke="#1A1A1A" stroke-width="1.2"/><rect x="169" y="125" width="13" height="8" fill="#1A1A1A"/><circle cx="72" cy="22" r="3.2" fill="#fff" stroke="#1A1A1A" stroke-width="1.2"/><rect x="69" y="125" width="13" height="8" fill="#1A1A1A"/><circle cx="100" cy="82" r="7" fill="#1A1A1A"/></svg></figure>
+      <div class="titled mt4"><span class="code">4</span><h2 style="margin:0">Volume complet</h2></div>
+      <p class="mt4">Quatre points en carré : le plus grand volume de vol et la stabilité maximale. Si un fil casse, les trois autres tiennent l'objet.</p>
+    </div>
+  </div>
+
+  <div class="matrix mt6 tight" style="grid-template-columns: 34mm 1fr 1fr 1fr;">
+    <div></div>
+    <div class="hd"><span class="code sm">2</span>LeviPods</div>
+    <div class="hd"><span class="code sm">3</span>LeviPods</div>
+    <div class="hd"><span class="code sm">4</span>LeviPods</div>
+
+    <div class="hd">Déplacement</div>
+    <div class="cell">Haut, bas, gauche, droite</div>
+    <div class="cell">Dans tout le volume</div>
+    <div class="cell">Dans tout le volume</div>
+
+    <div class="hd">Points d'accroche</div>
+    <div class="cell">2</div>
+    <div class="cell">3</div>
+    <div class="cell">4</div>
+
+    <div class="hd">Stabilité</div>
+    <div class="cell">Légère oscillation possible en profondeur</div>
+    <div class="cell">Bonne</div>
+    <div class="cell">Maximale</div>
+
+    <div class="hd">Idéal pour</div>
+    <div class="cell">Passage, couloir, entre deux murs, vitrine</div>
+    <div class="cell">Salle sans 4 points accessibles. <span class="v">Ex. : <i>Ballon Rouge</i></span></div>
+    <div class="cell">Grande salle, structure autonome. Ex. : <i>Aethéris</i></div>
+
+    <div class="hd">Électricité</div>
+    <div class="cell"><span class="v">3</span> prises</div>
+    <div class="cell"><span class="v">4</span> prises</div>
+    <div class="cell"><span class="v">5</span> prises</div>
+  </div>
+
+  <div class="alert mt6"><b>Comment on choisit</b><span>Nous définissons la configuration avec vous, sur plans ou lors d'une visite technique. Le reste du système (LeviHub, logiciel, câblage) ne change pas : on ajoute ou on retire simplement des LeviPods.</span></div>
+
+  <div class="runfoot"><svg class="signe" viewBox="0 0 140 140"  aria-label="L'Envol"><circle cx="70" cy="44" r="22" fill="#1A1A1A"/><line x1="22" y1="108" x2="118" y2="108" stroke="#1A1A1A" stroke-width="9"/></svg><span><span class="wm">Lenvol</span> &nbsp;·&nbsp; <span class="url">lenvol.xyz</span></span><span class="folio">03</span></div>
+</section>
+
+<!-- =========================================================
      03 · DEUX FAÇONS D'INSTALLER
      ========================================================= -->
 <section class="page">
   <div class="runhead"><span><span class="wm" style="letter-spacing:.3em">Lenvol</span> — Fiche technique</span><span class="rh-right">V1 · 2026</span></div>
   <div class="draft-note"><i></i>Valeurs à confirmer</div>
 
-  <div class="kicker">02 — Implantation</div>
+  <div class="kicker">03 — Implantation</div>
   <h1>Deux façons<br>d'installer</h1>
   <span class="filet"></span>
-  <p class="lead">Le système a seulement besoin de <b>4 points d'accroche en hauteur</b> pour ses poulies. Nous les apportons avec notre propre structure, ou nous les fixons directement dans votre espace.</p>
+  <p class="lead">Le système a seulement besoin de <b>2 à 4 points d'accroche en hauteur</b>, un par LeviPod. Nous les apportons avec notre propre structure, ou nous les fixons directement dans votre espace.</p>
 
   <div class="g2 mt8">
     <!-- A -->
@@ -431,7 +499,7 @@ table.spec td:last-child { font-weight: 500; }
         </svg>
       </figure>
       <ul class="dash mt6">
-        <li>Les 4 poulies sont fixées à la structure du bâtiment : plafond, grill technique, poutres, murs.</li>
+        <li>Les poulies sont fixées à la structure du bâtiment : plafond, grill technique, poutres, murs.</li>
         <li><b>Seuls les LeviPods restent visibles</b> au sol, voire aucun s'ils sont cachés.</li>
         <li>Le volume de vol peut épouser la salle et devenir plus grand.</li>
         <li>Nécessite la validation des points d'accroche par le lieu.</li>
@@ -441,7 +509,7 @@ table.spec td:last-child { font-weight: 500; }
 
   <div class="alert mt10"><b>Bon à savoir</b><span>Plus les poulies sont hautes et écartées, plus l'amplitude du vol est grande. Les deux modes d'accroche peuvent être combinés (par exemple, deux poulies au plafond et deux sur des mâts autoportants).</span></div>
 
-  <div class="runfoot"><svg class="signe" viewBox="0 0 140 140"  aria-label="L'Envol"><circle cx="70" cy="44" r="22" fill="#1A1A1A"/><line x1="22" y1="108" x2="118" y2="108" stroke="#1A1A1A" stroke-width="9"/></svg><span><span class="wm">Lenvol</span> &nbsp;·&nbsp; <span class="url">lenvol.xyz</span></span><span class="folio">03</span></div>
+  <div class="runfoot"><svg class="signe" viewBox="0 0 140 140"  aria-label="L'Envol"><circle cx="70" cy="44" r="22" fill="#1A1A1A"/><line x1="22" y1="108" x2="118" y2="108" stroke="#1A1A1A" stroke-width="9"/></svg><span><span class="wm">Lenvol</span> &nbsp;·&nbsp; <span class="url">lenvol.xyz</span></span><span class="folio">04</span></div>
 </section>
 
 <!-- =========================================================
@@ -451,7 +519,7 @@ table.spec td:last-child { font-weight: 500; }
   <div class="runhead"><span><span class="wm" style="letter-spacing:.3em">Lenvol</span> — Fiche technique</span><span class="rh-right">V1 · 2026</span></div>
   <div class="draft-note"><i></i>Valeurs à confirmer</div>
 
-  <div class="titled"><span class="code">A</span><div><div class="kicker" style="margin:0">03 — Implantation A</div><h2 style="font-size:20pt;font-weight:900;letter-spacing:-.03em;margin:1mm 0 0">Structure autonome</h2></div></div>
+  <div class="titled"><span class="code">A</span><div><div class="kicker" style="margin:0">04 — Implantation A</div><h2 style="font-size:20pt;font-weight:900;letter-spacing:-.03em;margin:1mm 0 0">Structure autonome</h2></div></div>
   <span class="filet"></span>
 
   <figure>
@@ -476,7 +544,7 @@ table.spec td:last-child { font-weight: 500; }
     <div>
       <h3>Équipements intégrés</h3>
       <table class="spec">
-        <tr><td>LeviPods</td><td>4, au sol, sous les montants</td></tr>
+        <tr><td>LeviPods</td><td>4 sur <i>Aethéris</i>, au sol, sous les montants</td></tr>
         <tr><td>Poulies</td><td>4, dans les angles hauts</td></tr>
         <tr><td>Lidar</td><td>1, sur un montant</td></tr>
         <tr><td>Lumière</td><td>StripLeds au sol et sur les montants, gradables</td></tr>
@@ -494,7 +562,7 @@ table.spec td:last-child { font-weight: 500; }
     <div><b>Accès</b> : une porte de <span class="v">90 cm</span> minimum suffit, aucune pièce ne dépasse <span class="v">2 m</span>.</div>
   </div>
 
-  <div class="runfoot"><svg class="signe" viewBox="0 0 140 140"  aria-label="L'Envol"><circle cx="70" cy="44" r="22" fill="#1A1A1A"/><line x1="22" y1="108" x2="118" y2="108" stroke="#1A1A1A" stroke-width="9"/></svg><span><span class="wm">Lenvol</span> &nbsp;·&nbsp; <span class="url">lenvol.xyz</span></span><span class="folio">04</span></div>
+  <div class="runfoot"><svg class="signe" viewBox="0 0 140 140"  aria-label="L'Envol"><circle cx="70" cy="44" r="22" fill="#1A1A1A"/><line x1="22" y1="108" x2="118" y2="108" stroke="#1A1A1A" stroke-width="9"/></svg><span><span class="wm">Lenvol</span> &nbsp;·&nbsp; <span class="url">lenvol.xyz</span></span><span class="folio">05</span></div>
 </section>
 
 <!-- =========================================================
@@ -504,7 +572,7 @@ table.spec td:last-child { font-weight: 500; }
   <div class="runhead"><span><span class="wm" style="letter-spacing:.3em">Lenvol</span> — Fiche technique</span><span class="rh-right">V1 · 2026</span></div>
   <div class="draft-note"><i></i>Valeurs à confirmer</div>
 
-  <div class="titled"><span class="code">B</span><div><div class="kicker" style="margin:0">04 — Implantation B</div><h2 style="font-size:20pt;font-weight:900;letter-spacing:-.03em;margin:1mm 0 0">Accroche dans le lieu</h2></div></div>
+  <div class="titled"><span class="code">B</span><div><div class="kicker" style="margin:0">05 — Implantation B</div><h2 style="font-size:20pt;font-weight:900;letter-spacing:-.03em;margin:1mm 0 0">Accroche dans le lieu</h2></div></div>
   <span class="filet"></span>
 
   <figure>
@@ -573,7 +641,7 @@ table.spec td:last-child { font-weight: 500; }
     <div>
       <h3>Ce dont le système a besoin</h3>
       <table class="spec">
-        <tr><td>Points d'accroche</td><td>4 (jusqu'à 6 pour les grands volumes)</td></tr>
+        <tr><td>Points d'accroche</td><td>2, 3 ou 4 : un par LeviPod</td></tr>
         <tr><td>Charge par point</td><td><span class="v">50 kg</span> (coefficient de sécurité inclus)</td></tr>
         <tr><td>Hauteur des points</td><td><span class="v">4 à 8 m</span>, <span class="v">5 m</span> recommandés</td></tr>
         <tr><td>Écart entre points</td><td><span class="v">3 à 12 m</span></td></tr>
@@ -595,7 +663,7 @@ table.spec td:last-child { font-weight: 500; }
 
   <div class="alert mt8"><b>À la charge du lieu</b><span>Fournir les plans de la salle (hauteurs comprises) et confirmer que les points choisis supportent la charge indiquée, par le service technique ou un bureau de contrôle. Une nacelle ou un échafaudage est nécessaire pendant le montage.</span></div>
 
-  <div class="runfoot"><svg class="signe" viewBox="0 0 140 140"  aria-label="L'Envol"><circle cx="70" cy="44" r="22" fill="#1A1A1A"/><line x1="22" y1="108" x2="118" y2="108" stroke="#1A1A1A" stroke-width="9"/></svg><span><span class="wm">Lenvol</span> &nbsp;·&nbsp; <span class="url">lenvol.xyz</span></span><span class="folio">05</span></div>
+  <div class="runfoot"><svg class="signe" viewBox="0 0 140 140"  aria-label="L'Envol"><circle cx="70" cy="44" r="22" fill="#1A1A1A"/><line x1="22" y1="108" x2="118" y2="108" stroke="#1A1A1A" stroke-width="9"/></svg><span><span class="wm">Lenvol</span> &nbsp;·&nbsp; <span class="url">lenvol.xyz</span></span><span class="folio">06</span></div>
 </section>
 
 <!-- =========================================================
@@ -605,7 +673,7 @@ table.spec td:last-child { font-weight: 500; }
   <div class="runhead"><span><span class="wm" style="letter-spacing:.3em">Lenvol</span> — Fiche technique</span><span class="rh-right">V1 · 2026</span></div>
   <div class="draft-note"><i></i>Valeurs à confirmer</div>
 
-  <div class="kicker">05 — Électricité</div>
+  <div class="kicker">06 — Électricité</div>
   <h1>Courant permanent<br>ou coupé la nuit</h1>
   <span class="filet"></span>
   <p class="lead">Certains lieux coupent tout le courant à la fermeture. Nous proposons donc <b>deux versions du système</b>. Elles se montent de la même façon, seule la gestion de l'énergie change.</p>
@@ -643,14 +711,14 @@ table.spec td:last-child { font-weight: 500; }
   <h3 class="mt10">Besoins électriques</h3>
   <table class="spec">
     <tr><td>Alimentation</td><td>230 V monophasé, prises 16 A standard</td></tr>
-    <tr><td>Nombre d'arrivées</td><td><span class="v">5</span> : une par LeviPod, une pour la régie (LeviHub, routeur, lumière)</td></tr>
+    <tr><td>Nombre d'arrivées</td><td><span class="v">3 à 5</span> : une par LeviPod (2 à 4), plus une pour la régie (LeviHub, routeur, lumière)</td></tr>
     <tr><td>Puissance en vol</td><td><span class="v">≈ 400 W</span> au total &nbsp;·&nbsp; pointe <span class="v">1 kW</span></td></tr>
     <tr><td>Puissance en veille</td><td><span class="v">&lt; 20 W</span> (version 1) &nbsp;·&nbsp; 0 W une fois coupé (version 2)</td></tr>
     <tr><td>Batteries (version 2)</td><td>Lithium fer phosphate (LiFePO4), recharge complète en <span class="v">3 h</span>, autonomie de sécurité <span class="v">30 min</span></td></tr>
     <tr><td>Câblage entre éléments</td><td>Fourni par nos soins (Ethernet + alimentation). Longueurs à définir sur plan.</td></tr>
   </table>
 
-  <div class="runfoot"><svg class="signe" viewBox="0 0 140 140"  aria-label="L'Envol"><circle cx="70" cy="44" r="22" fill="#1A1A1A"/><line x1="22" y1="108" x2="118" y2="108" stroke="#1A1A1A" stroke-width="9"/></svg><span><span class="wm">Lenvol</span> &nbsp;·&nbsp; <span class="url">lenvol.xyz</span></span><span class="folio">06</span></div>
+  <div class="runfoot"><svg class="signe" viewBox="0 0 140 140"  aria-label="L'Envol"><circle cx="70" cy="44" r="22" fill="#1A1A1A"/><line x1="22" y1="108" x2="118" y2="108" stroke="#1A1A1A" stroke-width="9"/></svg><span><span class="wm">Lenvol</span> &nbsp;·&nbsp; <span class="url">lenvol.xyz</span></span><span class="folio">07</span></div>
 </section>
 
 <!-- =========================================================
@@ -660,7 +728,7 @@ table.spec td:last-child { font-weight: 500; }
   <div class="runhead"><span><span class="wm" style="letter-spacing:.3em">Lenvol</span> — Fiche technique</span><span class="rh-right">V1 · 2026</span></div>
   <div class="draft-note"><i></i>Valeurs à confirmer</div>
 
-  <div class="kicker">06 — Lieu &amp; exploitation</div>
+  <div class="kicker">07 — Lieu &amp; exploitation</div>
   <h1>Les conditions<br>d'un bon vol</h1>
   <span class="filet"></span>
   <p class="lead">La lévitation est une illusion fragile : un courant d'air ou un fond trop chargé suffisent à la trahir. Voici ce qui compte pour que l'objet semble réellement flotter.</p>
@@ -708,7 +776,7 @@ table.spec td:last-child { font-weight: 500; }
       <h3>Sécurité</h3>
       <ul class="dash">
         <li>Fils dimensionnés à <span class="v">10 fois</span> le poids de l'objet.</li>
-        <li>Rupture d'un fil : les 3 autres retiennent l'objet, le système le pose et envoie une alerte.</li>
+        <li>Rupture d'un fil : le système pose l'objet et envoie une alerte. Avec 4 LeviPods, les trois autres fils continuent de le tenir.</li>
         <li>Objet léger et sans arête : aucun risque en cas de chute.</li>
         <li>Structure A : montage selon les règles du constructeur du truss, attestation fournie.</li>
         <li>Matériaux : classement au feu <span class="v">M1</span> pour les éléments textiles.</li>
@@ -717,7 +785,7 @@ table.spec td:last-child { font-weight: 500; }
     </div>
   </div>
 
-  <div class="runfoot"><svg class="signe" viewBox="0 0 140 140"  aria-label="L'Envol"><circle cx="70" cy="44" r="22" fill="#1A1A1A"/><line x1="22" y1="108" x2="118" y2="108" stroke="#1A1A1A" stroke-width="9"/></svg><span><span class="wm">Lenvol</span> &nbsp;·&nbsp; <span class="url">lenvol.xyz</span></span><span class="folio">07</span></div>
+  <div class="runfoot"><svg class="signe" viewBox="0 0 140 140"  aria-label="L'Envol"><circle cx="70" cy="44" r="22" fill="#1A1A1A"/><line x1="22" y1="108" x2="118" y2="108" stroke="#1A1A1A" stroke-width="9"/></svg><span><span class="wm">Lenvol</span> &nbsp;·&nbsp; <span class="url">lenvol.xyz</span></span><span class="folio">08</span></div>
 </section>
 
 <!-- =========================================================
@@ -727,7 +795,7 @@ table.spec td:last-child { font-weight: 500; }
   <div class="runhead"><span><span class="wm" style="letter-spacing:.3em">Lenvol</span> — Fiche technique</span><span class="rh-right">V1 · 2026</span></div>
   <div class="draft-note"><i></i>Valeurs à confirmer</div>
 
-  <div class="kicker">07 — En résumé</div>
+  <div class="kicker">08 — En résumé</div>
   <h1>Quelle configuration<br>pour votre lieu&nbsp;?</h1>
   <span class="filet"></span>
 
@@ -737,7 +805,7 @@ table.spec td:last-child { font-weight: 500; }
     <div class="hd"><span class="code sm">2</span>Autonome · coupure la nuit</div>
 
     <div class="hd"><span class="code sm">A</span>Structure</div>
-    <div class="cell"><span class="tag g">Le plus simple</span><b>A1</b>Rien à fixer, 5 prises. Montage en <span class="v">1 jour</span>.</div>
+    <div class="cell"><span class="tag g">Le plus simple</span><b>A1</b>Rien à fixer, 3 à 5 prises. Montage en <span class="v">1 jour</span>.</div>
     <div class="cell"><span class="tag">Lieu sans courant la nuit</span><b>A2</b>Rien à fixer, aucune intervention à la réouverture.</div>
 
     <div class="hd"><span class="code sm">B</span>Accroche</div>
@@ -764,7 +832,7 @@ table.spec td:last-child { font-weight: 500; }
     <div>
       <h3>Ce que nous apportons</h3>
       <ul class="dash">
-        <li>Le système de vol complet : LeviPods, poulies, fils, objet, LeviHub</li>
+        <li>Le système de vol complet : 2 à 4 LeviPods, poulies, fils, objet, LeviHub</li>
         <li>La structure truss (implantation A)</li>
         <li>Le câblage, les rallonges et le routeur 4G</li>
         <li>L'équipe de montage, le calibrage et la formation du personnel</li>
@@ -781,7 +849,7 @@ table.spec td:last-child { font-weight: 500; }
     </div>
   </div>
 
-  <div class="runfoot"><svg class="signe" viewBox="0 0 140 140"  aria-label="L'Envol"><circle cx="70" cy="44" r="22" fill="#1A1A1A"/><line x1="22" y1="108" x2="118" y2="108" stroke="#1A1A1A" stroke-width="9"/></svg><span><span class="wm">Lenvol</span> &nbsp;·&nbsp; <span class="url">lenvol.xyz</span></span><span class="folio">08</span></div>
+  <div class="runfoot"><svg class="signe" viewBox="0 0 140 140"  aria-label="L'Envol"><circle cx="70" cy="44" r="22" fill="#1A1A1A"/><line x1="22" y1="108" x2="118" y2="108" stroke="#1A1A1A" stroke-width="9"/></svg><span><span class="wm">Lenvol</span> &nbsp;·&nbsp; <span class="url">lenvol.xyz</span></span><span class="folio">09</span></div>
 </section>
 
 </body>
