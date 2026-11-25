@@ -107,6 +107,12 @@ réelle) : ils donnent un ordre de grandeur, pas une garantie.
   nylon fritté ni en dépôt de fil. Sortie par un œillet céramique de canne à pêche.
 - **Aucune fente.** La bobine est d'une seule pièce et tourne dans une chambre fermée,
   séparée de l'électronique.
+- **Un fil détendu peut sortir de la gorge.** Tendu, le fil reste entre les deux joues,
+  hautes de 6 mm, et arrive droit depuis la bague (moins d'un degré d'écart). Détendu, une
+  boucle peut passer par-dessus une joue. Un garde-fil, anneau fixe du corps placé à 0,6 mm
+  des joues, l'empêche alors d'aller s'enrouler sur le moteur ; il est ouvert du côté de la
+  sortie. Il limite les dégâts mais ne remplace pas la règle de base : ne jamais dérouler
+  plus vite que l'objet ne descend.
 - **La précision.** Un fil aussi fin s'allonge de plusieurs millimètres par mètre selon le
   poids. Un même objet revient au même endroit ; l'étalonnage se fait avec l'objet accroché.
 
@@ -268,7 +274,7 @@ Quatre pièces à imprimer. Chacune se pose à plat sur le plateau et s'imprime 
 
 | Pièce | Fichiers | Taille | Matière | Sens d'impression |
 |---|---|---|---|---|
-| Corps | `cad/export/corps.stl` / `.step` | 112 × 123 × 43 mm, 104 cm³ | nylon PA12 (MJF) ou PETG | cloison sur le plateau |
+| Corps | `cad/export/corps.stl` / `.step` | 112 × 123 × 43 mm, 108 cm³ | nylon PA12 (MJF) ou PETG | cloison sur le plateau |
 | Capot arrière | `cad/export/capot_arriere.stl` / `.step` | 112 × 123 × 24,5 mm, 63 cm³ | nylon PA12 (MJF) ou PETG | fond sur le plateau |
 | Couvercle avant | `cad/export/couvercle_avant.stl` / `.step` | 112 × 123 × 2,5 mm, 34 cm³ | nylon PA12 (MJF) ou PETG | à plat |
 | Bobine | `cad/export/bobine.stl` / `.step` | Ø 92 × 32,7 mm, 44 cm³ | **résine (SLA)** | fond de la cloche sur le plateau |

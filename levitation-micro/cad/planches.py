@@ -18,6 +18,7 @@ NOTES = {
         ("Cloison porte-moteur", f"épaisseur {t.PART_T:.0f} mm"),
         ("Fixation du moteur", f"4 trous Ø {t.M3_CLEAR} sur un cercle de {t.BASE_PCD:.0f} mm (vis M3 × 6)"),
         ("Passage des fils du moteur", f"2 trous Ø 8 au rayon {t.WIRES_R} mm, autour de {t.WIRES_DEG:.0f}°"),
+        ("Garde-fil", f"anneau fixe autour de la bobine, à {t.GUARD_GAP} mm de ses joues, ouvert du côté de la sortie du fil"),
         ("Colonnes de vissage", f"4 avant-trous Ø {t.M3_PILOT} traversants, dans les angles"),
         ("Logement de l'œillet", f"Ø {t.EYELET_OD + t.FIT:.1f} dans le fond, à {t.EYE_Y:.1f} mm de l'axe"),
         ("Accroche", f"2 bossages avec écrou M10 prisonnier (17 sur plats) et trou Ø 10,5, à {t.SPIGOT_X:.0f} mm de la cloison : un sur le dessus, un sur le côté"),

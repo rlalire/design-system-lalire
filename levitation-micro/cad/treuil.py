@@ -62,6 +62,9 @@ OUT_Y, OUT_Z = (IN_Y[0] - WALL, IN_Y[1] + WALL), (IN_Z[0] - WALL, IN_Z[1] + WALL
 EYE_Y = DRUM_D / 2 + LINE_D / 2                    # le fil descend à la verticale du bord de la bobine
 FLEET_DEG = math.degrees(math.atan((SLOT_W / 2) / abs(IN_Z[0])))
 COL_D = 9.0                                        # colonnes de vissage dans les quatre angles
+# Garde-fil : un anneau fixe entoure la bobine au ras de ses joues. Un fil détendu ne peut
+# plus passer par-dessus une joue et aller s'enrouler sur le moteur. Mettre 0 pour le retirer.
+GUARD_GAP, GUARD_T = 0.6, 1.6                      # jeu au rayon avec les joues, épaisseur de l'anneau
 CORNERS = [(y, z) for y in (IN_Y[0] + 4.5, IN_Y[1] - 4.5) for z in (IN_Z[0] + 4.5, IN_Z[1] - 4.5)]
 # Accroche : un spigot de 16 mm à filetage M10 (pour pince type Super Clamp) se visse dans un
 # écrou M10 prisonnier. Deux emplacements : sur le dessus, à l'aplomb du moteur, et sur le
@@ -100,6 +103,13 @@ def corps():
     b = shell(0, X_FRONT).cut(cavity(PART_T, X_FRONT))
     for c in CORNERS:                                                    # colonnes de vissage
         b = b.union(cyl_x(COL_D, X_FRONT - PART_T, PART_T, c).intersect(shell(0, X_FRONT)))
+    if GUARD_GAP > 0:                                                    # garde-fil autour de la bobine
+        inner = FLANGE_D + 2 * GUARD_GAP
+        length = X_REEL + REEL_W + 1.0 - PART_T                          # dépasse la joue avant de 1 mm
+        ring = cyl_x(inner + 2 * GUARD_T, length, PART_T).cut(cyl_x(inner, length, PART_T))
+        # Fenêtre du côté de la sortie : le fil quitte la bobine et descend vers la bague
+        ring = ring.cut(box(PART_T, PART_T + length, EYE_Y - 14, IN_Y[1], -FLANGE_D / 2, 6))
+        b = b.union(ring)
     for c in CORNERS:
         b = b.cut(cyl_x(M3_PILOT, X_FRONT, 0, c))                        # vis du capot (arrière) et du couvercle (avant)
     for a in range(4):                                                   # 4 vis M3 x 6 du moteur, sur Ø 24
