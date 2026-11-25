@@ -166,17 +166,19 @@ en main. Pour 3 m/s, le passage en 16 V demandera une autre alimentation.
 |---|---|
 | Broches 4, 5, 13 | `IN1`, `IN2`, `IN3` de la carte de commande du moteur |
 | Broche 14 | `EN` de la carte de commande |
-| Broche 15 | horloge de l'encodeur (SCK / CLK) |
-| Broche 36 | données venant de l'encodeur (MISO / DO) |
-| Broche 2 | données vers l'encodeur (MOSI / DI) |
-| Broche 16 | sélection de l'encodeur (CS / CSn) |
-| `3.3V` | alimentation de l'encodeur. **Pas le 5 V** : ses signaux reviendraient en 5 V sur la carte |
-| `GND` | masse de l'encodeur, de la carte de commande et du 12 V, toutes reliées |
+| Broche 15 | horloge de l'encodeur (CLK) : fil **bleu** |
+| Broche 36 | données venant de l'encodeur (MISO) : fil **vert** |
+| Broche 2 | données vers l'encodeur (MOSI) : fil **jaune** |
+| Broche 16 | sélection de l'encodeur (CSn) : fil **blanc** |
+| `3.3V` | alimentation de l'encodeur : fil **rouge** (marqué « 5V » chez CubeMars, qui confirme que 3,3 V convient). **Pas le 5 V** : ses signaux reviendraient en 5 V sur la carte |
+| `GND` | masse de l'encodeur (fil **noir fin**), de la carte de commande et du 12 V, toutes reliées |
 | `+5V` | sortie du convertisseur 5 V |
 | Broche 33 | pont vers `3.3V`, tant qu'aucune boucle d'arrêt d'urgence n'est câblée. Sans ce pont, le bloc reste en défaut |
 
+Couleurs des fils de l'encodeur confirmées par CubeMars le 25 novembre 2026.
+
 Le 12 V va sur la carte de commande du moteur et sur l'entrée du convertisseur 5 V. Les
-trois fils de phase du moteur vont sur les trois sorties de la carte de commande, dans
+trois fils de phase du moteur (les trois gros fils noirs) vont sur les trois sorties de la carte de commande, dans
 n'importe quel ordre.
 
 ### Trois précautions
