@@ -43,6 +43,7 @@ NOTES = {
         ("Gorge", f"{t.SLOT_W:.0f} mm de large, {t.SLOT_DEPTH:.0f} mm de profondeur, joues de 2 mm"),
         ("Logement du moteur", f"Ø {t.BORE_D:.0f} mm (moteur de {t.MOTOR_D} mm)"),
         ("Fond de la cloche", f"{t.DISC_T} mm d'épaisseur"),
+        ("Allègement", f"poche borgne de {t.POCKET_DEPTH} mm dans la jante, ouverte vers l'arrière, 6 nervures"),
         ("Fixation sur le moteur", f"4 trous Ø {t.M3_CLEAR} sur un cercle de {t.HUB_PCD:.0f} mm (vis M3 × 5, pas plus longues)"),
         ("Téton de centrage", f"Ø {t.HUB_BORE - t.FIT:.1f} × {t.SPIGOT_H} mm, dans l'alésage de {t.HUB_BORE:.0f} mm du moteur"),
         ("Ancrage du fil", "trou Ø 1 dans la joue arrière"),

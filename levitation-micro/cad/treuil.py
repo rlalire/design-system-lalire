@@ -51,6 +51,7 @@ FLANGE_D = DRUM_D + 2 * SLOT_DEPTH
 REEL_W = SLOT_W + 4.0                              # deux joues de 2 mm
 WALL, PART_T, DISC_T = 2.5, 3.0, 3.0
 BORE_D = 46.0                                      # la cloche entoure le moteur (jeu de 2,1 mm au rayon)
+POCKET_DEPTH = 4.2                                 # poche d'allègement de la jante (reste 1,8 mm de voile)
 X_MOTOR = PART_T                                   # le moteur est vissé à plat sur la cloison
 X_REEL = X_MOTOR + 4.0                             # face arrière de la bobine
 X_HUB = X_MOTOR + MOTOR_L + 0.2                    # face tournante = appui de la bobine (tolérance comprise)
@@ -165,6 +166,14 @@ def bobine():
     r = cyl_x(DRUM_D, REEL_W, 0).union(cyl_x(BORE_D + 6, depth, 0))      # jante + manchon
     r = r.union(cyl_x(FLANGE_D, 2, 0)).union(cyl_x(FLANGE_D, 2, REEL_W - 2))   # deux joues
     r = r.cut(cyl_x(BORE_D, seat, 0))                                    # logement du carter
+    # Allègement de la jante : une poche borgne ouverte vers l'arrière, face à la cloison et
+    # à l'abri du garde-fil. Elle ne débouche ni dans la gorge ni vers l'avant, pour qu'un
+    # fil détendu ne puisse pas s'y glisser. Six nervures gardent la jante rigide.
+    pocket = cyl_x(DRUM_D - 6, POCKET_DEPTH, 0).cut(cyl_x(BORE_D + 6 + 3, POCKET_DEPTH, 0))
+    for k in range(6):
+        rib = box(0, POCKET_DEPTH, -0.8, 0.8, (BORE_D + 6) / 2, DRUM_D / 2)
+        pocket = pocket.cut(rib.rotate((0, 0, 0), (1, 0, 0), 60 * k))
+    r = r.cut(pocket)
     r = r.union(cyl_x(HUB_BORE - FIT, SPIGOT_H, seat - SPIGOT_H))        # téton de centrage
     for a in range(4):                                                   # 4 vis M3 x 5 sur Ø 20
         ang = a * math.pi / 2

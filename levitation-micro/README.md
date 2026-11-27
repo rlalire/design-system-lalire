@@ -128,7 +128,7 @@ Prix en ordres de grandeur, non vérifiés sauf mention contraire.
 | Alimentation | Module séparateur PoE 802.3af avec sortie 12 V, 1 A (par exemple Banana Pi BPI-7604) | 38 × 38 × 18 mm | 10 à 15 € |
 | Alimentation | Convertisseur 12 V vers 5 V, 1 A | environ 22 × 17 mm | 3 € |
 | Sortie du fil | Bague céramique, diamètre extérieur 6 mm, trou de 2 à 3 mm | | 2 € |
-| Bobine | Impression résine, 92 mm de diamètre, environ 53 g | | à chiffrer |
+| Bobine | Impression résine, 92 mm de diamètre, environ 43 g | | à chiffrer |
 | Boîtier | Corps, capot arrière et couvercle avant imprimés | | à chiffrer |
 | Accroche | Spigot 16 mm M10, 2 écrous M10, pince Super Clamp, anneau à vis M10, élingue | | 40 à 50 € |
 | Divers | Visserie M3, câbles, mousse adhésive | | 10 € |
@@ -277,7 +277,7 @@ Quatre pièces à imprimer. Chacune se pose à plat sur le plateau et s'imprime 
 | Corps | `cad/export/corps.stl` / `.step` | 112 × 123 × 43 mm, 108 cm³ | nylon PA12 (MJF) ou PETG | cloison sur le plateau |
 | Capot arrière | `cad/export/capot_arriere.stl` / `.step` | 112 × 123 × 24,5 mm, 63 cm³ | nylon PA12 (MJF) ou PETG | fond sur le plateau |
 | Couvercle avant | `cad/export/couvercle_avant.stl` / `.step` | 112 × 123 × 2,5 mm, 34 cm³ | nylon PA12 (MJF) ou PETG | à plat |
-| Bobine | `cad/export/bobine.stl` / `.step` | Ø 92 × 32,7 mm, 44 cm³ | **résine (SLA)** | fond de la cloche sur le plateau |
+| Bobine | `cad/export/bobine.stl` / `.step` | Ø 92 × 32,7 mm, 36 cm³ | **résine (SLA)** | fond de la cloche sur le plateau |
 
 `cad/export/planches.pdf` donne pour chaque pièce trois vues, une perspective et le tableau
 de ses cotes. Ce sont des planches de contrôle, sans lignes de cote dessinées : pour
